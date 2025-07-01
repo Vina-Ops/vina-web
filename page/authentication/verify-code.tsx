@@ -1,5 +1,6 @@
+"use client";
+
 import React, { useState, useRef } from "react";
-import { AuthLayout } from "@/components/layout/authentication-layout";
 import Button from "@/components/ui/button/button";
 import { Icon } from "@/components/ui/icon/icon";
 import { useRouter } from "next/navigation";
@@ -42,53 +43,51 @@ const VerifyCodePage = () => {
   };
 
   return (
-    <AuthLayout>
-      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 space-y-6 flex flex-col items-center">
-        <Icon
-          name="Mail"
-          className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"
-        />
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
-          Code from email
-        </h2>
-        <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
-          Enter the code sent to your email.
-        </p>
-        <form
-          className="w-full space-y-4 flex flex-col items-center"
-          onSubmit={handleSubmit}
-        >
-          <div className="flex gap-2 justify-center mb-2">
-            {code.map((digit, idx) => (
-              <input
-                key={idx}
-                ref={(el) => {
-                  inputsRef.current[idx] = el;
-                }}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(e.target.value, idx)}
-                onPaste={handlePaste}
-                className="w-10 h-12 text-center text-xl border border-gray-300 dark:border-gray-700 rounded-md bg-transparent text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-700"
-              />
-            ))}
-          </div>
-          <Button type="submit" className="w-full" disabled={!isCodeComplete}>
-            Submit
-          </Button>
-        </form>
-        <div className="flex justify-center text-sm text-green-900 dark:text-green-300 mt-2">
-          <button
-            type="button"
-            className="hover:underline bg-transparent border-none p-0"
-          >
-            Resend code
-          </button>
+    <div className="w-full max-w-lg dark:bg-gray-900 space-y-6 flex flex-col items-center">
+      <Icon
+        name="Mail"
+        className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"
+      />
+      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+        Code from email
+      </h2>
+      <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
+        Enter the code sent to your email.
+      </p>
+      <form
+        className="w-full space-y-4 flex flex-col items-center"
+        onSubmit={handleSubmit}
+      >
+        <div className="flex gap-2 justify-center mb-2">
+          {code.map((digit, idx) => (
+            <input
+              key={idx}
+              ref={(el) => {
+                inputsRef.current[idx] = el;
+              }}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={digit}
+              onChange={(e) => handleChange(e.target.value, idx)}
+              onPaste={handlePaste}
+              className="w-10 h-12 text-center text-xl border border-gray-300 dark:border-gray-700 rounded-md bg-transparent text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-700"
+            />
+          ))}
         </div>
+        <Button type="submit" className="w-full" disabled={!isCodeComplete}>
+          Submit
+        </Button>
+      </form>
+      <div className="flex justify-center text-sm text-green-900 dark:text-green-300 mt-2">
+        <button
+          type="button"
+          className="hover:underline bg-transparent border-none p-0"
+        >
+          Resend code
+        </button>
       </div>
-    </AuthLayout>
+    </div>
   );
 };
 

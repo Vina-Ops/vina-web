@@ -1,5 +1,6 @@
+"use client";
+
 import React, { useState } from "react";
-import { AuthLayout } from "@/components/layout/authentication-layout";
 import { Input } from "@/components/ui/input/input";
 import Button from "@/components/ui/button/button";
 import { Icon } from "@/components/ui/icon/icon";
