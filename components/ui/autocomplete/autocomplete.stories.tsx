@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Autocomplete } from "./autocomplete";
 
 const meta: Meta<typeof Autocomplete> = {
@@ -145,47 +145,51 @@ export const CustomOption: Story = {
   },
 };
 
-export const Interactive: Story = {
-  render: () => {
-    const [value, setValue] = useState("");
+const InteractiveAutocomplete = () => {
+  const [value, setValue] = useState("");
 
-    return (
-      <div className="w-[300px] space-y-4">
-        <Autocomplete
-          options={options}
-          value={value}
-          onChange={setValue}
-          placeholder="Select a technology..."
-        />
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <p className="text-sm text-gray-500">
-            Selected value: {value || "None"}
-          </p>
-        </div>
+  return (
+    <div className="w-[300px] space-y-4">
+      <Autocomplete
+        options={options}
+        value={value}
+        onChange={setValue}
+        placeholder="Select a technology..."
+      />
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <p className="text-sm text-gray-500">
+          Selected value: {value || "None"}
+        </p>
       </div>
-    );
-  },
+    </div>
+  );
+};
+
+export const Interactive: Story = {
+  render: InteractiveAutocomplete,
+};
+
+const InteractiveMultipleAutocomplete = () => {
+  const [value, setValue] = useState("");
+
+  return (
+    <div className="w-[300px] space-y-4">
+      <Autocomplete
+        options={options}
+        value={value}
+        onChange={setValue}
+        multiple
+        placeholder="Select technologies..."
+      />
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <p className="text-sm text-gray-500">
+          Selected values: {value || "None"}
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export const InteractiveMultiple: Story = {
-  render: () => {
-    const [value, setValue] = useState("");
-
-    return (
-      <div className="w-[300px] space-y-4">
-        <Autocomplete
-          options={options}
-          value={value}
-          onChange={setValue}
-          multiple
-          placeholder="Select technologies..."
-        />
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <p className="text-sm text-gray-500">
-            Selected values: {value || "None"}
-          </p>
-        </div>
-      </div>
-    );
-  },
+  render: InteractiveMultipleAutocomplete,
 };

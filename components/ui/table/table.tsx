@@ -4,19 +4,13 @@ import React, { useState } from "react";
 import {
   ChevronDown,
   ChevronUp,
-  Search,
-  Filter,
   MoreHorizontal,
   Eye,
   Edit,
   Trash2,
-  Check,
-  X,
-  Clock,
-  AlertCircle,
 } from "lucide-react";
 import { ActionButton } from "./action-button/action-button";
-import StatusBadge from "./status-badge.tsx/status-badge";
+import { StatusBadge } from "./status-badge.tsx/status-badge";
 
 type TableHeaderProps = {
   title: string;
@@ -92,6 +86,66 @@ type DataTableProps = {
   selectable?: boolean;
   actions?: boolean;
   className?: string;
+};
+
+// ActionButtons component to fix hooks usage
+const ActionButtons = ({ row, index }: { row: any; index: number }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const actionButtons = [
+    { icon: "Eye", label: "View" },
+    { icon: "Edit", label: "Edit", variant: "primary" },
+    { icon: "Trash2", label: "Delete", variant: "danger" },
+  ];
+
+  return (
+    <div className="flex items-center justify-end" ref={ref}>
+      <div
+        className="flex items-center overflow-hidden transition-all duration-500 ease-in-out"
+        style={{
+          maxWidth: isOpen ? "300px" : "0px",
+        }}
+      >
+        {actionButtons.map((action, idx) => (
+          <div
+            key={action.label}
+            className="transform transition-all duration-300 ease-out mr-1"
+            style={{
+              transitionDelay: `${isOpen ? 100 + idx * 50 : 0}ms`,
+              opacity: isOpen ? 1 : 0,
+              transform: `scale(${isOpen ? 1 : 0.9})`,
+            }}
+          >
+            <ActionButton
+              icon={action.icon as any}
+              label={action.label}
+              variant={action.variant as any}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="flex-shrink-0">
+        <ActionButton
+          icon={MoreHorizontal}
+          label="More"
+          onClick={() => setIsOpen((prev) => !prev)}
+        />
+      </div>
+    </div>
+  );
 };
 
 // Base Table Component
@@ -244,78 +298,7 @@ const DataTable = ({
                 ))}
                 {actions && (
                   <td className="px-4 py-3 whitespace-nowrap text-right">
-                    {React.createElement(() => {
-                      const [isOpen, setIsOpen] = React.useState(false);
-                      const ref = React.useRef<HTMLDivElement>(null);
-
-                      React.useEffect(() => {
-                        const handleClickOutside = (event: MouseEvent) => {
-                          if (
-                            ref.current &&
-                            !ref.current.contains(event.target as Node)
-                          ) {
-                            setIsOpen(false);
-                          }
-                        };
-                        document.addEventListener(
-                          "mousedown",
-                          handleClickOutside
-                        );
-                        return () => {
-                          document.removeEventListener(
-                            "mousedown",
-                            handleClickOutside
-                          );
-                        };
-                      }, []);
-
-                      const actionButtons = [
-                        { icon: Eye, label: "View" },
-                        { icon: Edit, label: "Edit", variant: "primary" },
-                        { icon: Trash2, label: "Delete", variant: "danger" },
-                      ];
-
-                      return (
-                        <div
-                          className="flex items-center justify-end"
-                          ref={ref}
-                        >
-                          <div
-                            className="flex items-center overflow-hidden transition-all duration-500 ease-in-out"
-                            style={{
-                              maxWidth: isOpen ? "300px" : "0px",
-                            }}
-                          >
-                            {actionButtons.map((action, index) => (
-                              <div
-                                key={action.label}
-                                className="transform transition-all duration-300 ease-out mr-1"
-                                style={{
-                                  transitionDelay: `${
-                                    isOpen ? 100 + index * 50 : 0
-                                  }ms`,
-                                  opacity: isOpen ? 1 : 0,
-                                  transform: `scale(${isOpen ? 1 : 0.9})`,
-                                }}
-                              >
-                                <ActionButton
-                                  icon={action.icon}
-                                  label={action.label}
-                                  variant={action.variant as any}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                          <div className="flex-shrink-0">
-                            <ActionButton
-                              icon={MoreHorizontal}
-                              label="More"
-                              onClick={() => setIsOpen((prev) => !prev)}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
+                    <ActionButtons row={row} index={index} />
                   </td>
                 )}
               </tr>

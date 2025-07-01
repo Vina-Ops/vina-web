@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import {
   Card,
   CardHeader,
@@ -180,34 +180,36 @@ export const WithList: Story = {
 };
 
 // Interactive Card
-export const Interactive: Story = {
-  render: (args) => {
-    const [isHovered, setIsHovered] = React.useState(false);
+const InteractiveCard = (args: any) => {
+  const [isHovered, setIsHovered] = React.useState(false);
 
-    return (
-      <Card
-        {...args}
-        className={`w-[300px] transition-all duration-200 ${
-          isHovered ? "scale-105" : ""
-        }`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <CardHeader>
-          <CardTitle>Interactive Card</CardTitle>
-          <CardDescription>Hover to see the effect</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-600">
-            This card demonstrates interactive hover effects and animations.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <Button variant="primary" className="w-full">
-            Learn More
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  },
+  return (
+    <Card
+      {...args}
+      className={`w-[300px] transition-all duration-200 ${
+        isHovered ? "scale-105" : ""
+      }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <CardHeader>
+        <CardTitle>Interactive Card</CardTitle>
+        <CardDescription>Hover to see the effect</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-gray-600">
+          This card demonstrates interactive hover effects and animations.
+        </p>
+      </CardContent>
+      <CardFooter>
+        <Button variant="primary" className="w-full">
+          Learn More
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
+export const Interactive: Story = {
+  render: InteractiveCard,
 };

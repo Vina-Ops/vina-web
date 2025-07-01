@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Clock, ChevronUp, ChevronDown } from "lucide-react";
+import { Clock,  } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../button/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../popover/popover";

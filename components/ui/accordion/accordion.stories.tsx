@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Accordion, AccordionItem } from "./accordion";
 import { User, Settings, Bell, Lock, Star, Trash } from "lucide-react";
 

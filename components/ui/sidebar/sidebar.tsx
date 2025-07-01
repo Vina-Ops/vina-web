@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 export type SidebarVariant = "default" | "compact" | "expanded";
 export type SidebarSize = "sm" | "md" | "lg";
@@ -126,7 +126,7 @@ export const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
                   className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   {isCollapsed ? (
-                    <ChevronRight className="w-5 h-5" />
+                    <className="w-5 h-5" />
                   ) : (
                     <ChevronDown className="w-5 h-5" />
                   )}

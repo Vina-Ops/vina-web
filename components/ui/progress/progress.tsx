@@ -75,7 +75,7 @@ export const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
     ref
   ) => {
     const clampedValue = Math.min(Math.max(value, 0), 100);
-    const progressId = React.useId();
+    const progressId = `progress-${Math.random().toString(36).substr(2, 9)}`;
 
     return (
       <div

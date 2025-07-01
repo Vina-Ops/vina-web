@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronDown, Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type DropdownVariant = "default" | "primary" | "outline" | "ghost";

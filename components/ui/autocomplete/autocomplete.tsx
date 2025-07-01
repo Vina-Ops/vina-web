@@ -113,7 +113,7 @@ export function Autocomplete({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, selectedIndex, filteredOptions]);
+  }, [isOpen, selectedIndex, filteredOptions, handleSelect]);
 
   // Handle click outside
   useEffect(() => {
@@ -132,21 +132,24 @@ export function Autocomplete({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (option: AutocompleteOption) => {
-    if (option.disabled) return;
+  const handleSelect = React.useCallback(
+    (option: AutocompleteOption) => {
+      if (option.disabled) return;
 
-    if (multiple) {
-      const newValues = selectedValues.includes(option.value)
-        ? selectedValues.filter((v) => v !== option.value)
-        : [...selectedValues, option.value];
-      setSelectedValues(newValues);
-      onChange?.(newValues.join(","));
-    } else {
-      setSelectedValues([option.value]);
-      onChange?.(option.value);
-      setIsOpen(false);
-    }
-  };
+      if (multiple) {
+        const newValues = selectedValues.includes(option.value)
+          ? selectedValues.filter((v) => v !== option.value)
+          : [...selectedValues, option.value];
+        setSelectedValues(newValues);
+        onChange?.(newValues.join(","));
+      } else {
+        setSelectedValues([option.value]);
+        onChange?.(option.value);
+        setIsOpen(false);
+      }
+    },
+    [multiple, onChange, selectedValues]
+  );
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();

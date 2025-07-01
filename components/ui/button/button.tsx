@@ -1,31 +1,5 @@
 import React from "react";
-import {
-  Plus,
-  Download,
-  Edit,
-  Trash2,
-  Eye,
-  Share,
-  Save,
-  X,
-  ArrowRight,
-  ArrowLeft,
-  Check,
-  Mail,
-  Phone,
-  Search,
-  Filter,
-  Upload,
-  Settings,
-  User,
-  Heart,
-  Star,
-  ShoppingCart,
-  Bell,
-  Home,
-  Menu,
-  LucideIcon,
-} from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 export type ButtonVariant =
   | "primary"

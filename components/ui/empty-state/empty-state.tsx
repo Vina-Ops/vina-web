@@ -128,7 +128,7 @@ export const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
           {image ? (
             <img
               src={image}
-              alt=""
+              alt={title}
               className={cn(
                 "h-24 w-24 object-contain",
                 size === "lg" && "h-32 w-32",

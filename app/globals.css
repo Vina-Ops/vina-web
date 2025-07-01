@@ -2,48 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/*  */
 
-:root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f7f9fc;
-  --text-primary: #333333;
-  --text-secondary: #666666;
-  --accent-primary: #3b82f6;
-  --accent-secondary: #60a5fa;
-  --font-heading: var(--font-playfair);
-  --font-body: var(--font-inter);
-  --font-ui: var(--font-roboto);
-}
-
-[data-theme="dark"] {
-  --bg-primary: #121212;
-  --bg-secondary: #1e1e1e;
-  --text-primary: #f3f4f6;
-  --text-secondary: #d1d5db;
-  --accent-primary: #60a5fa;
-  --accent-secondary: #3b82f6;
-}
-
-[data-theme="print"] {
-  --font-heading: var(--font-merriweather);
-  --font-body: var(--font-merriweather);
-  --font-ui: var(--font-merriweather);
-  --text-primary: #000000;
-  --text-secondary: #333333;
-  --accent-primary: #000000;
-  --accent-secondary: #555555;
-}
-
-[data-theme="accessibility"] {
-  --font-heading: var(--font-roboto);
-  --font-body: var(--font-roboto);
-  --font-ui: var(--font-roboto);
-  /* Higher contrast for accessibility */
-  --text-primary: #000000;
-  --bg-primary: #ffffff;
-  --accent-primary: #0000ee;
-}
 
 .line-height {
   line-height: 1%;

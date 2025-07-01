@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Calendar } from "./calendar";
 
 const meta: Meta<typeof Calendar> = {
@@ -137,45 +137,49 @@ export const WithWeekStartOnMonday: Story = {
   },
 };
 
-export const Interactive: Story = {
-  render: () => {
-    const [selected, setSelected] = useState<Date | null>(null);
+const InteractiveCalendar = () => {
+  const [selected, setSelected] = useState<Date | null>(null);
 
-    return (
-      <div className="space-y-4">
-        <Calendar
-          mode="single"
-          selected={selected || undefined}
-          onSelect={(date) => setSelected(date as Date)}
-        />
-        {selected && (
-          <div className="text-center text-sm text-gray-500">
-            Selected date: {selected.toLocaleDateString()}
-          </div>
-        )}
-      </div>
-    );
-  },
+  return (
+    <div className="space-y-4">
+      <Calendar
+        mode="single"
+        selected={selected || undefined}
+        onSelect={(date) => setSelected(date as Date)}
+      />
+      {selected && (
+        <div className="text-center text-sm text-gray-500">
+          Selected date: {selected.toLocaleDateString()}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const Interactive: Story = {
+  render: InteractiveCalendar,
+};
+
+const InteractiveRangeCalendar = () => {
+  const [range, setRange] = useState<{ from: Date; to: Date } | null>(null);
+
+  return (
+    <div className="space-y-4">
+      <Calendar
+        mode="range"
+        selected={range || undefined}
+        onSelect={(date) => setRange(date as { from: Date; to: Date })}
+      />
+      {range && (
+        <div className="text-center text-sm text-gray-500">
+          Selected range: {range.from.toLocaleDateString()} -{" "}
+          {range.to.toLocaleDateString()}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export const InteractiveRange: Story = {
-  render: () => {
-    const [range, setRange] = useState<{ from: Date; to: Date } | null>(null);
-
-    return (
-      <div className="space-y-4">
-        <Calendar
-          mode="range"
-          selected={range || undefined}
-          onSelect={(date) => setRange(date as { from: Date; to: Date })}
-        />
-        {range && (
-          <div className="text-center text-sm text-gray-500">
-            Selected range: {range.from.toLocaleDateString()} -{" "}
-            {range.to.toLocaleDateString()}
-          </div>
-        )}
-      </div>
-    );
-  },
+  render: InteractiveRangeCalendar,
 };

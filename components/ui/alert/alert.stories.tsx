@@ -1,5 +1,5 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Alert } from "./alert";
 import { Bell } from "lucide-react";
 
@@ -84,31 +84,33 @@ export const Error: Story = {
 };
 
 // Closable Alert
-export const Closable: Story = {
-  render: (args) => {
-    const [isVisible, setIsVisible] = React.useState(true);
+const ClosableAlert = (args: any) => {
+  const [isVisible, setIsVisible] = React.useState(true);
 
-    if (!isVisible) {
-      return (
-        <button
-          onClick={() => setIsVisible(true)}
-          className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
-        >
-          Show Alert
-        </button>
-      );
-    }
-
+  if (!isVisible) {
     return (
-      <Alert
-        {...args}
-        closable
-        onClose={() => setIsVisible(false)}
-        title="Closable Alert"
-        description="This alert can be closed by clicking the X button."
-      />
+      <button
+        onClick={() => setIsVisible(true)}
+        className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
+      >
+        Show Alert
+      </button>
     );
-  },
+  }
+
+  return (
+    <Alert
+      {...args}
+      closable
+      onClose={() => setIsVisible(false)}
+      title="Closable Alert"
+      description="This alert can be closed by clicking the X button."
+    />
+  );
+};
+
+export const Closable: Story = {
+  render: ClosableAlert,
 };
 
 // Custom Icon Alert
