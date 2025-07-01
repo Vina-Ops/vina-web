@@ -1,0 +1,50 @@
+import React, { useState } from "react";
+import { AuthLayout } from "@/components/layout/authentication-layout";
+import { Input } from "@/components/ui/input/input";
+import Button from "@/components/ui/button/button";
+import { Icon } from "@/components/ui/icon/icon";
+import { useRouter } from "next/navigation";
+
+const ForgotPasswordPage = () => {
+  const [email, setEmail] = useState("");
+  const isEmailValid = email.length > 0; // Simple check for demo
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isEmailValid) {
+      router.push("/auth/verify-code");
+    }
+  };
+
+  return (
+    <AuthLayout>
+      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 space-y-6 flex flex-col items-center">
+        <Icon
+          name="mail"
+          className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"
+        />
+        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+          Email for recovery
+        </h2>
+        <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
+          Enter your account email to receive a recovery code.
+        </p>
+        <form className="w-full space-y-4" onSubmit={handleSubmit}>
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <Button type="submit" className="w-full" disabled={!isEmailValid}>
+            Submit
+          </Button>
+        </form>
+      </div>
+    </AuthLayout>
+  );
+};
+
+export default ForgotPasswordPage;
