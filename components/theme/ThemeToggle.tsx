@@ -11,13 +11,13 @@ export const ThemeToggle = () => {
       aria-label={
         theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
       }
-      className="p-2 rounded-full border border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+      className="p-2 flex justify-center items-center rounded-full border border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-0 focus:ring-primary"
       type="button"
     >
       {theme === "dark" ? (
-        <Icon name="sun" className="w-5 h-5 text-yellow-400" />
+        <Icon name="Sun" className="w-7 h-7 text-green text-xl" />
       ) : (
-        <Icon name="moon" className="w-5 h-5 text-gray-700" />
+        <Icon name="Moon" className="w-7 h-7 text-green text-xl" />
       )}
     </button>
   );

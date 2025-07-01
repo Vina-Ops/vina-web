@@ -1,3 +1,5 @@
+"use client";
+
 import React, { PropsWithChildren, Suspense } from "react";
 
 import Link from "next/link";
@@ -20,7 +22,7 @@ export const BaseLayout = (props: PropsWithChildren<BaseLayoutProps>) => {
   return (
     <main className="bg-[#EFFAF7] min-h-screen">
       <Suspense>
-        <div className="md:max-w-[80%] mx-auto py-10 px-8 md:px-0 relative">
+        <div className="md:max-w-[90%] mx-auto py-10 px-8 md:px-0 relative">
           <span className="sticky top-10 z-20">
             <Link href="/" className="flex items-center gap-2">
               <Image

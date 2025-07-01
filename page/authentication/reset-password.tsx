@@ -14,7 +14,7 @@ const ResetPasswordPage = () => {
     <AuthLayout>
       <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 space-y-6 flex flex-col items-center">
         <Icon
-          name="key"
+          name="Key"
           className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"
         />
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">

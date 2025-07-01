@@ -1,7 +1,6 @@
 import { AuthLayout } from "@/components/layout/authentication-layout";
 import React from "react";
 import { RegistrationProvider } from "@/components/auth/RegistrationContext";
-import { usePathname } from "next/navigation";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   // Only wrap registration routes with RegistrationProvider

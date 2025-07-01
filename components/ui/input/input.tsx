@@ -1,5 +1,7 @@
+"use client";
+
 import React from "react";
-import { LucideIcon, } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 export interface InputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
@@ -131,7 +133,6 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       <Input
         {...props}
         type="search"
-        icon={}
         iconPosition="left"
         onFocus={() => setIsOpen(true)}
         onBlur={() => setTimeout(() => setIsOpen(false), 200)}
