@@ -21,6 +21,14 @@ export const BaseLayout = (props: PropsWithChildren<BaseLayoutProps>) => {
   } = props;
   return (
     <main className="bg-[#EFFAF7] min-h-screen">
+      {background && (
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100"
+          style={{ backgroundImage: `url(${background})` }}
+          aria-hidden="true"
+        />
+      )}
+
       <Suspense>
         <div className="md:max-w-[90%] mx-auto py-10 px-8 md:px-0 relative">
           <span className="sticky top-10 z-20">

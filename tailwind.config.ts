@@ -1,4 +1,5 @@
 const config = {
+  darkMode: "class",
   content: [
     "./page/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",

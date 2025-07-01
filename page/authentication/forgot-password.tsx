@@ -45,46 +45,44 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <AuthLayout>
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -40 }}
-        transition={{ duration: 0.4, type: "spring" }}
-        className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 space-y-6 flex flex-col items-center"
-      >
-        <Icon
-          name="Mail"
-          className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -40 }}
+      transition={{ duration: 0.4, type: "spring" }}
+      className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 space-y-6 flex flex-col items-center"
+    >
+      <Icon
+        name="Mail"
+        className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"
+      />
+      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+        Email for recovery
+      </h2>
+      <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
+        Enter your account email to receive a recovery code.
+      </p>
+      <form className="w-full space-y-4" onSubmit={handleSubmit}>
+        <Input
+          type="email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onBlur={handleBlur}
+          required
+          aria-invalid={!!error}
+          aria-describedby="email-error"
         />
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
-          Email for recovery
-        </h2>
-        <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
-          Enter your account email to receive a recovery code.
-        </p>
-        <form className="w-full space-y-4" onSubmit={handleSubmit}>
-          <Input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onBlur={handleBlur}
-            required
-            aria-invalid={!!error}
-            aria-describedby="email-error"
-          />
-          {touched && error && (
-            <div id="email-error" className="text-red-600 text-sm mt-1">
-              {error}
-            </div>
-          )}
-          <Button type="submit" className="w-full" disabled={!email || !!error}>
-            Submit
-          </Button>
-        </form>
-      </motion.div>
-    </AuthLayout>
+        {touched && error && (
+          <div id="email-error" className="text-red-600 text-sm mt-1">
+            {error}
+          </div>
+        )}
+        <Button type="submit" className="w-full" disabled={!email || !!error}>
+          Submit
+        </Button>
+      </form>
+    </motion.div>
   );
 };
 

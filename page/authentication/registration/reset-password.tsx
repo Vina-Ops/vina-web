@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { AuthLayout } from "@/components/layout/authentication-layout";
 import { Input } from "@/components/ui/input/input";
 import Button from "@/components/ui/button/button";
 import { Icon } from "@/components/ui/icon/icon";
@@ -58,66 +57,64 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <AuthLayout>
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -40 }}
-        transition={{ duration: 0.4, type: "spring" }}
-        className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 space-y-6 flex flex-col items-center"
-      >
-        <Icon
-          name="Key"
-          className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -40 }}
+      transition={{ duration: 0.4, type: "spring" }}
+      className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 space-y-6 flex flex-col items-center"
+    >
+      <Icon
+        name="Key"
+        className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"
+      />
+      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+        Create a new strong password
+      </h2>
+      <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
+        Enter and confirm your new password.
+      </p>
+      <form className="w-full space-y-4" onSubmit={handleSubmit}>
+        <Input
+          type="password"
+          placeholder="New password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onBlur={handlePasswordBlur}
+          required
+          aria-invalid={touched && !isPasswordValid}
+          aria-describedby="password-error"
         />
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
-          Create a new strong password
-        </h2>
-        <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
-          Enter and confirm your new password.
-        </p>
-        <form className="w-full space-y-4" onSubmit={handleSubmit}>
-          <Input
-            type="password"
-            placeholder="New password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onBlur={handlePasswordBlur}
-            required
-            aria-invalid={touched && !isPasswordValid}
-            aria-describedby="password-error"
-          />
-          {touched && error.length > 0 && (
-            <ul
-              id="password-error"
-              className="text-red-600 text-sm mt-1 list-disc list-inside"
-            >
-              {error.map((err, i) => (
-                <li key={i}>{err}</li>
-              ))}
-            </ul>
-          )}
-          <Input
-            type="password"
-            placeholder="Confirm password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            onBlur={handleConfirmBlur}
-            required
-            aria-invalid={touched && !isConfirmValid}
-            aria-describedby="confirm-error"
-          />
-          {touched && confirmError && (
-            <div id="confirm-error" className="text-red-600 text-sm mt-1">
-              {confirmError}
-            </div>
-          )}
-          <Button type="submit" className="w-full" disabled={!isValid}>
-            Save
-          </Button>
-        </form>
-      </motion.div>
-    </AuthLayout>
+        {touched && error.length > 0 && (
+          <ul
+            id="password-error"
+            className="text-red-600 text-sm mt-1 list-disc list-inside"
+          >
+            {error.map((err, i) => (
+              <li key={i}>{err}</li>
+            ))}
+          </ul>
+        )}
+        <Input
+          type="password"
+          placeholder="Confirm password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          onBlur={handleConfirmBlur}
+          required
+          aria-invalid={touched && !isConfirmValid}
+          aria-describedby="confirm-error"
+        />
+        {touched && confirmError && (
+          <div id="confirm-error" className="text-red-600 text-sm mt-1">
+            {confirmError}
+          </div>
+        )}
+        <Button type="submit" className="w-full" disabled={!isValid}>
+          Save
+        </Button>
+      </form>
+    </motion.div>
   );
 };
 

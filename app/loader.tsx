@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { easeInOut, motion } from "framer-motion";
 
 const pathVariants = {
   hidden: { pathLength: 0, opacity: 0 },

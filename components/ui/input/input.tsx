@@ -51,7 +51,7 @@ export const Input: React.FC<InputProps> = ({
   };
 
   const inputClasses = [
-    "w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500",
+    "w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green",
     variant === "outlined" && "border-2",
     variant === "filled" && "bg-gray-100",
     variant === "underlined" && "border-x-0 border-t-0 rounded-none",

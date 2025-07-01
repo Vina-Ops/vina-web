@@ -59,7 +59,7 @@ const Button = ({
 
   const variants = {
     primary:
-      "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm hover:shadow-md",
+      "bg-green text-white hover:bg-green/75 focus:ring-green shadow-sm hover:shadow-md",
     secondary:
       "bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500 shadow-sm hover:shadow-md",
     success:

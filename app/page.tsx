@@ -16,10 +16,10 @@ export default function HomePage() {
   if (isStart) {
     // Render your landing/start page UI
     return (
-      <AuthLayout backgroundImage="https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-background_w4kipf.svg">
+      <BaseLayout background="https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-background_w4kipf.svg">
         {/* Main Content */}
         <main className="flex-1 flex flex-col items-center justify-center px-4">
-          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-2 archivo">
             Vina
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
@@ -31,7 +31,7 @@ export default function HomePage() {
                 Log In
               </button>
             </Link>
-            <button className="w-full py-2 rounded-lg bg-[#F5F4F5] dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center gap-2 text-[#18181B] font-bold dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+            <button className="w-full py-2 mt-6 rounded-lg bg-[#F5F4F5] dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center gap-2 text-[#18181B] font-bold dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
               {/* Google SVG icon inline */}
               <FcGoogle className="w-5 h-5" />
               Continue with Google
@@ -43,7 +43,7 @@ export default function HomePage() {
             </Link>
           </div>
         </main>
-      </AuthLayout>
+      </BaseLayout>
     );
   }
 
