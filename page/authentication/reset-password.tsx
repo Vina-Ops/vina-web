@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input/input";
 import Button from "@/components/ui/button/button";
@@ -10,7 +12,7 @@ const ResetPasswordPage = () => {
     password.length > 0 && confirm.length > 0 && password === confirm;
 
   return (
-    <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 space-y-6 flex flex-col items-center">
+    <div className="w-full max-w-lg dark:bg-gray-900 rounded-lg space-y-6 flex flex-col items-center">
       <Icon
         name="Key"
         className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"

@@ -16,12 +16,14 @@ const layout = ({ children }: { children: React.ReactNode }) => {
   );
 
   return (
-    <BaseLayout
-      className="flex justify-center items-center"
-      background="https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-background_w4kipf.svg"
-    >
-      {content}
-    </BaseLayout>
+    <RegistrationProvider>
+      <BaseLayout
+        className="flex justify-center items-center pt-20 md:py-20 px-4 sm:px-6 lg:px-8"
+        background="https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-background_w4kipf.svg"
+      >
+        {content}
+      </BaseLayout>
+    </RegistrationProvider>
   );
 };
 

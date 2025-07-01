@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input/input";
 import Button from "@/components/ui/button/button";
@@ -78,7 +80,7 @@ const RegisterPage = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -40 }}
       transition={{ duration: 0.4, type: "spring" }}
-      className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 space-y-6 flex flex-col items-center"
+      className="w-full max-w-lg dark:bg-gray-900 rounded-lg space-y-6 flex flex-col items-center"
     >
       <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
         New account
@@ -119,7 +121,12 @@ const RegisterPage = () => {
             ))}
           </ul>
         )}
-        <Button type="submit" className="w-full" disabled={!isValid}>
+        <Button
+          variant="primary"
+          type="submit"
+          className="w-full"
+          disabled={!isValid}
+        >
           Create Account
         </Button>
       </form>

@@ -23,7 +23,7 @@ export const BaseLayout = (props: PropsWithChildren<BaseLayoutProps>) => {
     <main className="bg-[#EFFAF7] min-h-screen">
       {background && (
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
           style={{ backgroundImage: `url(${background})` }}
           aria-hidden="true"
         />

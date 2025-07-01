@@ -32,7 +32,7 @@ export const AuthLayout = ({
     {/* Background Image/Pattern */}
     {backgroundImage && (
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
         style={{ backgroundImage: `url(${backgroundImage})` }}
         aria-hidden="true"
       />
