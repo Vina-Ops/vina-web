@@ -1,8 +1,18 @@
+@font-face {
+  font-family: "satoshi";
+  src: url("../fonts/WEB/fonts/Satoshi-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
+* {
+  font-family: "satoshi", sans-serif;
+}
 
 .line-height {
   line-height: 1%;
