@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
-import { Upload, X, File, Image, FileText, } from "lucide-react";
+import { Upload, X, File, Image, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "../button/button";
+import Button from "../button/button";
 
 export type FileUploadVariant =
   | "default"
@@ -120,7 +120,7 @@ const labelSizeStyles: Record<FileUploadSize, string> = {
 
 const getFileIcon = (file: File) => {
   if (file.type.startsWith("image/")) {
-    return <Image className="h-6 w-6 text-gray-400" />;
+    return <Image className="h-6 w-6 text-gray-400" aria-label="Image file" />;
   }
   if (file.type.includes("pdf") || file.type.includes("document")) {
     return <FileText className="h-6 w-6 text-gray-400" />;
@@ -294,7 +294,7 @@ export const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
                 </div>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="small"
                   onClick={() => handleRemoveFile(file)}
                   disabled={disabled}
                 >

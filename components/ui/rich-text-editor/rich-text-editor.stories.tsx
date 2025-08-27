@@ -92,24 +92,27 @@ export const CustomStyles: Story = {
   },
 };
 
-export const Interactive: Story = {
-  render: () => {
-    const [content, setContent] = useState("");
+// Interactive story component
+const InteractiveEditorStory = () => {
+  const [content, setContent] = useState("");
 
-    return (
-      <div className="space-y-4">
-        <RichTextEditor
-          content={content}
-          onChange={setContent}
-          placeholder="Start typing..."
-        />
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <h3 className="mb-2 font-medium">HTML Output:</h3>
-          <pre className="whitespace-pre-wrap text-sm">{content}</pre>
-        </div>
+  return (
+    <div className="space-y-4">
+      <RichTextEditor
+        content={content}
+        onChange={setContent}
+        placeholder="Start typing..."
+      />
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <h3 className="mb-2 font-medium">HTML Output:</h3>
+        <pre className="whitespace-pre-wrap text-sm">{content}</pre>
       </div>
-    );
-  },
+    </div>
+  );
+};
+
+export const Interactive: Story = {
+  render: () => <InteractiveEditorStory />,
 };
 
 export const WithInitialContent: Story = {
@@ -132,5 +135,71 @@ export const WithInitialContent: Story = {
 export const WithCustomPlaceholder: Story = {
   args: {
     placeholder: "Write your story here...",
+  },
+};
+
+// Additional story examples for comprehensive testing
+export const WithValidation: Story = {
+  render: () => {
+    const ValidationStory = () => {
+      const [content, setContent] = useState("");
+      const [error, setError] = useState("");
+
+      const handleChange = (value: string) => {
+        setContent(value);
+        if (value.length < 10) {
+          setError("Content must be at least 10 characters long");
+        } else {
+          setError("");
+        }
+      };
+
+      return (
+        <div className="space-y-2">
+          <RichTextEditor
+            content={content}
+            onChange={handleChange}
+            placeholder="Write at least 10 characters..."
+          />
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
+        </div>
+      );
+    };
+
+    return <ValidationStory />;
+  },
+};
+
+export const MultipleEditors: Story = {
+  render: () => {
+    const MultipleEditorsStory = () => {
+      const [content1, setContent1] = useState("");
+      const [content2, setContent2] = useState("");
+
+      return (
+        <div className="space-y-6">
+          <div>
+            <h3 className="mb-2 font-medium">Editor 1</h3>
+            <RichTextEditor
+              content={content1}
+              onChange={setContent1}
+              placeholder="First editor..."
+            />
+          </div>
+          <div>
+            <h3 className="mb-2 font-medium">Editor 2</h3>
+            <RichTextEditor
+              content={content2}
+              onChange={setContent2}
+              placeholder="Second editor..."
+            />
+          </div>
+        </div>
+      );
+    };
+
+    return <MultipleEditorsStory />;
   },
 };

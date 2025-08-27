@@ -29,7 +29,8 @@ interface SearchResult {
   subtitle: string;
 }
 
-export default {
+// Fix 1: Assign to variable before exporting
+const meta = {
   title: "Components/Input",
   component: Input,
   parameters: {
@@ -89,6 +90,8 @@ export default {
     },
   },
 };
+
+export default meta;
 
 // Basic Input Stories
 export const Default = {
@@ -289,25 +292,29 @@ export const PasswordInput = {
   },
 };
 
+// Fix 2: Create proper React components for stories with state
+const ClearableInputStory = () => {
+  const [value, setValue] = React.useState("This text can be cleared");
+  
+  return (
+    <div className="max-w-md">
+      <Input
+        placeholder="Type something..."
+        label="Clearable Input"
+        clearable={true}
+        value={value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setValue(e.target.value)
+        }
+        helperText="Click the X to clear the input"
+      />
+    </div>
+  );
+};
+
 // Clearable Input
 export const ClearableInput = {
-  render: () => {
-    const [value, setValue] = React.useState("This text can be cleared");
-    return (
-      <div className="max-w-md">
-        <Input
-          placeholder="Type something..."
-          label="Clearable Input"
-          clearable={true}
-          value={value}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setValue(e.target.value)
-          }
-          helperText="Click the X to clear the input"
-        />
-      </div>
-    );
-  },
+  render: () => <ClearableInputStory />,
   parameters: {
     docs: {
       description: {
@@ -334,28 +341,30 @@ export const SearchInputBasic = {
   },
 };
 
-export const SearchWithResults = {
-  render: () => {
-    const searchResults: SearchResult[] = [
-      { title: "Apple iPhone 14", subtitle: "Electronics > Smartphones" },
-      { title: "Apple MacBook Pro", subtitle: "Electronics > Laptops" },
-      { title: "Apple Watch Series 8", subtitle: "Electronics > Wearables" },
-      { title: "AirPods Pro", subtitle: "Electronics > Audio" },
-    ];
+const SearchWithResultsStory = () => {
+  const searchResults: SearchResult[] = [
+    { title: "Apple iPhone 14", subtitle: "Electronics > Smartphones" },
+    { title: "Apple MacBook Pro", subtitle: "Electronics > Laptops" },
+    { title: "Apple Watch Series 8", subtitle: "Electronics > Wearables" },
+    { title: "AirPods Pro", subtitle: "Electronics > Audio" },
+  ];
 
-    return (
-      <div className="max-w-md">
-        <SearchInput
-          placeholder="Search Apple products..."
-          showResults={true}
-          results={searchResults}
-          onResultClick={(result: SearchResult) =>
-            console.log("Selected:", result)
-          }
-        />
-      </div>
-    );
-  },
+  return (
+    <div className="max-w-md">
+      <SearchInput
+        placeholder="Search Apple products..."
+        showResults={true}
+        results={searchResults}
+        onResultClick={(result: SearchResult) =>
+          console.log("Selected:", result)
+        }
+      />
+    </div>
+  );
+};
+
+export const SearchWithResults = {
+  render: () => <SearchWithResultsStory />,
   parameters: {
     docs: {
       description: {
@@ -384,49 +393,51 @@ export const SearchVariants = {
   },
 };
 
-// Form Examples
+// Form Examples with proper React components
+const ContactFormStory = () => {
+  const [formData, setFormData] = React.useState<FormData>({});
+
+  const handleChange =
+    (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+    };
+
+  return (
+    <div className="max-w-md bg-white p-6 rounded-lg border">
+      <h3 className="text-lg font-semibold mb-4">Contact Form</h3>
+      <FormGroup>
+        <Input
+          placeholder="John Doe"
+          label="Full Name"
+          icon={User}
+          required={true}
+          value={formData.name || ""}
+          onChange={handleChange("name")}
+        />
+        <Input
+          placeholder="john@example.com"
+          label="Email Address"
+          icon={Mail}
+          type="email"
+          required={true}
+          value={formData.email || ""}
+          onChange={handleChange("email")}
+        />
+        <Input
+          placeholder="+1 (555) 123-4567"
+          label="Phone Number"
+          icon={Phone}
+          type="tel"
+          value={formData.phone || ""}
+          onChange={handleChange("phone")}
+        />
+      </FormGroup>
+    </div>
+  );
+};
+
 export const ContactForm = {
-  render: () => {
-    const [formData, setFormData] = React.useState<FormData>({});
-
-    const handleChange =
-      (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-      };
-
-    return (
-      <div className="max-w-md bg-white p-6 rounded-lg border">
-        <h3 className="text-lg font-semibold mb-4">Contact Form</h3>
-        <FormGroup>
-          <Input
-            placeholder="John Doe"
-            label="Full Name"
-            icon={User}
-            required={true}
-            value={formData.name || ""}
-            onChange={handleChange("name")}
-          />
-          <Input
-            placeholder="john@example.com"
-            label="Email Address"
-            icon={Mail}
-            type="email"
-            required={true}
-            value={formData.email || ""}
-            onChange={handleChange("email")}
-          />
-          <Input
-            placeholder="+1 (555) 123-4567"
-            label="Phone Number"
-            icon={Phone}
-            type="tel"
-            value={formData.phone || ""}
-            onChange={handleChange("phone")}
-          />
-        </FormGroup>
-      </div>
-    );
-  },
+  render: () => <ContactFormStory />,
   parameters: {
     docs: {
       description: {
@@ -437,42 +448,44 @@ export const ContactForm = {
   },
 };
 
+const LoginFormStory = () => {
+  const [formData, setFormData] = React.useState<FormData>({});
+
+  const handleChange =
+    (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+    };
+
+  return (
+    <div className="max-w-md bg-white p-6 rounded-lg border">
+      <h3 className="text-lg font-semibold mb-4">Login Form</h3>
+      <FormGroup>
+        <Input
+          placeholder="Enter your email"
+          label="Email"
+          icon={Mail}
+          type="email"
+          variant="outlined"
+          required={true}
+          value={formData.email || ""}
+          onChange={handleChange("email")}
+        />
+        <Input
+          placeholder="Enter your password"
+          label="Password"
+          type="password"
+          variant="outlined"
+          required={true}
+          value={formData.password || ""}
+          onChange={handleChange("password")}
+        />
+      </FormGroup>
+    </div>
+  );
+};
+
 export const LoginForm = {
-  render: () => {
-    const [formData, setFormData] = React.useState<FormData>({});
-
-    const handleChange =
-      (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-      };
-
-    return (
-      <div className="max-w-md bg-white p-6 rounded-lg border">
-        <h3 className="text-lg font-semibold mb-4">Login Form</h3>
-        <FormGroup>
-          <Input
-            placeholder="Enter your email"
-            label="Email"
-            icon={Mail}
-            type="email"
-            variant="outlined"
-            required={true}
-            value={formData.email || ""}
-            onChange={handleChange("email")}
-          />
-          <Input
-            placeholder="Enter your password"
-            label="Password"
-            type="password"
-            variant="outlined"
-            required={true}
-            value={formData.password || ""}
-            onChange={handleChange("password")}
-          />
-        </FormGroup>
-      </div>
-    );
-  },
+  render: () => <LoginFormStory />,
   parameters: {
     docs: {
       description: {

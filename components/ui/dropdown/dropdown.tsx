@@ -12,7 +12,7 @@ export type DropdownPlacement =
 
 export interface DropdownItem {
   id: string;
-  label: string;
+  label?: string;
   icon?: React.ReactNode;
   disabled?: boolean;
   selected?: boolean;

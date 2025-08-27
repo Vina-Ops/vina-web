@@ -129,7 +129,8 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
 Radio.displayName = "Radio";
 
 // Radio Group Component
-export interface RadioGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface RadioGroupProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
   /**
    * The label for the radio group
    */
@@ -219,9 +220,9 @@ export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
             if (React.isValidElement(child)) {
               return React.cloneElement(child, {
                 name,
-                checked: child.props.value === value,
+                checked: (child.props as any).value === value,
                 onChange: handleChange,
-              });
+              } as any);
             }
             return child;
           })}

@@ -111,30 +111,33 @@ export const Disabled: Story = {
   },
 };
 
+// Create proper React component for animated progress
+const AnimatedProgressStory = () => {
+  const [progress, setProgress] = React.useState(0);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((prev) => (prev >= 100 ? 0 : prev + 10));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="w-full max-w-md">
+      <Progress
+        value={progress}
+        label="Downloading..."
+        showValue
+        variant="success"
+      />
+    </div>
+  );
+};
+
 // Animated Progress
 export const AnimatedProgress: Story = {
-  render: () => {
-    const [progress, setProgress] = React.useState(0);
-
-    React.useEffect(() => {
-      const timer = setInterval(() => {
-        setProgress((prev) => (prev >= 100 ? 0 : prev + 10));
-      }, 1000);
-
-      return () => clearInterval(timer);
-    }, []);
-
-    return (
-      <div className="w-full max-w-md">
-        <Progress
-          value={progress}
-          label="Downloading..."
-          showValue
-          variant="success"
-        />
-      </div>
-    );
-  },
+  render: () => <AnimatedProgressStory />,
 };
 
 // Complex Example

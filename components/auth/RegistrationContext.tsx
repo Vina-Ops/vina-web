@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
+import { Toaster } from "react-hot-toast";
 
 interface RegistrationState {
   email: string;
@@ -36,6 +37,7 @@ export const RegistrationProvider = ({
       value={{ email, password, code, setEmail, setPassword, setCode, reset }}
     >
       {children}
+      <Toaster />
     </RegistrationContext.Provider>
   );
 };

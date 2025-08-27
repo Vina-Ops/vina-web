@@ -20,7 +20,7 @@ export const BaseLayout = (props: PropsWithChildren<BaseLayoutProps>) => {
     minHeight = "h-screen",
   } = props;
   return (
-    <main className="bg-[#EFFAF7] min-h-screen">
+    <main className="bg-[#EFFAF7] dark:bg-gray-900 min-h-screen">
       {background && (
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
@@ -31,7 +31,7 @@ export const BaseLayout = (props: PropsWithChildren<BaseLayoutProps>) => {
 
       <Suspense>
         <div className="md:max-w-[90%] mx-auto py-10 px-8 md:px-0 relative">
-          <span className="sticky top-10 z-20">
+          <span className="sticky top-10 z-20 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <Image
                 src="https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-logo_jeyist.svg"
@@ -41,9 +41,10 @@ export const BaseLayout = (props: PropsWithChildren<BaseLayoutProps>) => {
                 className="object-cover"
               />
             </Link>
-          </span>
-          <span className="absolute top-10 right-0 z-20">
-            <ThemeToggle />
+
+            <span className="sticky top-10 right-0 z-20">
+              <ThemeToggle />
+            </span>
           </span>
           <div className={`${background}  ${className} `}>{children}</div>
         </div>

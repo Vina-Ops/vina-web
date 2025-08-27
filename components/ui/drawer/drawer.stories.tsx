@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Drawer } from "./drawer";
-import { Button } from "../button/button";
+import Button from "../button/button";
 
 const meta: Meta<typeof Drawer> = {
   title: "UI/Drawer",
@@ -72,10 +72,10 @@ const sampleContent = (
 
 const sampleFooter = (
   <div className="flex justify-end gap-2">
-    <Button variant="outline" size="sm">
+    <Button variant="outline" size="small">
       Cancel
     </Button>
-    <Button variant="primary" size="sm">
+    <Button variant="primary" size="small">
       Save Changes
     </Button>
   </div>
@@ -111,20 +111,23 @@ export const Variants: Story = {
         open={true}
         title="Default Drawer"
         variant="default"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
       <Drawer
         open={true}
         title="Bordered Drawer"
         variant="bordered"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
       <Drawer
         open={true}
         title="Shadow Drawer"
         variant="shadow"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
     </div>
   ),
 };
@@ -136,26 +139,30 @@ export const Sizes: Story = {
         open={true}
         title="Small Drawer"
         size="sm"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
       <Drawer
         open={true}
         title="Medium Drawer"
         size="md"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
       <Drawer
         open={true}
         title="Large Drawer"
         size="lg"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
       <Drawer
         open={true}
         title="Full Drawer"
         size="full"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
     </div>
   ),
 };
@@ -167,26 +174,30 @@ export const Positions: Story = {
         open={true}
         title="Left Drawer"
         position="left"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
       <Drawer
         open={true}
         title="Right Drawer"
         position="right"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
       <Drawer
         open={true}
         title="Top Drawer"
         position="top"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
       <Drawer
         open={true}
         title="Bottom Drawer"
         position="bottom"
-        children={sampleContent}
-      />
+      >
+        {sampleContent}
+      </Drawer>
     </div>
   ),
 };
@@ -213,13 +224,24 @@ export const WithoutOverlay: Story = {
 };
 
 export const Complex: Story = {
-  args: {
-    open: true,
-    title: "Settings",
-    variant: "bordered",
-    size: "md",
-    position: "right",
-    children: (
+  render: () => (
+    <Drawer
+      open={true}
+      title="Settings"
+      variant="bordered"
+      size="md"
+      position="right"
+      footer={
+        <div className="flex justify-end gap-2">
+              <Button variant="outline" size="small">
+      Cancel
+    </Button>
+    <Button variant="primary" size="small">
+            Save Changes
+          </Button>
+        </div>
+      }
+    >
       <div className="space-y-6">
         <div>
           <h3 className="text-lg font-medium">Profile Settings</h3>
@@ -250,16 +272,6 @@ export const Complex: Story = {
           </div>
         </div>
       </div>
-    ),
-    footer: (
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" size="sm">
-          Cancel
-        </Button>
-        <Button variant="primary" size="sm">
-          Save Changes
-        </Button>
-      </div>
-    ),
-  },
+    </Drawer>
+  ),
 };

@@ -1,7 +1,8 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Icon } from "../icon/icon";
-import { Button } from "../button/button";
+import Button from "../button/button";
+import * as LucideIcons from "lucide-react";
 
 export type EmptyStateVariant = "default" | "simple" | "compact";
 export type EmptyStateSize = "sm" | "md" | "lg";
@@ -165,9 +166,9 @@ export const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
               {action && (
                 <Button
                   variant="primary"
-                  size={size === "lg" ? "lg" : "md"}
+                  size={size === "lg" ? "large" : "medium"}
                   onClick={action.onClick}
-                  icon={action.icon}
+                  icon={action.icon ? (LucideIcons as any)[action.icon] : undefined}
                 >
                   {action.label}
                 </Button>
@@ -175,9 +176,9 @@ export const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
               {secondaryAction && (
                 <Button
                   variant="outline"
-                  size={size === "lg" ? "lg" : "md"}
+                  size={size === "lg" ? "large" : "medium"}
                   onClick={secondaryAction.onClick}
-                  icon={secondaryAction.icon}
+                  icon={secondaryAction.icon ? (LucideIcons as any)[secondaryAction.icon] : undefined}
                 >
                   {secondaryAction.label}
                 </Button>

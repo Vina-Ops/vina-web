@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Clock,  } from "lucide-react";
+import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "../button/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../popover/popover";
+import Button from "../button/button";
+import { Popover } from "../popover/popover";
 
 export type TimePickerVariant =
   | "default"
@@ -211,11 +211,13 @@ export const TimePicker = React.forwardRef<HTMLInputElement, TimePickerProps>(
             {label}
           </label>
         )}
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
+        <Popover
+          trigger={
             <Button
               variant="outline"
-              size={size}
+              size={
+                size === "sm" ? "small" : size === "lg" ? "large" : "medium"
+              }
               className={cn(
                 "w-full justify-start text-left font-normal",
                 !selectedTime && "text-gray-500",
@@ -231,36 +233,40 @@ export const TimePicker = React.forwardRef<HTMLInputElement, TimePickerProps>(
               )}
               {selectedTime || placeholder}
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <div className="max-h-[200px] overflow-y-auto p-2">
-              {filteredOptions.map((time) => (
-                <button
-                  key={time}
-                  className={cn(
-                    "w-full rounded-md px-2 py-1 text-left text-sm hover:bg-gray-100",
-                    selectedTime === time && "bg-gray-100"
-                  )}
-                  onClick={() => handleTimeSelect(time)}
-                >
-                  {time}
-                </button>
-              ))}
-            </div>
-            {clearable && selectedTime && (
-              <div className="border-t p-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full"
-                  onClick={handleClear}
-                >
-                  Clear
-                </Button>
+          }
+          content={
+            <div className="w-auto p-0">
+              <div className="max-h-[200px] overflow-y-auto p-2">
+                {filteredOptions.map((time) => (
+                  <button
+                    key={time}
+                    className={cn(
+                      "w-full rounded-md px-2 py-1 text-left text-sm hover:bg-gray-100",
+                      selectedTime === time && "bg-gray-100"
+                    )}
+                    onClick={() => handleTimeSelect(time)}
+                  >
+                    {time}
+                  </button>
+                ))}
               </div>
-            )}
-          </PopoverContent>
-        </Popover>
+              {clearable && selectedTime && (
+                <div className="border-t p-2">
+                  <Button
+                    variant="ghost"
+                    size="small"
+                    className="w-full"
+                    onClick={handleClear}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              )}
+            </div>
+          }
+          open={open}
+          onOpenChange={setOpen}
+        />
         {helperText && !error && (
           <span className="text-sm text-gray-500">{helperText}</span>
         )}

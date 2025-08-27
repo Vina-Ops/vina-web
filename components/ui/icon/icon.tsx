@@ -85,9 +85,9 @@ export const Icon = React.forwardRef<HTMLSpanElement, IconProps>(
     },
     ref
   ) => {
-    const LucideIcon = LucideIcons[name];
+    const IconComponent = LucideIcons[name];
 
-    if (!LucideIcon) {
+    if (!IconComponent) {
       console.warn(`Icon "${name}" not found in Lucide icons`);
       return null;
     }
@@ -108,10 +108,10 @@ export const Icon = React.forwardRef<HTMLSpanElement, IconProps>(
         aria-hidden="true"
         {...props}
       >
-        <LucideIcon
-          className={cn(fill && "fill-current")}
-          strokeWidth={strokeWidth}
-        />
+        {React.createElement(IconComponent as React.ComponentType<any>, {
+          className: cn(fill && "fill-current"),
+          strokeWidth: strokeWidth,
+        })}
       </span>
     );
   }

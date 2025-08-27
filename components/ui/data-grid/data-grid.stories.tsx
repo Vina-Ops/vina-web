@@ -1,9 +1,9 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { DataGrid } from "./data-grid";
-import { Badge } from "../badge/badge";
-import { Button } from "../button/button";
-import { Avatar } from "../avatar/avatar";
+import Badge from "../badge/badge";
+import Button from "../button/button";
+import Avatar from "../avatar/avatar";
 
 const meta: Meta<typeof DataGrid> = {
   title: "UI/DataGrid",
@@ -159,10 +159,10 @@ const complexColumns = [
     header: "Actions",
     cell: (row: any) => (
       <div className="flex gap-2">
-        <Button size="sm" variant="outline">
+        <Button size="small" variant="outline">
           Edit
         </Button>
-        <Button size="sm" variant="outline" color="error">
+        <Button size="small" variant="outline-danger">
           Delete
         </Button>
       </div>

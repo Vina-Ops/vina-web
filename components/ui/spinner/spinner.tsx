@@ -10,7 +10,8 @@ export type SpinnerVariant =
 export type SpinnerSize = "sm" | "md" | "lg" | "xl";
 export type SpinnerStyle = "circular" | "dots" | "pulse";
 
-export interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SpinnerProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "style"> {
   /**
    * The visual variant of the spinner
    */

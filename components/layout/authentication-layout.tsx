@@ -38,7 +38,7 @@ export const AuthLayout = ({
       />
     )}
 
-    <div className="relative z-10 max-w-x w-full space-y-8">
+    <div className="relative z-10 w-full space-y-8">
       {/* Header Section */}
       {/* Content Area */}
       <div className={`${contentClassName} flex justify-center items-center`}>

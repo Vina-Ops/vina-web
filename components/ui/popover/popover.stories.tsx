@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Popover } from "./popover";
-import { Button } from "../button/button";
+import Button from "../button/button";
 
 const meta: Meta<typeof Popover> = {
   title: "UI/Popover",
@@ -208,7 +208,7 @@ export const Disabled: Story = {
 export const Complex: Story = {
   args: {
     trigger: (
-      <Button variant="primary" size="lg">
+      <Button variant="primary" size="large">
         Open Popover
       </Button>
     ),
@@ -217,10 +217,10 @@ export const Complex: Story = {
         <h4 className="font-medium">Welcome to our app!</h4>
         <p>This is a more complex popover with rich content.</p>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="small">
             Cancel
           </Button>
-          <Button variant="primary" size="sm">
+          <Button variant="primary" size="small">
             Confirm
           </Button>
         </div>

@@ -3,17 +3,30 @@
 import React, { useState, useRef } from "react";
 import Button from "@/components/ui/button/button";
 import { Icon } from "@/components/ui/icon/icon";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import useAuthApi from "@/hooks/use-auth-api";
+import { requestOTP, verifyOTP } from "@/services/auth-service";
+import useApi from "@/hooks/unauthenticated-api";
+import { useTopToast } from "@/components/ui/toast";
 
 const CODE_LENGTH = 6;
 
 const VerifyCodePage = () => {
+  const email = useSearchParams().get("email");
   const [code, setCode] = useState(Array(CODE_LENGTH).fill(""));
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState("");
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
+  const { showToast, hideToast } = useTopToast();
+
+  const { callApi, loading, error: apiError } = useApi(verifyOTP);
+  const {
+    callApi: resendCode,
+    loading: resendLoading,
+    error: resendError,
+  } = useApi(requestOTP);
 
   const isCodeComplete = code.every(
     (digit) => digit.length === 1 && /^[0-9]$/.test(digit)
@@ -40,6 +53,24 @@ const VerifyCodePage = () => {
     }
   };
 
+  const handleResend = () => {
+    const otpPayload = {
+      email: email || "",
+      request_type: "register",
+    };
+    resendCode(otpPayload)
+      .then(() => {
+        showToast("Verification code resent successfully!", {
+          type: "success",
+        });
+      })
+      .catch((err) => {
+        showToast(err.message || "Failed to resend code. Please try again.", {
+          type: "error",
+        });
+      });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
@@ -47,8 +78,25 @@ const VerifyCodePage = () => {
       setError("Please enter the 6-digit code sent to your email.");
       return;
     }
+
+    const otpData = {
+      otp: code.join(""),
+      email: email || "",
+    };
+    callApi(otpData)
+      .then(() => {
+        setError("");
+        showToast("Code verified successfully!", { type: "success" });
+        // Redirect to success page or next step
+        router.push("/auth/register/success");
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to verify code. Please try again.");
+        showToast(err.detail || "Failed to verify code. Please try again.", {
+          type: "error",
+        });
+      });
     setError("");
-    router.push("/auth/reset-password");
   };
 
   return (
@@ -104,6 +152,7 @@ const VerifyCodePage = () => {
       <div className="flex justify-center text-sm text-green-900 dark:text-green-300 mt-2">
         <button
           type="button"
+          onClick={handleResend}
           className="hover:underline bg-transparent border-none p-0"
         >
           Resend code

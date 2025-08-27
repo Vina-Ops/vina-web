@@ -91,88 +91,97 @@ export const Disabled: Story = {
   },
 };
 
-// Radio Group
-export const Group: Story = {
-  render: () => {
-    const [value, setValue] = React.useState("option1");
+// Radio Group Component
+const RadioGroupStory = () => {
+  const [value, setValue] = React.useState("option1");
 
-    return (
-      <RadioGroup
-        name="options"
-        value={value}
-        onChange={setValue}
-        label="Select an option"
-        helperText="Choose one of the following options"
-      >
-        <Radio label="Option 1" value="option1" />
-        <Radio label="Option 2" value="option2" />
-        <Radio label="Option 3" value="option3" />
-      </RadioGroup>
-    );
-  },
+  return (
+    <RadioGroup
+      name="options"
+      value={value}
+      onChange={setValue}
+      label="Select an option"
+      helperText="Choose one of the following options"
+    >
+      <Radio label="Option 1" value="option1" />
+      <Radio label="Option 2" value="option2" />
+      <Radio label="Option 3" value="option3" />
+    </RadioGroup>
+  );
 };
 
-// Horizontal Group
-export const HorizontalGroup: Story = {
-  render: () => {
-    const [value, setValue] = React.useState("option1");
+export const Group: Story = {
+  render: () => <RadioGroupStory />,
+};
 
-    return (
+// Horizontal Group Component
+const HorizontalRadioGroupStory = () => {
+  const [value, setValue] = React.useState("option1");
+
+  return (
+    <RadioGroup
+      name="options"
+      value={value}
+      onChange={setValue}
+      label="Select an option"
+      orientation="horizontal"
+    >
+      <Radio label="Option 1" value="option1" />
+      <Radio label="Option 2" value="option2" />
+      <Radio label="Option 3" value="option3" />
+    </RadioGroup>
+  );
+};
+
+export const HorizontalGroup: Story = {
+  render: () => <HorizontalRadioGroupStory />,
+};
+
+// Complex Example Component
+const ComplexRadioStory = () => {
+  const [planValue, setPlanValue] = React.useState("basic");
+  const [billingValue, setBillingValue] = React.useState("monthly");
+
+  return (
+    <div className="space-y-6">
       <RadioGroup
         name="options"
-        value={value}
-        onChange={setValue}
-        label="Select an option"
+        value={planValue}
+        onChange={setPlanValue}
+        label="Select a plan"
+        helperText="Choose the plan that best fits your needs"
+      >
+        <Radio
+          label="Basic Plan"
+          value="basic"
+          helperText="Perfect for individuals"
+        />
+        <Radio
+          label="Pro Plan"
+          value="pro"
+          helperText="Great for small teams"
+        />
+        <Radio
+          label="Enterprise Plan"
+          value="enterprise"
+          helperText="For large organizations"
+        />
+      </RadioGroup>
+
+      <RadioGroup
+        name="billing"
+        value={billingValue}
+        onChange={setBillingValue}
+        label="Billing Cycle"
         orientation="horizontal"
       >
-        <Radio label="Option 1" value="option1" />
-        <Radio label="Option 2" value="option2" />
-        <Radio label="Option 3" value="option3" />
+        <Radio label="Monthly" value="monthly" />
+        <Radio label="Yearly" value="yearly" />
       </RadioGroup>
-    );
-  },
+    </div>
+  );
 };
 
-// Complex Example
 export const Complex: Story = {
-  render: () => {
-    const [value, setValue] = React.useState("option1");
-
-    return (
-      <div className="space-y-6">
-        <RadioGroup
-          name="options"
-          value={value}
-          onChange={setValue}
-          label="Select a plan"
-          helperText="Choose the plan that best fits your needs"
-        >
-          <Radio
-            label="Basic Plan"
-            value="basic"
-            helperText="Perfect for individuals"
-          />
-          <Radio
-            label="Pro Plan"
-            value="pro"
-            helperText="Great for small teams"
-          />
-          <Radio
-            label="Enterprise Plan"
-            value="enterprise"
-            helperText="For large organizations"
-          />
-        </RadioGroup>
-
-        <RadioGroup
-          name="billing"
-          label="Billing Cycle"
-          orientation="horizontal"
-        >
-          <Radio label="Monthly" value="monthly" />
-          <Radio label="Yearly" value="yearly" />
-        </RadioGroup>
-      </div>
-    );
-  },
+  render: () => <ComplexRadioStory />,
 };

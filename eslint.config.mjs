@@ -15,6 +15,10 @@ const eslintConfig = [
     rules: {
       "react/exhausive-deps": "off",
       "react/no-unescaped-entities": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
+      "@next/next/no-img-element": "off",
+      "@react/no-children-prop": "off",
+      "@typescript-eslint/no-this-alias": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-empty-object-type": "off",
       "@typescript-eslint/no-explicit-any": "off",

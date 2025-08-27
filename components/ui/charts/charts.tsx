@@ -22,7 +22,7 @@ export type ChartType = "line" | "bar" | "area" | "pie";
 
 export interface ChartData {
   name: string;
-  value: number;
+  value?: number;
   [key: string]: any;
 }
 

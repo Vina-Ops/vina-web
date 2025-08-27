@@ -137,7 +137,7 @@ const sampleData = [
   },
 ];
 
-const basicColumns = [
+const basicColumns: Column[] = [
   { key: "id", title: "Order ID", sortable: true },
   { key: "customer", title: "Customer", sortable: true },
   { key: "product", title: "Product", sortable: true },
@@ -274,7 +274,7 @@ const usersData = [
   },
 ];
 
-const userColumns = [
+const userColumns: Column[] = [
   { key: "name", title: "Name", sortable: true },
   { key: "email", title: "Email", sortable: true },
   { key: "role", title: "Role", sortable: true },
@@ -333,7 +333,7 @@ const productsData = [
   },
 ];
 
-const productColumns = [
+const productColumns: Column[] = [
   { key: "name", title: "Product Name", sortable: true },
   { key: "category", title: "Category", sortable: true },
   { key: "brand", title: "Brand", sortable: true },

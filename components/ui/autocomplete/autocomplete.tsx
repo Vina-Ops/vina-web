@@ -82,6 +82,25 @@ export function Autocomplete({
       }, {} as Record<string, AutocompleteOption[]>)
     : null;
 
+  const handleSelect = React.useCallback(
+    (option: AutocompleteOption) => {
+      if (option.disabled) return;
+
+      if (multiple) {
+        const newValues = selectedValues.includes(option.value)
+          ? selectedValues.filter((v) => v !== option.value)
+          : [...selectedValues, option.value];
+        setSelectedValues(newValues);
+        onChange?.(newValues.join(","));
+      } else {
+        setSelectedValues([option.value]);
+        onChange?.(option.value);
+        setIsOpen(false);
+      }
+    },
+    [multiple, onChange, selectedValues]
+  );
+
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -131,25 +150,6 @@ export function Autocomplete({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const handleSelect = React.useCallback(
-    (option: AutocompleteOption) => {
-      if (option.disabled) return;
-
-      if (multiple) {
-        const newValues = selectedValues.includes(option.value)
-          ? selectedValues.filter((v) => v !== option.value)
-          : [...selectedValues, option.value];
-        setSelectedValues(newValues);
-        onChange?.(newValues.join(","));
-      } else {
-        setSelectedValues([option.value]);
-        onChange?.(option.value);
-        setIsOpen(false);
-      }
-    },
-    [multiple, onChange, selectedValues]
-  );
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();

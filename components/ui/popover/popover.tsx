@@ -18,7 +18,8 @@ export type PopoverPlacement =
   | "right-start"
   | "right-end";
 
-export interface PopoverProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface PopoverProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "content"> {
   /**
    * The trigger element that opens the popover
    */

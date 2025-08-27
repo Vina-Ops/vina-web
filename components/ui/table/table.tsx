@@ -10,7 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { ActionButton } from "./action-button/action-button";
-import { StatusBadge } from "./status-badge.tsx/status-badge";
+import StatusBadge from "./status-badge.tsx/status-badge";
 
 type TableHeaderProps = {
   title: string;

@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 export type AccordionVariant = "default" | "bordered" | "separated";
 export type AccordionSize = "sm" | "md" | "lg";
 
-export interface AccordionProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface AccordionProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
   /**
    * The visual variant of the accordion
    */
@@ -37,7 +38,7 @@ export interface AccordionProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export interface AccordionItemProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   /**
    * The unique identifier for the accordion item
    */
@@ -198,14 +199,15 @@ export const AccordionItem = React.forwardRef<
         <button
           type="button"
           className={cn(
-            "flex w-full items-center justify-between gap-2 text-left",
+            "flex w-full items-center justify-between gap-2 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded transition-colors",
             sizeStyles[size].header,
-            disabled && "cursor-not-allowed"
+            disabled && "cursor-not-allowed hover:bg-transparent"
           )}
           onClick={() => !disabled && toggleItem(id)}
           disabled={disabled}
           aria-expanded={isExpanded}
           aria-controls={`accordion-content-${id}`}
+          id={`accordion-header-${id}`}
         >
           <div className="flex items-center gap-2">
             {icon && <span className="flex-shrink-0">{icon}</span>}
@@ -229,8 +231,8 @@ export const AccordionItem = React.forwardRef<
           role="region"
           aria-labelledby={`accordion-header-${id}`}
           className={cn(
-            "overflow-hidden transition-all duration-200",
-            isExpanded ? "max-h-[1000px]" : "max-h-0"
+            "overflow-hidden transition-all duration-200 ease-in-out",
+            isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
           )}
         >
           <div className={sizeStyles[size].content}>{children}</div>
