@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { UserRoute } from "@/components/auth/ProtectedRoute";
-import { useAuth } from "@/context/auth-context";
+import AuthGuard from "@/components/auth/AuthGuard";
+import { useUser } from "@/context/user-context";
 import {
   User,
   MessageSquare,
@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 export default function UserDashboard() {
-  const { user } = useAuth();
+  const { user } = useUser();
 
   const stats = [
     {
@@ -77,7 +77,7 @@ export default function UserDashboard() {
   ];
 
   return (
-    <UserRoute>
+    <AuthGuard requiredRole="user">
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -314,6 +314,6 @@ export default function UserDashboard() {
           </div>
         </div>
       </div>
-    </UserRoute>
+    </AuthGuard>
   );
 }

@@ -12,9 +12,11 @@ type UserProfile = ReturnType<typeof getUserProfile> extends Promise<infer T>
 const UserContext = createContext<{
   user: UserProfile | null;
   setUser: React.Dispatch<React.SetStateAction<UserProfile | null>>;
+  loading: boolean;
 }>({
   user: null,
   setUser: () => {},
+  loading: false,
 });
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
@@ -23,6 +25,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const hasAttemptedFetch = React.useRef(false);
 
   React.useEffect(() => {
+    // console.log("UserContext: data received", data);
     if (data) {
       setUser(data);
     }
@@ -42,26 +45,42 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   }, [error]);
 
   React.useEffect(() => {
-    // Only execute once on mount if user is null and not currently loading
-    // Also check if we're not on an auth page to avoid unnecessary calls
-    if (!user && !loading && !hasAttemptedFetch.current) {
-      const isOnAuthPage =
-        typeof window !== "undefined" &&
-        window.location.pathname.startsWith("/auth/");
+    const fetchUser = async () => {
+      // console.log("UserContext: useEffect triggered", {
+      //   user,
+      //   loading,
+      //   hasAttemptedFetch: hasAttemptedFetch.current,
+      // });
 
-      // Only fetch user profile if we're not on an auth page
-      if (!isOnAuthPage) {
-        hasAttemptedFetch.current = true;
-        execute();
-      } else {
-        // Mark as attempted to prevent future attempts on auth pages
-        hasAttemptedFetch.current = true;
+      // Only execute once on mount if user is null and not currently loading
+      // Also check if we're not on an auth page to avoid unnecessary calls
+      if (!user && !loading && !hasAttemptedFetch.current) {
+        const isOnAuthPage =
+          typeof window !== "undefined" &&
+          window.location.pathname.startsWith("/auth/");
+
+        console.log("UserContext: isOnAuthPage", isOnAuthPage);
+
+        // Only fetch user profile if we're not on an auth page
+        if (!isOnAuthPage) {
+          hasAttemptedFetch.current = true;
+          // console.log("UserContext: executing getUserProfile");
+          const data = await execute();
+          // console.log("UserContext: data received", data);
+          setUser(data);
+        } else {
+          // Mark as attempted to prevent future attempts on auth pages
+          hasAttemptedFetch.current = true;
+          console.log("UserContext: on auth page, skipping fetch");
+        }
       }
-    }
+    };
+
+    fetchUser();
   }, []); // Empty dependency array - only run once on mount
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, loading }}>
       {children}
     </UserContext.Provider>
   );

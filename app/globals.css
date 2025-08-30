@@ -96,21 +96,21 @@
     animation-delay: 0.3s;
   }
 
-    /* Glow effect */
+  /* Glow effect */
   .animate-glow {
     animation: glow 2s ease-in-out infinite alternate;
   }
-  
+
   @keyframes glow {
     from {
       box-shadow: 0 0 5px rgba(34, 197, 94, 0.5);
     }
     to {
       box-shadow: 0 0 20px rgba(34, 197, 94, 0.8),
-         0 0 30px rgba(34, 197, 94, 0.6);
+        0 0 30px rgba(34, 197, 94, 0.6);
     }
   }
-  
+
   /* Typing animations */
   .typing-animation {
     display: inline-block;
@@ -119,39 +119,43 @@
     white-space: nowrap;
     animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
   }
-  
+
   .typing-animation-delay {
     display: inline-block;
     overflow: hidden;
     border-right: 2px solid #10b981;
     white-space: nowrap;
-    animation: typing 3s steps(40, end) 1s both, blink-caret 0.75s step-end infinite 1s;
+    animation: typing 3s steps(40, end) 1s both,
+      blink-caret 0.75s step-end infinite 1s;
   }
-  
+
   .typing-animation-delay-2 {
     display: inline-block;
     overflow: hidden;
     border-right: 2px solid #10b981;
     white-space: nowrap;
-    animation: typing 4s steps(60, end) 2.5s both, blink-caret 0.75s step-end infinite 2.5s;
+    animation: typing 4s steps(60, end) 2.5s both,
+      blink-caret 0.75s step-end infinite 2.5s;
   }
-  
+
   .typing-animation-delay-3 {
     display: inline-block;
     overflow: hidden;
     border-right: 2px solid #10b981;
     white-space: nowrap;
-    animation: typing 3s steps(40, end) 4s both, blink-caret 0.75s step-end infinite 4s;
+    animation: typing 3s steps(40, end) 4s both,
+      blink-caret 0.75s step-end infinite 4s;
   }
-  
+
   .typing-animation-delay-4 {
     display: inline-block;
     overflow: hidden;
     border-right: 2px solid #10b981;
     white-space: nowrap;
-    animation: typing 5s steps(80, end) 5.5s both, blink-caret 0.75s step-end infinite 5.5s;
+    animation: typing 5s steps(80, end) 5.5s both,
+      blink-caret 0.75s step-end infinite 5.5s;
   }
-  
+
   @keyframes typing {
     from {
       width: 0;
@@ -160,7 +164,7 @@
       width: 100%;
     }
   }
-  
+
   @keyframes blink-caret {
     from,
     to {
@@ -268,4 +272,34 @@
 /* Gradient background for chat */
 .chat-gradient {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+textarea:focus,
+input:focus,
+select:focus,
+rich-text-editor:focus,
+select:active {
+  outline: none;
+  border-color: #83cd20; /* Change to your desired focus color */
+  box-shadow: 0 0 0 2px rgba(131, 205, 32, 0.2); /* Optional shadow for focus */
+}
+
+select {
+  padding: 10px 40px 10px 12px; /* Top/Right/Bottom/Left */
+  /* width: 200px; */
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+
+  /* Remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /* Add custom icon */
+  background-image: url("https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-logo_jeyist.svg");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
 }

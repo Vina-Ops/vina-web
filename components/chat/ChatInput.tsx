@@ -54,7 +54,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
   };
 
   return (
-    <div className="border-t border-gray-200 bg-transparent p-4">
+    <div className="border-t border-gray-200 bg-transparent p-4 sticky bottom-0 bg-white">
       <form onSubmit={handleSubmit} className="flex items-center gap-3">
         <AudioRecorder
           onAudioRecorded={handleAudioRecorded}

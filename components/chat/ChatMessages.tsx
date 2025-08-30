@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ChatMessagesProps } from "@/types/chat";
 import { ChatMessage } from "./ChatMessage";
 import { TypingIndicator } from "./TypingIndicator";
@@ -10,9 +10,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   isTyping,
   messagesEndRef,
 }) => {
-  // console.log("Messages in ChatMessages:", messages); // Debug log
   const containerRef = useRef<HTMLDivElement>(null);
   const [stickyDate, setStickyDate] = useState<string>("");
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sort messages by timestamp to ensure proper chronological order
   const sortedMessages = [...messages].sort(
@@ -36,95 +36,139 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
   const messageGroups = groupMessagesByDate(sortedMessages);
 
-  // Scroll to bottom when new messages are added
+  // Function to format date display
+  const formatDateDisplay = useCallback((dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return "Yesterday";
+    } else {
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
+  }, []);
+
+  // Scroll handler for sticky date
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    let isUpdating = false;
+
+    const handleScroll = () => {
+      if (isUpdating) return;
+
+      const scrollTop = container.scrollTop;
+      const containerHeight = container.clientHeight;
+      const scrollHeight = container.scrollHeight;
+
+      // Check if we're at the bottom
+      const isAtBottom = scrollTop + containerHeight >= scrollHeight - 100;
+
+      if (isAtBottom && sortedMessages.length > 0) {
+        const latestMessage = sortedMessages[sortedMessages.length - 1];
+        const latestDate = latestMessage.timestamp.toDateString();
+        if (latestDate !== stickyDate) {
+          isUpdating = true;
+          setStickyDate(latestDate);
+          setTimeout(() => {
+            isUpdating = false;
+          }, 100);
+        }
+        return;
+      }
+
+      // Find which date section is most visible
+      const dateSections = container.querySelectorAll("[data-date-key]");
+      let currentDate = "";
+
+      for (let i = dateSections.length - 1; i >= 0; i--) {
+        const section = dateSections[i] as HTMLElement;
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+
+        // Check if this section is visible in the viewport
+        if (
+          scrollTop <= sectionTop + sectionHeight &&
+          scrollTop + containerHeight >= sectionTop
+        ) {
+          currentDate = section.getAttribute("data-date-key") || "";
+          break;
+        }
+      }
+
+      if (currentDate && currentDate !== stickyDate) {
+        isUpdating = true;
+        setStickyDate(currentDate);
+        setTimeout(() => {
+          isUpdating = false;
+        }, 100);
+      }
+    };
+
+    // Initial call
+    handleScroll();
+
+    // Add scroll listener
+    container.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+    };
+  }, [sortedMessages, stickyDate]);
+
+  // Auto-scroll to bottom when new messages are added
   useEffect(() => {
     if (messagesEndRef.current && containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      const container = containerRef.current;
+      const isScrolledToBottom =
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - 100;
+
+      // Only auto-scroll if user is already at or near the bottom
+      if (isScrolledToBottom) {
+        container.scrollTop = container.scrollHeight;
+      }
     }
   }, [messages]);
 
-  // Handle scroll to update sticky date
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current) return;
-
-      const container = containerRef.current;
-      const scrollTop = container.scrollTop;
-      const containerHeight = container.clientHeight;
-
-      // Find the date that should be sticky based on scroll position
-      let currentStickyDate = "";
-
-      // Get all date elements
-      const dateElements = container.querySelectorAll("[data-date-key]");
-
-      dateElements.forEach((element) => {
-        const rect = element.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-
-        // If the date element is at or near the top of the visible area
-        if (
-          rect.top <= containerRect.top + 60 &&
-          rect.bottom > containerRect.top
-        ) {
-          currentStickyDate = element.getAttribute("data-date-key") || "";
-        }
-      });
-
-      setStickyDate(currentStickyDate);
-    };
-
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
-    }
-  }, [messageGroups]);
-
   return (
-    <div className="flex-1 flex flex-col relative">
+    <div className="flex-1 flex flex-col">
       {/* Sticky Date Header - Fixed at top */}
       {stickyDate && (
-        <div className="absolute top-0 left-0 right-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 py-2">
+        <div className="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 py-2 transition-all duration-200">
           <div className="flex justify-center">
             <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm">
               <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                {new Date(stickyDate).toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+                {formatDateDisplay(stickyDate)}
               </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Messages Container - with top padding when sticky header is shown */}
+      {/* Messages Container */}
       <div
         ref={containerRef}
-        className={`flex-1 overflow-y-auto px-4 space-y-4 chat-scrollbar bg-transparent ${
-          stickyDate ? "pt-16" : "pt-6"
-        } pb-6`}
+        className="flex-1 overflow-y-auto px-4 space-y-4 chat-scrollbar bg-transparent pt-6 pb-6"
+        style={{ scrollBehavior: "smooth" }}
       >
         {Object.entries(messageGroups).map(([dateKey, dateMessages]) => (
-          <div key={dateKey} className="space-y-4">
-            {/* Date separator (hidden when sticky) */}
-            <div
-              className={`flex justify-center ${
-                stickyDate === dateKey ? "opacity-0" : ""
-              }`}
-              data-date-key={dateKey}
-            >
+          <div key={dateKey} className="space-y-4" data-date-key={dateKey}>
+            {/* Date separator */}
+            <div className="flex justify-center">
               <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {new Date(dateKey).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">
+                  {formatDateDisplay(dateKey)}
                 </span>
               </div>
             </div>
@@ -134,6 +178,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
               <div
                 key={message.id}
                 data-message-timestamp={message.timestamp.getTime()}
+                className="scroll-mt-20" // Offset for sticky header
               >
                 <ChatMessage message={message} />
               </div>

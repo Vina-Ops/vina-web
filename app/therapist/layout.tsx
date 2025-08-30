@@ -5,8 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { TherapistRoute } from "@/components/auth/ProtectedRoute";
-import { useAuth } from "@/context/auth-context";
+import AuthGuard from "@/components/auth/AuthGuard";
+import { useUser } from "@/context/user-context";
+import { removeToken } from "@/helpers/logout";
+import { useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   User,
@@ -79,10 +81,21 @@ const navigation = [
 export default function TherapistLayout({ children }: TherapistLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, setUser } = useUser();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await removeToken();
+      setUser(null);
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
-    <TherapistRoute>
+    <AuthGuard requiredRole="therapist">
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Mobile sidebar */}
         <div
@@ -231,7 +244,7 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
                 <ThemeToggle />
                 <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:bg-gray-700" />
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="flex items-center gap-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                 >
                   <LogOut className="h-5 w-5" />
@@ -249,6 +262,6 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
           </main>
         </div>
       </div>
-    </TherapistRoute>
+    </AuthGuard>
   );
 }

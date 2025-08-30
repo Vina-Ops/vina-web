@@ -5,7 +5,7 @@ export const getWebSocketUrl = (endpoint: string = "/api/vina"): string => {
   const devUrl = process.env.NEXT_PUBLIC_API_URL;
   const prodUrl = process.env.NEXT_PUBLIC_API_URL_PROD;
 
-  console.log("🌐 WebSocket config:", {
+  // console.log("🌐 WebSocket config:", {
     environment,
     devUrl,
     prodUrl,

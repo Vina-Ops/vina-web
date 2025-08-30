@@ -5,7 +5,12 @@ import type { NextRequest } from "next/server";
 const protectedRoutes = {
   "/admin": ["admin"],
   "/therapist": ["therapist"],
-  "/dashboard": ["user", "therapist", "admin"],
+  "/dashboard": ["user", "therapist", "admin", "customer"],
+  "/chat-room": ["user", "therapist", "admin", "customer"],
+  "/profile": ["user", "therapist", "admin", "customer"],
+  "/therapists": ["user", "therapist", "admin", "customer"],
+  "/settings": ["user", "therapist", "admin", "customer"],
+  "/chat": ["user", "therapist", "admin", "customer"],
 };
 
 // Define public routes that don't require authentication
@@ -16,7 +21,10 @@ const publicRoutes = [
   "/",
   "/api/auth/login",
   "/api/auth/register",
-  "/api/auth/me",
+  "/api/set-cookie",
+  "/api/remove-cookie",
+  "/api/get-cookie",
+  "/api/get-refresh-cookie",
 ];
 
 export function middleware(request: NextRequest) {
@@ -34,9 +42,22 @@ export function middleware(request: NextRequest) {
 
   if (protectedRoute) {
     // Get the token from cookies or headers
-    const token =
-      request.cookies.get("authToken")?.value ||
-      request.headers.get("authorization")?.replace("Bearer ", "");
+    const accessToken = request.cookies.get("access_token")?.value;
+    const authToken = request.cookies.get("authToken")?.value;
+    const authHeader = request.headers
+      .get("authorization")
+      ?.replace("Bearer ", "");
+
+    const token = accessToken || authToken || authHeader;
+
+    // Debug logging
+    console.log("Middleware Debug:", {
+      pathname,
+      accessToken: accessToken ? "exists" : "missing",
+      authToken: authToken ? "exists" : "missing",
+      authHeader: authHeader ? "exists" : "missing",
+      hasToken: !!token,
+    });
 
     if (!token) {
       // Redirect to login if no token
