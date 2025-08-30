@@ -47,7 +47,7 @@ const LoginPage = () => {
         });
 
         if (data.ok) {
-          toast.success("Login successful!");
+          // toast.success("Login successful!");
           // Optionally fetch user details and redirect as needed
           router.push("/chat");
           localStorage.removeItem("2fa_user_id");
