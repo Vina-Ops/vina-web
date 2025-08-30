@@ -87,7 +87,7 @@ const messageBubbles: MessageBubble[] = [
   {
     id: "10",
     content: "Self-care isn't selfish, it's necessary 💆‍♀️",
-    side: "top",
+    side: "right",
     delay: 7200,
     duration: 2500,
     position: 30,
@@ -221,7 +221,7 @@ export const PopupMessageBubbles: React.FC = () => {
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-20">
       {messageBubbles.map((bubble) => (
         <div
           key={bubble.id}
@@ -247,7 +247,7 @@ export const PopupMessageBubbles: React.FC = () => {
           }}
         >
           <div
-            className={`relative max-w-xs px-4 py-3 rounded-2xl shadow-lg ${
+            className={`relative max-w-md px-4 py-3 rounded-2xl shadow-lg z-20 ${
               bubble.side === "left"
                 ? "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-l-4 border-green-500"
                 : bubble.side === "right"

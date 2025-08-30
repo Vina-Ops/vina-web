@@ -84,28 +84,28 @@ function HomePageContent() {
       >
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-light-green dark:via-greener dark:to-green">
           {/* Navigation Header */}
-          <nav className="relative z-10 px-6 py-4">
+          <nav className="relative z-10 px-4 md:px-6 py-4">
             {/* Background decoration */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent dark:via-gray-800/5"></div>
 
             <div className="flex items-center justify-between relative z-10">
               <div className="flex items-center space-x-2 group">
                 <Logo />
-                <div className="hidden md:block">
+                <div className="hidden sm:block">
                   <div className="text-xs text-gray-500 dark:text-gray-400 animate-pulse">
                     Always Listening
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 md:space-x-4">
                 {/* <ThemeToggle /> */}
                 <Link href="/auth/login">
-                  <button className="px-4 py-2 text-gray-600 dark:text-gray-600 hover:text-gray-900 dark:hover:text-white transition hover:scale-105">
+                  <button className="px-3 md:px-4 py-2 text-gray-600 dark:text-gray-600 hover:text-gray-900 dark:hover:text-white transition hover:scale-105 text-sm md:text-base">
                     Sign In
                   </button>
                 </Link>
                 <Link href="/?start=1">
-                  <button className="px-4 py-2 bg-green text-white rounded-lg hover:bg-green/80 transition transform hover:scale-105 shadow-lg hover:shadow-xl">
+                  <button className="px-3 md:px-4 py-2 bg-green text-white rounded-lg hover:bg-green/80 transition transform hover:scale-105 shadow-lg hover:shadow-xl text-sm md:text-base">
                     Get Started
                   </button>
                 </Link>
@@ -114,7 +114,7 @@ function HomePageContent() {
           </nav>
 
           {/* Hero Section */}
-          <section className="relative px-6 py-20 overflow-hidden">
+          <section className="relative px-4 md:px-6 py-12 md:py-20 overflow-hidden">
             {/* Popup Message Bubbles */}
             <PopupMessageBubbles />
 
@@ -144,13 +144,13 @@ function HomePageContent() {
                   <div className="absolute top-20 right-1/2 w-14 h-14 bg-indigo/20 rounded-full animate-bounce delay-1000 cursor-pointer hover:scale-125 transition-transform"></div>
                 </div>
 
-                <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight animate-fade-in">
+                <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight animate-fade-in">
                   Your Mental Wellness
                   <span className="text-green-600 dark:text-green-400 block animate-pulse">
                     Companion
                   </span>
                 </h1>
-                <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-delay">
+                <p className="text-lg md:text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-delay">
                   Vina is here to always listen, support, and guide you through
                   life's challenges with compassionate AI-powered conversations.
                 </p>
@@ -158,12 +158,12 @@ function HomePageContent() {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
                 <Link href="/chat">
-                  <button className="px-8 py-4 bg-green text-white text-lg font-semibold rounded-xl hover:bg-green/80 transition-all transform hover:scale-105 shadow-lg">
+                  <button className="px-6 md:px-8 py-3 md:py-4 bg-green text-white text-base md:text-lg font-semibold rounded-xl hover:bg-green/80 transition-all transform hover:scale-105 shadow-lg">
                     Start Chatting Now
                   </button>
                 </Link>
                 <div className="relative group">
-                  <button className="px-8 py-4 border-2 border-green text-green dark:text-green-400 text-lg font-semibold rounded-xl hover:bg-green/80 hover:text-white transition-all transform hover:scale-105">
+                  <button className="px-6 md:px-8 py-3 md:py-4 border-2 border-green text-green dark:text-green-400 text-base md:text-lg font-semibold rounded-xl hover:bg-green/80 hover:text-white transition-all transform hover:scale-105">
                     Watch Demo
                   </button>
                   <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
@@ -171,7 +171,7 @@ function HomePageContent() {
               </div>
 
               {/* Trust Indicators */}
-              <div className="flex flex-wrap justify-center items-center gap-8 text-gray-500 dark:text-gray-400">
+              <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 text-gray-500 dark:text-gray-400 text-sm md:text-base">
                 <div className="flex items-center space-x-2 hover:scale-110 transition-transform">
                   <div className="w-2 h-2 bg-green rounded-full animate-pulse"></div>
                   <span>24/7 Available</span>
@@ -189,7 +189,7 @@ function HomePageContent() {
           </section>
 
           {/* Features Section */}
-          <section className="px-6 py-20 bg-white dark:bg-light-green relative overflow-hidden">
+          <section className="px-4 md:px-6 py-12 md:py-20 bg-white dark:bg-light-green relative overflow-hidden">
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-5">
               <div className="absolute top-10 left-10 w-20 h-20 border-2 border-green rounded-full animate-spin-slow"></div>
@@ -207,11 +207,11 @@ function HomePageContent() {
             </div>
 
             <div className="mx-auto relative z-10">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-fade-in">
+              <div className="text-center mb-12 md:mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-fade-in">
                   Why Choose Vina?
                 </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto animate-fade-in-delay">
+                <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto animate-fade-in-delay">
                   Experience the future of mental wellness support with our
                   advanced AI companion.
                 </p>
@@ -300,7 +300,7 @@ function HomePageContent() {
           </section>
 
           {/* CTA Section */}
-          <section className="px-6 py-20 relative overflow-hidden">
+          <section className="px-4 md:px-6 py-12 md:py-20 relative overflow-hidden">
             {/* Floating elements */}
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-green/20 to-blue/20 rounded-full blur-xl animate-float"></div>
@@ -309,10 +309,10 @@ function HomePageContent() {
             </div>
 
             <div className="max-w-4xl mx-auto text-center relative z-10">
-              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 animate-fade-in">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6 animate-fade-in">
                 Ready to Start Your Wellness Journey?
               </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 animate-fade-in-delay">
+              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 animate-fade-in-delay">
                 Join thousands of users who have found support, understanding,
                 and growth with Vina.
               </p>
@@ -324,7 +324,7 @@ function HomePageContent() {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/auth/register">
-                  <button className="px-8 py-4 bg-green text-white text-lg font-semibold rounded-xl hover:bg-green/80 transition-all transform hover:scale-105 shadow-lg">
+                  <button className="px-6 md:px-8 py-3 md:py-4 bg-green text-white text-base md:text-lg font-semibold rounded-xl hover:bg-green/80 transition-all transform hover:scale-105 shadow-lg">
                     Create Free Account
                   </button>
                 </Link>
@@ -338,23 +338,23 @@ function HomePageContent() {
           </section>
 
           {/* Stats Section */}
-          <section className="px-6 py-20 bg-gradient-to-r from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 relative overflow-hidden">
+          <section className="px-4 md:px-6 py-12 md:py-20 bg-gradient-to-r from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 relative overflow-hidden">
             {/* Animated background */}
             <div className="absolute inset-0">
               <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green/5 to-blue/5"></div>
             </div>
 
             <div className="max-w-6xl mx-auto relative z-10">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-fade-in">
+              <div className="text-center mb-12 md:mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-fade-in">
                   Trusted by Thousands
                 </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-300 animate-fade-in-delay">
+                <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 animate-fade-in-delay">
                   Join our growing community of users finding support and growth
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
                 {/* Stat 1 */}
                 <div className="text-center group">
                   <div className="relative mb-4">
@@ -411,7 +411,7 @@ function HomePageContent() {
           </section>
 
           {/* Testimonials Section */}
-          <section className="px-6 py-20 bg-white dark:bg-gray-900 relative overflow-hidden">
+          <section className="px-4 md:px-6 py-12 md:py-20 bg-white dark:bg-gray-900 relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute inset-0 opacity-5">
               <div className="absolute top-20 left-10 w-32 h-32 border border-green rounded-full animate-spin-slow"></div>
@@ -419,11 +419,11 @@ function HomePageContent() {
             </div>
 
             <div className="max-w-6xl mx-auto relative z-10">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-fade-in">
+              <div className="text-center mb-12 md:mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-fade-in">
                   What Our Users Say
                 </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-300 animate-fade-in-delay">
+                <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 animate-fade-in-delay">
                   Real stories from people who found support with Vina
                 </p>
               </div>
@@ -500,11 +500,11 @@ function HomePageContent() {
           </section>
 
           {/* Floating Action Button */}
-          <div className="fixed bottom-8 right-8 z-50">
-            <button className="w-16 h-16 bg-green rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 animate-glow">
+          <div className="fixed bottom-4 md:bottom-8 right-4 md:right-8 z-50">
+            <button className="w-12 h-12 md:w-16 md:h-16 bg-green rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 animate-glow">
               <div className="flex items-center justify-center">
                 <svg
-                  className="w-8 h-8 text-white"
+                  className="w-6 h-6 md:w-8 md:h-8 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -521,7 +521,7 @@ function HomePageContent() {
           </div>
 
           {/* Footer */}
-          <footer className="px-6 py-12 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <footer className="px-4 md:px-6 py-8 md:py-12 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
             <div className="mx-auto">
               <div className="flex flex-col md:flex-row justify-between items-center">
                 <div className="flex items-center space-x-2 mb-4 md:mb-0">
@@ -529,7 +529,7 @@ function HomePageContent() {
                     <Logo />
                   </div>
                 </div>
-                <div className="flex space-x-6 text-gray-600 dark:text-gray-400">
+                <div className="flex flex-wrap justify-center space-x-4 md:space-x-6 text-gray-600 dark:text-gray-400 text-sm md:text-base">
                   <a
                     href="#"
                     className="hover:text-green-600 dark:hover:text-green-400 transition"
@@ -556,7 +556,7 @@ function HomePageContent() {
                   </a>
                 </div>
               </div>
-              <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400">
+              <div className="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 text-sm md:text-base">
                 <p>
                   &copy; 2025 Vina. All rights reserved. Your mental wellness
                   companion.

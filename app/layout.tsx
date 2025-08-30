@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { AuthProvider } from "@/context/auth-context";
 import { UserProvider } from "@/context/user-context";
 import { WebSocketProvider } from "@/context/websocket-context";
 
@@ -18,9 +19,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={` antialiased`}>
         <ThemeProvider>
-          <UserProvider>
-            <WebSocketProvider>{children}</WebSocketProvider>
-          </UserProvider>
+          <AuthProvider>
+            <UserProvider>
+              <WebSocketProvider>{children}</WebSocketProvider>
+            </UserProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

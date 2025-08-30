@@ -5,6 +5,7 @@ import React, { PropsWithChildren, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ThemeToggle } from "../theme/ThemeToggle";
+import Logo from "../logo";
 
 interface BaseLayoutProps {
   className?: string;
@@ -30,22 +31,20 @@ export const BaseLayout = (props: PropsWithChildren<BaseLayoutProps>) => {
       )}
 
       <Suspense>
-        <div className="md:max-w-[90%] mx-auto py-10 px-8 md:px-0 relative">
-          <span className="sticky top-10 z-20 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <Image
-                src="https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-logo_jeyist.svg"
-                alt="Via Logo"
-                width={91}
-                height={48}
-                className="object-cover"
-              />
+        <div className="md:max-w-[90%] mx-auto md:px-0 relative">
+          <span className="sticky px-4 top-10 z-20 flex items-center justify-between">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-sm text-gray-500"
+            >
+              <Logo /> Always Learning
             </Link>
 
             <span className="sticky top-10 right-0 z-20">
               <ThemeToggle />
             </span>
           </span>
+
           <div className={`${background}  ${className} `}>{children}</div>
         </div>
       </Suspense>

@@ -27,7 +27,7 @@ export const AuthLayout = ({
   footerContent,
 }: AuthLayoutProps) => (
   <BaseLayout
-    className={`flex items-start md:items-center justify-center bg-[#EFFAF7] pt-20 md:py-20 px-4 sm:px-6 lg:px-8 ${className}`}
+    className={`flex items-start md:items-center justify-center bg-green bg-[#EFFAF7 pt-10 md:py-20 px-4 sm:px-6 lg:px-8 ${className}`}
   >
     {/* Background Image/Pattern */}
     {backgroundImage && (
