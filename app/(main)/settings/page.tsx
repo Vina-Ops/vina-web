@@ -127,15 +127,29 @@ export default function SettingsPage() {
     },
   ];
 
-  const renderSettingItem = (item: any) => {
+  // Type definitions for settings items
+  type SettingItem = {
+    id: string;
+    label: string;
+    description: string;
+    type: "toggle" | "select" | "action";
+    value?: boolean | string;
+    onChange?: (value: boolean | string) => void;
+    options?: string[];
+    action?: () => void;
+    icon?: React.ComponentType<{ className?: string }>;
+    danger?: boolean;
+  };
+
+  const renderSettingItem = (item: SettingItem) => {
     switch (item.type) {
       case "toggle":
         return (
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              checked={item.value}
-              onChange={(e) => item.onChange(e.target.checked)}
+              checked={typeof item.value === 'boolean' ? item.value : false}
+              onChange={(e) => item.onChange && item.onChange(e.target.checked)}
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green/20 dark:peer-focus:ring-green/80 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green"></div>
@@ -144,11 +158,11 @@ export default function SettingsPage() {
       case "select":
         return (
           <select
-            value={item.value}
-            onChange={(e) => item.onChange(e.target.value)}
+            value={typeof item.value === 'string' ? item.value : ''}
+            onChange={(e) => item.onChange && item.onChange(e.target.value)}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green focus:border-transparent"
           >
-            {item.options.map((option: string) => (
+            {item.options?.map((option: string) => (
               <option key={option} value={option}>
                 {option}
               </option>
@@ -219,7 +233,7 @@ export default function SettingsPage() {
                         <div className="flex items-center justify-between">
                           <h3
                             className={`text-sm font-medium ${
-                              item.danger
+                              (item as any).danger
                                 ? "text-red-600"
                                 : "text-gray-900 dark:text-white"
                             }`}
@@ -235,7 +249,7 @@ export default function SettingsPage() {
                         </p>
                       </div>
                       <div className="ml-4 flex-shrink-0">
-                        {renderSettingItem(item)}
+                        {renderSettingItem(item as SettingItem)}
                       </div>
                     </div>
                   </div>

@@ -20,7 +20,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Update navigation items to reflect current path
   const updatedNavItems = defaultNavItems.map((item) => ({
     ...item,
-    isActive: pathname === item.href || pathname.startsWith(item.href),
+    isActive: item.href
+      ? pathname === item.href || pathname.startsWith(item.href)
+      : false,
   }));
 
   return (

@@ -193,7 +193,7 @@ export default function ChatSessionPage() {
                 <img
                   className="h-10 w-10 rounded-full object-cover"
                   src={mockParticipant.avatar}
-                  alt={mockParticipant.name}
+                  alt={`${mockParticipant.name} avatar`}
                 />
                 <div
                   className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white ${
