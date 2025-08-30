@@ -43,7 +43,7 @@ const VerifyCodePage = () => {
   };
 
   return (
-    <div className="w-full max-w-lg dark:bg-gray-900 space-y-6 flex flex-col items-center">
+    <div className="w-full max-w-lg dark:bg-gra-900 space-y-6 flex flex-col items-center">
       <Icon
         name="Mail"
         className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"
@@ -58,7 +58,7 @@ const VerifyCodePage = () => {
         className="w-full space-y-4 flex flex-col items-center"
         onSubmit={handleSubmit}
       >
-        <div className="flex gap-2 justify-center mb-2">
+        <div className="flex w-full gap-2 justify-between mb-2">
           {code.map((digit, idx) => (
             <input
               key={idx}
@@ -71,7 +71,7 @@ const VerifyCodePage = () => {
               value={digit}
               onChange={(e) => handleChange(e.target.value, idx)}
               onPaste={handlePaste}
-              className="w-10 h-12 text-center text-xl border border-gray-300 dark:border-gray-700 rounded-md bg-transparent text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="w-14 h-14 text-center text-xl border border-gray-300 dark:border-green rounded-md bg-transparent text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green"
             />
           ))}
         </div>

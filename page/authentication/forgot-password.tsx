@@ -31,7 +31,7 @@ const ForgotPasswordPage = () => {
       return;
     }
     setError("");
-    router.push("/auth/verify-code");
+    router.push("/auth/verify-password ");
   };
 
   const handleBlur = () => {
@@ -51,7 +51,7 @@ const ForgotPasswordPage = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -40 }}
       transition={{ duration: 0.4, type: "spring" }}
-      className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-md p-8 space-y-6 flex flex-col items-center"
+      className="w-full max-w-lg bg-whit dark:bg-gray-900 rounded-lg space-y-6 flex flex-col items-center"
     >
       <Icon
         name="Mail"

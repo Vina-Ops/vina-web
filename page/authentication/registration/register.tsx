@@ -249,7 +249,7 @@ const RegisterPage = () => {
       className="w-full max-w-lg dark:bg-gray-900 rounded-lg space-y-6 flex flex-col items-center"
     >
       <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
-        New account
+        Create New account
       </h2>
       <form className="w-full space-y-4" onSubmit={handleSubmit}>
         <div className="mb-4">

@@ -4,21 +4,23 @@ import React from "react";
 
 interface ConnectionLoadingProps {
   isConnecting: boolean;
+  isConnected: boolean;
   error?: string | null;
   onRetry?: () => void;
 }
 
 export const ConnectionLoading: React.FC<ConnectionLoadingProps> = ({
   isConnecting,
+  isConnected,
   error,
   onRetry,
 }) => {
   if (!isConnecting && !error) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-50/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-gray-50/80 backdrop-blur-sm z-[70] flex items-center justify-center w-full">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
-        {isConnecting && !error ? (
+        {isConnecting || !isConnected || !error ? (
           <div className="text-center">
             {/* Animated Loading Spinner */}
             <div className="relative mb-6">
@@ -36,13 +38,13 @@ export const ConnectionLoading: React.FC<ConnectionLoadingProps> = ({
 
             {/* Animated Dots */}
             <div className="flex justify-center mt-4 space-x-1">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-green rounded-full animate-bounce"></div>
               <div
-                className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+                className="w-2 h-2 bg-green rounded-full animate-bounce"
                 style={{ animationDelay: "0.1s" }}
               ></div>
               <div
-                className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+                className="w-2 h-2 bg-green rounded-full animate-bounce"
                 style={{ animationDelay: "0.2s" }}
               ></div>
             </div>
@@ -76,7 +78,7 @@ export const ConnectionLoading: React.FC<ConnectionLoadingProps> = ({
             {onRetry && (
               <button
                 onClick={onRetry}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                className="bg-green hover:bg-green/80 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
               >
                 Try Again
               </button>

@@ -245,9 +245,9 @@ export const DynamicChat: React.FC = () => {
   }, [currentConversation, isAutoPlay]); // Depend on currentConversation and isAutoPlay
 
   return (
-    <div className="flex gap-6 items-start">
+    <div className="grid grid-cols-1 md:flex gap-6 items-start">
       {/* Conversation Selector */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 w-64 flex-shrink-0">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 lg:w-64 flex-shrink-0">
         <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm">
           Choose Conversation Type
         </h3>
@@ -310,7 +310,7 @@ export const DynamicChat: React.FC = () => {
           </div>
         </div>
 
-        <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent pr-2 chat-messages-container flex flex-col">
+        <div className="space-y-3 max-h-96 lg:max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent pr-2 chat-messages-container flex flex-col">
           {visibleMessages.map((message, index) => (
             <div
               key={`${currentConversation}-${message.id}-${index}`}

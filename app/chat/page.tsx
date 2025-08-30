@@ -97,16 +97,20 @@ export default function ChatPage() {
     return <SearchPage messages={messages} onClose={handleCloseSearch} />;
   }
 
+  console.log("ChatPage: isConnecting", isConnecting);
+
   return (
     <>
       {/* Connection Loading Overlay */}
-      <ConnectionLoading
-        isConnecting={isConnecting}
-        error={error}
-        onRetry={forceReconnect}
-      />
 
       <div className="flex h-screen relative">
+        <ConnectionLoading
+          isConnecting={isConnecting}
+          isConnected={isConnected}
+          error={error}
+          onRetry={forceReconnect}
+        />
+
         {/* Fixed Sidebar Navigation */}
         <FixedNavbar
           navItems={defaultNavItems}
