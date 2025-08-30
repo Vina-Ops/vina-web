@@ -168,7 +168,7 @@ export default function ChatPage() {
             </div>
           )}
 
-          <DateHeader messages={messages} />
+          {/* <DateHeader messages={messages} /> */}
 
           <ChatMessages
             messages={messages}
