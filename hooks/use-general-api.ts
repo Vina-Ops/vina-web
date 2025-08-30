@@ -46,7 +46,7 @@ const useApi = <T, Args extends any[] = any[]>(
       if (process.env.NODE_ENV !== "production") {
         // Only log in development
         // eslint-disable-next-line no-console
-        console.log(err);
+        // console.log(err);
       }
       // Re-throw the error so consumers can catch it
       throw err;

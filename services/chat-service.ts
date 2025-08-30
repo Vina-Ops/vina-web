@@ -54,14 +54,14 @@ export class ChatWebSocketService {
     const baseUrl = getWebSocketUrl("api/vina");
     // Try different formats for the authorization header
     const authParam = `token=${encodeURIComponent(token)}`;
-    console.log("Auth parameter:", authParam);
+    // console.log("Auth parameter:", authParam);
     return `${baseUrl}?${authParam}`;
   }
 
   private getWebSocketUrlWithTokenParam(token: string): string {
     const baseUrl = getWebSocketUrl("api/vina");
     const authParam = `token=${encodeURIComponent(token)}`;
-    console.log("Token parameter:", authParam);
+    // console.log("Token parameter:", authParam);
     return `${baseUrl}?${authParam}`;
   }
 
@@ -73,7 +73,7 @@ export class ChatWebSocketService {
       this.ws?.readyState
     );
     if (this.isConnecting || this.ws?.readyState === WebSocket.OPEN) {
-      console.log("Skipping connection - already connecting or connected");
+      // console.log("Skipping connection - already connecting or connected");
       return;
     }
 
@@ -84,7 +84,7 @@ export class ChatWebSocketService {
       const { fetchToken } = await import("@/helpers/get-token");
       const token = await fetchToken();
 
-      console.log("WebSocket auth - token available:", !!token);
+      // console.log("WebSocket auth - token available:", !!token);
 
       // Create WebSocket connection with Authorization in query parameter
       if (token) {

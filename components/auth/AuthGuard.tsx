@@ -19,29 +19,29 @@ export default function AuthGuard({
   const router = useRouter();
 
   useEffect(() => {
-    console.log("AuthGuard Debug:", {
-      user,
-      loading,
-      requiredRole,
-      userRole: user ? (user as any).role : "no user",
-    });
+    // console.log("AuthGuard Debug:", {
+    //   user,
+    //   loading,
+    //   requiredRole,
+    //   userRole: user ? (user as any).role : "no user",
+    // });
 
     // If still loading, wait
     if (loading) {
-      console.log("Still loading, waiting...");
+      // console.log("Still loading, waiting...");
       return;
     }
 
     // If no user after loading is complete, redirect to login
     if (!user) {
-      console.log("No user found after loading, redirecting to login");
+      // console.log("No user found after loading, redirecting to login");
       router.push(redirectTo);
       return;
     }
 
     // If role is required, check user role
     if (requiredRole && (user as any).role !== requiredRole) {
-      console.log("User role mismatch, redirecting to appropriate dashboard");
+      // console.log("User role mismatch, redirecting to appropriate dashboard");
       // Redirect based on user's actual role
       switch ((user as any).role) {
         case "admin":
@@ -58,7 +58,7 @@ export default function AuthGuard({
           router.push("/dashboard");
       }
     } else {
-      console.log("User authenticated and has correct role, allowing access");
+      // console.log("User authenticated and has correct role, allowing access");
     }
   }, [user, requiredRole, redirectTo, router, loading]);
 
@@ -86,6 +86,6 @@ export default function AuthGuard({
   }
 
   // User is authenticated and has the right role (if required)
-  console.log("AuthGuard: Rendering children");
+  // console.log("AuthGuard: Rendering children");
   return <>{children}</>;
 }

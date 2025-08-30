@@ -99,7 +99,7 @@ export default function SettingsPage() {
 
   const handleSave = () => {
     // Here you would typically save to backend
-    console.log("Saving settings:", settings);
+    // console.log("Saving settings:", settings);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };

@@ -157,14 +157,14 @@ const RegisterPage = () => {
 
     try {
       const response = await registerUser(payload);
-      console.log("Registration successful");
+      // console.log("Registration successful");
 
       if (response) {
         showToast("Registration successful", {
           type: "success",
         });
 
-        console.log(response);
+        // console.log(response);
         setUser(response);
 
         const otpPayload = {
@@ -176,7 +176,7 @@ const RegisterPage = () => {
           type: "success",
         });
 
-        console.log("OTP request sent successfully");
+        // console.log("OTP request sent successfully");
         router.push(`/auth/register/verify?email=${email}`);
       }
       // Reset form fields after successful registration
