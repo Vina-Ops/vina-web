@@ -28,7 +28,7 @@ const LoginPage = () => {
 
     try {
       const response = await callApi(payload);
-      console.log("Login successful:", response);
+      // console.log("Login successful:", response);
       // Store return URL if needed
       // storeReturnUrl();
       // Redirect to the return URL or dashboard

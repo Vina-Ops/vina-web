@@ -25,7 +25,7 @@ const refreshToken = async () => {
       { refresh_token: refreshToken }
     );
 
-    console.log(response.status);
+    // console.log(response.status);
 
     if (response.status === 401) {
       window.location.href = "/login";
@@ -50,7 +50,7 @@ const refreshToken = async () => {
     }
 
     if (result.ok) {
-      console.log("Cookies set successfully");
+      // console.log("Cookies set successfully");
 
       return newAccessToken;
     }
@@ -105,7 +105,7 @@ apiClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return apiClient(originalRequest); // Retry the original request with the new token
       } catch (refreshError) {
-        console.error("Token refresh failed: ", refreshError);
+        // console.error("Token refresh failed: ", refreshError);
         return Promise.reject(refreshError); // Handle failure to refresh token
       }
     }

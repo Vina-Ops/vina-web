@@ -73,12 +73,12 @@ apiClient.interceptors.request.use(
     }
 
     const accessToken = token || storedData.token;
-    console.log("API Client Interceptor:", {
-      url: config.url,
-      token: token ? "exists" : "missing",
-      storedToken: storedData.token ? "exists" : "missing",
-      accessToken: accessToken ? "exists" : "missing",
-    });
+    // console.log("API Client Interceptor:", {
+    //   url: config.url,
+    //   token: token ? "exists" : "missing",
+    //   storedToken: storedData.token ? "exists" : "missing",
+    //   accessToken: accessToken ? "exists" : "missing",
+    // });
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -117,7 +117,7 @@ apiClient.interceptors.response.use(
   (response) => response, // Return response if successful
   async (error) => {
     const originalRequest = error.config;
-    console.log("Original request error:", error);
+    // console.log("Original request error:", error);
 
     // If the request URL is the refresh token endpoint, avoid recursion
     if (originalRequest.url?.includes("/auth/refresh-token")) {
@@ -189,7 +189,7 @@ export const logout = () => {
   });
 };
 export const getUserProfile = () => {
-  console.log("getUserProfile: Making API call to /auth/me");
+  // console.log("getUserProfile: Making API call to /auth/me");
   return request("get", "/auth/me", null, {
     headers: { "Content-Type": "application/json" },
   });
@@ -234,7 +234,7 @@ export const RefreshToken = async () => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching refresh token:", error);
+    // console.error("Error fetching refresh token:", error);
     throw error;
   }
 };

@@ -41,8 +41,8 @@ const useApi = <T, Args extends any[] = any[]>(
         err?.detail ||
         "Something went wrong";
       setError(errorMessage);
-      console.log("error from api", errorMessage);
-      console.log("error from api", err);
+      // console.log("error from api", errorMessage);
+      // console.log("error from api", err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);

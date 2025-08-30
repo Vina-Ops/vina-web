@@ -178,13 +178,13 @@ export default function ChatSessionPage() {
 
   const handleAttachment = (type: "image" | "file" | "audio") => {
     // Handle file attachment
-    console.log("Attach", type);
+    // console.log("Attach", type);
     setShowAttachmentMenu(false);
   };
 
   const handleVoiceMessage = () => {
     // Handle voice message recording
-    console.log("Record voice message");
+    // console.log("Record voice message");
   };
 
   return (

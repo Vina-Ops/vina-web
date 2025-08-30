@@ -59,7 +59,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           typeof window !== "undefined" &&
           window.location.pathname.startsWith("/auth/");
 
-        console.log("UserContext: isOnAuthPage", isOnAuthPage);
+        // console.log("UserContext: isOnAuthPage", isOnAuthPage);
 
         // Only fetch user profile if we're not on an auth page
         if (!isOnAuthPage) {
@@ -71,7 +71,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           // Mark as attempted to prevent future attempts on auth pages
           hasAttemptedFetch.current = true;
-          console.log("UserContext: on auth page, skipping fetch");
+          // console.log("UserContext: on auth page, skipping fetch");
         }
       }
     };

@@ -46,8 +46,8 @@ const useAuthApi = <T = any, Args extends any[] = any[]>(
         err?.detail ||
         "Something went wrong";
       setError(errorMessage);
-      console.log("error from auth api", errorMessage);
-      console.log("error from auth api", err);
+      // console.log("error from auth api", errorMessage);
+      // console.log("error from auth api", err);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);

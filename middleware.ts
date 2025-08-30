@@ -51,13 +51,13 @@ export function middleware(request: NextRequest) {
     const token = accessToken || authToken || authHeader;
 
     // Debug logging
-    console.log("Middleware Debug:", {
-      pathname,
-      accessToken: accessToken ? "exists" : "missing",
-      authToken: authToken ? "exists" : "missing",
-      authHeader: authHeader ? "exists" : "missing",
-      hasToken: !!token,
-    });
+    // console.log("Middleware Debug:", {
+    //   pathname,
+    //   accessToken: accessToken ? "exists" : "missing",
+    //   authToken: authToken ? "exists" : "missing",
+    //   authHeader: authHeader ? "exists" : "missing",
+    //   hasToken: !!token,
+    // });
 
     if (!token) {
       // Redirect to login if no token

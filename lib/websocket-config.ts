@@ -6,11 +6,11 @@ export const getWebSocketUrl = (endpoint: string = "/api/vina"): string => {
   const prodUrl = process.env.NEXT_PUBLIC_API_URL_PROD;
 
   // console.log("🌐 WebSocket config:", {
-    environment,
-    devUrl,
-    prodUrl,
-    endpoint,
-  });
+  //   environment,
+  //   devUrl,
+  //   prodUrl,
+  //   endpoint,
+  // });
 
   const baseUrl = environment === "development" ? devUrl : prodUrl;
 
@@ -23,7 +23,7 @@ export const getWebSocketUrl = (endpoint: string = "/api/vina"): string => {
   const wsUrl = baseUrl.replace(/^https?:\/\//, "wss://");
   const finalUrl = `${wsUrl}${endpoint}`;
 
-  console.log("🌐 WebSocket URL:", finalUrl);
+  // console.log("🌐 WebSocket URL:", finalUrl);
   return finalUrl;
 };
 

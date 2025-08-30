@@ -97,7 +97,7 @@ export default function ChatPage() {
     return <SearchPage messages={messages} onClose={handleCloseSearch} />;
   }
 
-  console.log("ChatPage: isConnecting", isConnecting);
+      // console.log("ChatPage: isConnecting", isConnecting);
 
   return (
     <>
