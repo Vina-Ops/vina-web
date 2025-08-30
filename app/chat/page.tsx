@@ -121,7 +121,7 @@ export default function ChatPage() {
 
         {/* Main Content Area */}
         <div
-          className="flex flex-col flex-1 ml-64"
+          className="flex flex-col flex-1 md:ml-64"
           style={{
             backgroundImage: `url("https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-background_w4kipf.svg")`,
             backgroundSize: "cover",

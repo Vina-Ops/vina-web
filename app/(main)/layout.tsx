@@ -34,7 +34,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           showConnectionStatus={true}
           showThemeToggle={true}
         />
-        <div className="flex flex-col flex-1 ml-64">
+        <div className="flex flex-col flex-1 md:ml-64">
           <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
             {children}
           </main>
