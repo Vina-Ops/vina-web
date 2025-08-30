@@ -73,6 +73,13 @@ apiClient.interceptors.request.use(
     }
 
     const accessToken = token || storedData.token;
+    console.log("API Client Interceptor:", {
+      url: config.url,
+      token: token ? "exists" : "missing",
+      storedToken: storedData.token ? "exists" : "missing",
+      accessToken: accessToken ? "exists" : "missing",
+    });
+
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -181,10 +188,12 @@ export const logout = () => {
     headers: { "Content-Type": "application/json" },
   });
 };
-export const getUserProfile = () =>
-  request("get", "/auth/me", null, {
+export const getUserProfile = () => {
+  console.log("getUserProfile: Making API call to /auth/me");
+  return request("get", "/auth/me", null, {
     headers: { "Content-Type": "application/json" },
   });
+};
 
 export const updateUserProfile = (data: Record<string, any>) =>
   request("put", "/auth/me", data, {

@@ -5,8 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { AdminRoute } from "@/components/auth/ProtectedRoute";
-import { useAuth } from "@/context/auth-context";
+import AuthGuard from "@/components/auth/AuthGuard";
+import { useUser } from "@/context/user-context";
+import { removeToken } from "@/helpers/logout";
+import { useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -66,10 +68,21 @@ const navigation = [
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, setUser } = useUser();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await removeToken();
+      setUser(null);
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
-    <AdminRoute>
+    <AuthGuard requiredRole="admin">
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Mobile sidebar */}
         <div
@@ -132,10 +145,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {user?.name}
+                    {(user as any)?.name || (user as any)?.first_name}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {user?.email}
+                    {(user as any)?.email}
                   </p>
                 </div>
               </div>
@@ -189,10 +202,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {user?.name}
+                    {(user as any)?.name || (user as any)?.first_name}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {user?.email}
+                    {(user as any)?.email}
                   </p>
                 </div>
               </div>
@@ -218,7 +231,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <ThemeToggle />
                 <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200 dark:bg-gray-700" />
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="flex items-center gap-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                 >
                   <LogOut className="h-5 w-5" />
@@ -236,6 +249,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </main>
         </div>
       </div>
-    </AdminRoute>
+    </AuthGuard>
   );
 }

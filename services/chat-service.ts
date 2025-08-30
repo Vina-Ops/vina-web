@@ -113,19 +113,19 @@ export class ChatWebSocketService {
 
       this.ws.onopen = () => {
         console.log("🎉 WebSocket connected successfully!");
-        console.log("WebSocket readyState:", this.ws?.readyState);
+        // console.log("WebSocket readyState:", this.ws?.readyState);
         this.isConnecting = false;
         this.reconnectAttempts = 0;
 
         // Authentication is handled via query parameter, no need for post-connection auth
 
         // Notify that connection is established
-        console.log(
-          "WebSocket onopen: onConnectionChangeHandler exists:",
-          !!this.onConnectionChangeHandler
-        );
+        // console.log(
+        //   "WebSocket onopen: onConnectionChangeHandler exists:",
+        //   !!this.onConnectionChangeHandler
+        // );
         if (this.onConnectionChangeHandler) {
-          console.log("✅ Calling onConnectionChangeHandler with true");
+          // console.log("✅ Calling onConnectionChangeHandler with true");
           this.onConnectionChangeHandler(true);
         } else {
           console.warn("❌ No connection change handler registered");
@@ -192,8 +192,8 @@ export class ChatWebSocketService {
       // Handle Vina response format: { "vina": "response content" }
       if (data.vina && typeof data.vina === "string") {
         if (this.onMessageHandler) {
-          console.log("📨 Vina response received:", data.vina);
-          console.log("📅 Timestamp from server:", data.timestamp);
+          // console.log("📨 Vina response received:", data.vina);
+          // console.log("📅 Timestamp from server:", data.timestamp);
 
           // Clean up the response content
           let cleanedContent = data.vina;
@@ -218,7 +218,7 @@ export class ChatWebSocketService {
           const timestamp = data.timestamp
             ? new Date(data.timestamp)
             : new Date();
-          console.log("🕐 Parsed timestamp:", timestamp);
+          // console.log("🕐 Parsed timestamp:", timestamp);
 
           const message: Message = {
             id: this.generateUniqueId(),
@@ -234,14 +234,14 @@ export class ChatWebSocketService {
       // Handle human message format: { "human": "message content" }
       if (data.human && typeof data.human === "string") {
         if (this.onMessageHandler) {
-          console.log("👤 Human message received:", data.human);
-          console.log("📅 Human timestamp from server:", data.timestamp);
+          // console.log("👤 Human message received:", data.human);
+          // console.log("📅 Human timestamp from server:", data.timestamp);
 
           // Parse timestamp from the message
           const timestamp = data.timestamp
             ? new Date(data.timestamp)
             : new Date();
-          console.log("🕐 Parsed human timestamp:", timestamp);
+          // console.log("🕐 Parsed human timestamp:", timestamp);
 
           const message: Message = {
             id: this.generateUniqueId(),
@@ -282,11 +282,11 @@ export class ChatWebSocketService {
             break;
 
           case "connection":
-            console.log("Connection status:", data.data);
+            // console.log("Connection status:", data.data);
             break;
 
           case "auth":
-            console.log("Authentication response:", data.data);
+            // console.log("Authentication response:", data.data);
             break;
 
           default:
@@ -370,12 +370,12 @@ export class ChatWebSocketService {
 
   public isConnected(): boolean {
     const connected = this.ws?.readyState === WebSocket.OPEN;
-    console.log(
-      "Service: isConnected() called, readyState:",
-      this.ws?.readyState,
-      "connected:",
-      connected
-    );
+    // console.log(
+    //   "Service: isConnected() called, readyState:",
+    //   this.ws?.readyState,
+    //   "connected:",
+    //   connected
+    // );
     return connected;
   }
 
