@@ -15,12 +15,13 @@ export const ConnectionLoading: React.FC<ConnectionLoadingProps> = ({
   error,
   onRetry,
 }) => {
+  // Only show the modal if we're connecting or there's an error
   if (!isConnecting && !error) return null;
 
   return (
     <div className="fixed inset-0 bg-gray-50/80 backdrop-blur-sm z-[70] flex items-center justify-center w-full">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
-        {isConnecting || !isConnected || !error ? (
+        {isConnecting ? (
           <div className="text-center">
             {/* Animated Loading Spinner */}
             <div className="relative mb-6">

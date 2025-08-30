@@ -83,9 +83,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
   return (
     <div className="flex-1 flex flex-col relative">
-      {/* Sticky Date Header */}
+      {/* Sticky Date Header - Fixed at top */}
       {stickyDate && (
-        <div className="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 py-2">
+        <div className="absolute top-0 left-0 right-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 py-2">
           <div className="flex justify-center">
             <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full shadow-sm">
               <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
@@ -101,10 +101,12 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         </div>
       )}
 
-      {/* Messages Container */}
+      {/* Messages Container - with top padding when sticky header is shown */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto px-4 py-6 space-y-4 chat-scrollbar bg-transparent"
+        className={`flex-1 overflow-y-auto px-4 space-y-4 chat-scrollbar bg-transparent ${
+          stickyDate ? "pt-16" : "pt-6"
+        } pb-6`}
       >
         {Object.entries(messageGroups).map(([dateKey, dateMessages]) => (
           <div key={dateKey} className="space-y-4">
