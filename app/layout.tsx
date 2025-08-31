@@ -7,6 +7,11 @@ import { WebSocketProvider } from "@/context/websocket-context";
 export const metadata: Metadata = {
   title: "Vina - Mental Wellness Companion",
   description: "Your AI companion for mental wellness and emotional support",
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#013F25" },
+    { media: "(prefers-color-scheme: dark)", color: "#83CD20" },
+  ],
 };
 
 export default function RootLayout({
@@ -15,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={` antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased bg-background-white dark:bg-dark-bg-50 text-black dark:text-white transition-colors duration-300">
         <ThemeProvider>
           <UserProvider>
             <WebSocketProvider>{children}</WebSocketProvider>
