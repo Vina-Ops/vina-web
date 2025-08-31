@@ -61,17 +61,19 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
         // console.log("UserContext: isOnAuthPage", isOnAuthPage);
 
-        // Only fetch user profile if we're not on an auth page
-        if (!isOnAuthPage) {
+        // Only fetch user profile if we're not on an auth page or landing page
+        const currentPathname =
+          typeof window !== "undefined" ? window.location.pathname : "";
+        if (!isOnAuthPage && currentPathname !== "/") {
           hasAttemptedFetch.current = true;
           // console.log("UserContext: executing getUserProfile");
           const data = await execute();
           // console.log("UserContext: data received", data);
           setUser(data);
         } else {
-          // Mark as attempted to prevent future attempts on auth pages
+          // Mark as attempted to prevent future attempts on auth pages or landing page
           hasAttemptedFetch.current = true;
-          // console.log("UserContext: on auth page, skipping fetch");
+          // console.log("UserContext: on auth page or landing page, skipping fetch");
         }
       }
     };

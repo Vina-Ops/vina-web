@@ -25,10 +25,19 @@ const publicRoutes = [
   "/api/remove-cookie",
   "/api/get-cookie",
   "/api/get-refresh-cookie",
+  "/offline",
+  "/site.webmanifest",
+  "/manifest.json",
+  "/sw.js",
 ];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Special handling for root path
+  if (pathname === "/") {
+    return NextResponse.next();
+  }
 
   // Check if the route is public
   if (publicRoutes.some((route) => pathname.startsWith(route))) {

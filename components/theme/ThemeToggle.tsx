@@ -41,7 +41,7 @@ export const ThemeToggle = () => {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-50"
+            className="fixed relative inset-0 z-50"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
