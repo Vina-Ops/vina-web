@@ -158,10 +158,10 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {user?.name}
+                    {(user as any)?.name || (user as any)?.first_name}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {user?.email}
+                    {(user as any)?.email}
                   </p>
                 </div>
               </div>
@@ -215,10 +215,10 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {user?.name}
+                    {(user as any)?.name || (user as any)?.first_name}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {user?.email}
+                    {(user as any)?.email}
                   </p>
                 </div>
               </div>

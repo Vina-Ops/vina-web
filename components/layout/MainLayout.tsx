@@ -5,7 +5,7 @@ import {
   FixedNavbar,
   defaultNavItems,
 } from "@/components/navigation/FixedNavbar";
-import { useAuth } from "@/context/auth-context";
+import { useUser } from "@/context/user-context";
 import { usePathname } from "next/navigation";
 
 interface MainLayoutProps {
@@ -13,7 +13,7 @@ interface MainLayoutProps {
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, loading } = useUser();
   const pathname = usePathname();
 
   // Don't show navbar on auth pages or landing page
@@ -23,7 +23,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     (path) => pathname === path || pathname.startsWith(path.replace("?", ""))
   );
 
-  if (shouldHideNavbar || !isAuthenticated) {
+  if (shouldHideNavbar || loading || !user) {
     return <>{children}</>;
   }
 
