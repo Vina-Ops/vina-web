@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTheme } from "./ThemeProvider";
 import { Sun, Moon, Monitor } from "lucide-react";
 
@@ -41,13 +41,13 @@ export const ThemeToggle = () => {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-20"
+            className="fixed inset-0 z-50"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
 
           {/* Menu */}
-          <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-40 animate-scale-in">
+          <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[70]">
             {themes.map((themeOption) => {
               const Icon = themeOption.icon;
               const isActive = theme === themeOption.value;
@@ -61,7 +61,7 @@ export const ThemeToggle = () => {
                   }}
                   className={`w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
                     isActive
-                      ? "text-olive-green dark:text-olive-green bg-green-50 dark:bg-dark-green/20"
+                      ? "text-green dark:text-green bg-green-50 dark:bg-green-900/20"
                       : "text-gray-700 dark:text-gray-300"
                   }`}
                   role="option"
@@ -74,7 +74,7 @@ export const ThemeToggle = () => {
 
                   {/* Active indicator */}
                   {isActive && (
-                    <div className="ml-auto w-2 h-2 bg-green dark:bg-olive-green rounded-full" />
+                    <div className="ml-auto w-2 h-2 bg-green dark:bg-green rounded-full" />
                   )}
 
                   {/* System theme indicator */}

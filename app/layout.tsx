@@ -3,10 +3,31 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { UserProvider } from "@/context/user-context";
 import { WebSocketProvider } from "@/context/websocket-context";
+import { PWAProvider } from "@/components/pwa/PWAProvider";
 
 export const metadata: Metadata = {
   title: "Vina - Mental Wellness Companion",
   description: "Your AI companion for mental wellness and emotional support",
+  manifest: "/site.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Vina",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Vina",
+    title: "Vina - Mental Wellness Companion",
+    description: "Your AI companion for mental wellness and emotional support",
+  },
+  twitter: {
+    card: "summary",
+    title: "Vina - Mental Wellness Companion",
+    description: "Your AI companion for mental wellness and emotional support",
+  },
 };
 
 export const viewport: Viewport = {
@@ -15,6 +36,11 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#013F25" },
     { media: "(prefers-color-scheme: dark)", color: "#83CD20" },
   ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -27,7 +53,9 @@ export default function RootLayout({
       <body className="antialiased bg-background-white dark:bg-dark-bg-50 text-black dark:text-white transition-colors duration-300">
         <ThemeProvider>
           <UserProvider>
-            <WebSocketProvider>{children}</WebSocketProvider>
+            <WebSocketProvider>
+              <PWAProvider>{children}</PWAProvider>
+            </WebSocketProvider>
           </UserProvider>
         </ThemeProvider>
       </body>

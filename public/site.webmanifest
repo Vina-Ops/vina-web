@@ -1,0 +1,117 @@
+{
+  "name": "Vina - Mental Wellness Companion",
+  "short_name": "Vina",
+  "description": "Your AI companion for mental wellness and emotional support",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFFFA",
+  "theme_color": "#013F25",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["health", "medical", "lifestyle", "productivity", "mental", "wellness", "ai", "chat", "therapy", "therapist", "therapists", "therapist-finder", "therapist-finder-app", "therapist-finder-app-2025", "therapist-finder-app-2025-2026", "therapist-finder-app-2025-2026-2027", "therapist-finder-app-2025-2026-2027-2028", "therapist-finder-app-2025-2026-2027-2028-2029", "therapist-finder-app-2025-2026-2027-2028-2029-2030", "mental-wellness", "mental-wellness-companion", "mental-wellness-companion-app", "mental-wellness-companion-app-2025", "mental-wellness-companion-app-2025-2026", "mental-wellness-companion-app-2025-2026-2027", "mental-wellness-companion-app-2025-2026-2027-2028", "mental-wellness-companion-app-2025-2026-2027-2028-2029", "mental-wellness-companion-app-2025-2026-2027-2028-2029-2030"],
+  "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/android-chrome-192x192.png",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/android-chrome-192x192.png",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/android-chrome-192x192.png",
+      "sizes": "152x152",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/android-chrome-192x192.png",
+      "sizes": "384x384",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Chat",
+      "short_name": "Chat",
+      "description": "Start a new therapy session",
+      "url": "/chat",
+      "icons": [
+        {
+          "src": "/screenshots/chat.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Find Therapists",
+      "short_name": "Therapists",
+      "description": "Browse available therapists",
+      "url": "/therapists",
+      "icons": [
+        {
+          "src": "/screenshots/therapist.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "My Profile",
+      "short_name": "Profile",
+      "description": "View and edit your profile",
+      "url": "/profile",
+      "icons": [
+        {
+          "src": "/screenshots/profile.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-chat.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Chat interface on desktop"
+    },
+    {
+      "src": "/screenshots/mobile-chat.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Chat interface on mobile"
+    }
+  ]
+}

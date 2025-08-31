@@ -82,7 +82,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
       <nav
         className={`fixed top-0 left-0 h-screen bg-white/95 backdrop-blur-md border-r border-gray-200 dark:bg-gray-900/95 dark:border-gray-700 shadow-sm z-50 transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 w-80 md:w-64`}
+        } md:translate-x-0 w-80 md:w-64 overflow-visible`}
       >
         <div className="flex flex-col h-full">
           {/* Top section - Logo */}
@@ -147,7 +147,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
           </div>
 
           {/* Bottom section - Actions */}
-          <div className="flex-shrink-0 py-2 p-4 border-t sticky bottom-0 border-gray-200 dark:border-gray-700 space-y-4">
+          <div className="flex-shrink-0 py-2 p-4 border-t sticky bottom-0 border-gray-200 dark:border-gray-700 space-y-4 overflow-visible">
             {/* Search Button */}
             {showSearch && onSearchClick && (
               <button
@@ -192,7 +192,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
 
             {/* Theme Toggle */}
             {showThemeToggle && (
-              <div className="px-4">
+              <div className="px-4 overflow-visible">
                 <ThemeToggle />
               </div>
             )}
