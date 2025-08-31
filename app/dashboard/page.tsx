@@ -77,7 +77,7 @@ export default function UserDashboard() {
   ];
 
   return (
-    <AuthGuard requiredRole="user">
+    <AuthGuard requiredRole="customer">
       <div className="space-y-6">
         {/* Header */}
         <div>

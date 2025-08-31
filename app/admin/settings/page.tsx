@@ -33,7 +33,7 @@ const SettingSection: React.FC<SettingSectionProps> = ({
     <div className="px-4 py-5 sm:p-6">
       <div className="flex items-center mb-4">
         <div className="flex-shrink-0">
-          <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white">
+          <div className="w-8 h-8 bg-dark-green/50 rounded-md flex items-center justify-center text-white">
             {icon}
           </div>
         </div>
@@ -118,7 +118,7 @@ export default function SettingsPage() {
         </div>
         <button
           onClick={handleSave}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-dark-green/50 dark:bg-dark-green/90 hover:bg-dark-green/70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-green/50"
         >
           <Save className="h-4 w-4 mr-2" />
           Save Changes
@@ -128,7 +128,7 @@ export default function SettingsPage() {
       {saved && (
         <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-md p-4">
           <div className="flex">
-            <CheckCircle className="h-5 w-5 text-green-400" />
+            <CheckCircle className="h-5 w-5 text-dark-green" />
             <div className="ml-3">
               <p className="text-sm font-medium text-green-800 dark:text-green-200">
                 Settings saved successfully!
@@ -153,7 +153,7 @@ export default function SettingsPage() {
               type="text"
               value={settings.siteName}
               onChange={(e) => handleSettingChange("siteName", e.target.value)}
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             />
           </div>
           <div>
@@ -166,7 +166,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("siteDescription", e.target.value)
               }
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             />
           </div>
           <div className="flex items-center">
@@ -176,7 +176,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("maintenanceMode", e.target.checked)
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Maintenance Mode
@@ -189,7 +189,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("allowRegistration", e.target.checked)
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Allow User Registration
@@ -215,7 +215,7 @@ export default function SettingsPage() {
                   e.target.checked
                 )
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Require Email Verification
@@ -228,7 +228,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("enableTwoFactor", e.target.checked)
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Enable Two-Factor Authentication
@@ -247,7 +247,7 @@ export default function SettingsPage() {
                   parseInt(e.target.value)
                 )
               }
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             />
           </div>
           <div>
@@ -260,7 +260,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("sessionTimeout", parseInt(e.target.value))
               }
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             />
           </div>
         </div>
@@ -280,7 +280,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("emailNotifications", e.target.checked)
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Email Notifications
@@ -293,7 +293,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("pushNotifications", e.target.checked)
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Push Notifications
@@ -306,7 +306,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("adminAlerts", e.target.checked)
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded peer-focus:ring-dark-green/50 peer-focus:border-dark-green/50 peer-checked:ring-dark-green/50 peer-checked:border-dark-green/50 peer-checked:bg-dark-green/50 peer-checked:text-white peer-checked:bg-dark-green/50"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Admin Alerts
@@ -335,7 +335,7 @@ export default function SettingsPage() {
                   parseInt(e.target.value)
                 )
               }
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             />
           </div>
           <div>
@@ -351,7 +351,7 @@ export default function SettingsPage() {
                   parseInt(e.target.value)
                 )
               }
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             />
           </div>
           <div className="flex items-center">
@@ -361,7 +361,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("enableFileUpload", e.target.checked)
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Enable File Upload
@@ -377,7 +377,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("maxFileSize", parseInt(e.target.value))
               }
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             />
           </div>
         </div>
@@ -397,7 +397,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("enablePayments", e.target.checked)
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Enable Payments
@@ -410,7 +410,7 @@ export default function SettingsPage() {
             <select
               value={settings.currency}
               onChange={(e) => handleSettingChange("currency", e.target.value)}
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             >
               <option value="USD">USD - US Dollar</option>
               <option value="EUR">EUR - Euro</option>
@@ -425,7 +425,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("stripeEnabled", e.target.checked)
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Enable Stripe
@@ -438,7 +438,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("paypalEnabled", e.target.checked)
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-dark-green focus:ring-dark-green/50 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
               Enable PayPal
@@ -464,7 +464,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("maxUsers", parseInt(e.target.value))
               }
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             />
           </div>
           <div>
@@ -477,7 +477,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("maxTherapists", parseInt(e.target.value))
               }
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             />
           </div>
           <div>
@@ -489,7 +489,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("backupFrequency", e.target.value)
               }
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
             >
               <option value="hourly">Hourly</option>
               <option value="daily">Daily</option>
@@ -507,7 +507,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 handleSettingChange("logRetention", parseInt(e.target.value))
               }
-              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50 peer-focus:ring-dark-green/50 peer-focus:border-dark-green/50"
             />
           </div>
         </div>
@@ -528,7 +528,7 @@ export default function SettingsPage() {
               platform.
             </p>
           </div>
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-3 space-x-3">
             <button className="inline-flex items-center px-4 py-2 border border-red-300 dark:border-red-700 text-sm font-medium rounded-md text-red-700 dark:text-red-300 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
               Clear All Data
             </button>

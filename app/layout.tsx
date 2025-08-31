@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { UserProvider } from "@/context/user-context";
@@ -7,6 +7,9 @@ import { WebSocketProvider } from "@/context/websocket-context";
 export const metadata: Metadata = {
   title: "Vina - Mental Wellness Companion",
   description: "Your AI companion for mental wellness and emotional support",
+};
+
+export const viewport: Viewport = {
   colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#013F25" },

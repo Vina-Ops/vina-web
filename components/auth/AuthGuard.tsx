@@ -19,13 +19,6 @@ export default function AuthGuard({
   const router = useRouter();
 
   useEffect(() => {
-    // console.log("AuthGuard Debug:", {
-    //   user,
-    //   loading,
-    //   requiredRole,
-    //   userRole: user ? (user as any).role : "no user",
-    // });
-
     // If still loading, wait
     if (loading) {
       // console.log("Still loading, waiting...");
@@ -33,7 +26,7 @@ export default function AuthGuard({
     }
 
     // If no user after loading is complete, redirect to login
-    if (!user) {
+    if (!user && !loading) {
       // console.log("No user found after loading, redirecting to login");
       router.push(redirectTo);
       return;
