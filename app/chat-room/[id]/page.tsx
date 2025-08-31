@@ -199,7 +199,7 @@ export default function ChatSessionPage() {
         <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
           <div className="h-full flex flex-col bg-gray-50 dark:bg-gray-900">
             {/* Header */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+            <div className="bg-white ml-4 md:ml-0 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <button
@@ -216,7 +216,9 @@ export default function ChatSessionPage() {
                     />
                     <div
                       className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white ${
-                        mockParticipant.isOnline ? "bg-green-400" : "bg-gray-400"
+                        mockParticipant.isOnline
+                          ? "bg-green-400"
+                          : "bg-gray-400"
                       }`}
                     />
                   </div>
@@ -280,7 +282,9 @@ export default function ChatSessionPage() {
                     >
                       {message.timestamp}
                       {message.sender === "user" && (
-                        <span className="ml-2">{message.isRead ? "✓✓" : "✓"}</span>
+                        <span className="ml-2">
+                          {message.isRead ? "✓✓" : "✓"}
+                        </span>
                       )}
                     </p>
                   </div>

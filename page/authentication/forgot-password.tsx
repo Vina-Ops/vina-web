@@ -51,16 +51,16 @@ const ForgotPasswordPage = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -40 }}
       transition={{ duration: 0.4, type: "spring" }}
-      className="w-full max-w-lg bg-whit dark:bg-gray-900 rounded-lg space-y-6 flex flex-col items-center"
+      className="w-full max-w-lg bg-whit rounded-lg space-y-6 flex flex-col items-center"
     >
       <Icon
         name="Mail"
         className="w-12 h-12 text-green-900 dark:text-green-300 mb-2"
       />
-      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-dark-green">
         Email for recovery
       </h2>
-      <p className="text-center text-gray-600 dark:text-gray-300 mb-4">
+      <p className="text-center text-gray-600 dark:text-dark-green mb-4">
         Enter your account email to receive a recovery code.
       </p>
       <form className="w-full space-y-4" onSubmit={handleSubmit}>

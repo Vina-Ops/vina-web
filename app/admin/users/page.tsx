@@ -18,7 +18,10 @@ import {
   Ban,
   CheckCircle,
   AlertCircle,
+  X,
+  Save,
 } from "lucide-react";
+import { registerAdmin } from "@/services/general-service";
 
 interface User {
   id: string;
@@ -145,6 +148,17 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    email: "",
+    password: "",
+    first_name: "",
+    last_name: "",
+    gender: "",
+    dob: "",
+  });
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -166,6 +180,51 @@ export default function UsersPage() {
     setUsers(users.filter((u) => u.id !== userId));
   };
 
+  const handleCreateAdmin = async () => {
+    try {
+      setIsCreating(true);
+      setCreateError(null);
+      
+      const response = await registerAdmin(createForm);
+      
+      // Add the new admin to the list
+      const newAdmin: User = {
+        id: response.id || Date.now().toString(),
+        name: `${createForm.first_name} ${createForm.last_name}`,
+        email: createForm.email,
+        status: "active",
+        role: "admin",
+        joinDate: new Date().toISOString().split('T')[0],
+        lastLogin: new Date().toLocaleString(),
+        sessionsCount: 0,
+        avatar: "",
+        location: "",
+      };
+      
+      setUsers([...users, newAdmin]);
+      setShowCreateModal(false);
+      setCreateForm({
+        email: "",
+        password: "",
+        first_name: "",
+        last_name: "",
+        gender: "",
+        dob: "",
+      });
+    } catch (error: any) {
+      setCreateError(error.response?.data?.message || "Failed to create admin");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setCreateForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -178,9 +237,12 @@ export default function UsersPage() {
             Manage user accounts, permissions, and access
           </p>
         </div>
-        <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <button 
+          onClick={() => setShowCreateModal(true)}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
           <Plus className="h-4 w-4 mr-2" />
-          Add User
+          Add Admin
         </button>
       </div>
 
@@ -408,6 +470,152 @@ export default function UsersPage() {
           </div>
         </div>
       </div>
+
+      {/* Create Admin Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Add New Admin
+                </h3>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              {createError && (
+                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-red-600 dark:text-red-400 text-sm">{createError}</p>
+                </div>
+              )}
+
+              <form onSubmit={(e) => { e.preventDefault(); handleCreateAdmin(); }}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={createForm.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="admin@example.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Password *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={createForm.password}
+                      onChange={(e) => handleInputChange("password", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter password"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        First Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={createForm.first_name}
+                        onChange={(e) => handleInputChange("first_name", e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="John"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Last Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={createForm.last_name}
+                        onChange={(e) => handleInputChange("last_name", e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Doe"
+                      />
+                                         </div>
+                   </div>
+
+                   <div>
+                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                       Gender *
+                     </label>
+                     <select
+                       required
+                       value={createForm.gender}
+                       onChange={(e) => handleInputChange("gender", e.target.value)}
+                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                     >
+                       <option value="">Select Gender</option>
+                       <option value="male">Male</option>
+                       <option value="female">Female</option>
+                       <option value="other">Other</option>
+                     </select>
+                   </div>
+
+                   <div>
+                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                       Date of Birth *
+                     </label>
+                     <input
+                       type="date"
+                       required
+                       value={createForm.dob}
+                       onChange={(e) => handleInputChange("dob", e.target.value)}
+                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                     />
+                   </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isCreating}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isCreating ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Creating...
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <Save className="h-4 w-4 mr-2" />
+                        Create Admin
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

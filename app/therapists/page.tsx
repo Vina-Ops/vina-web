@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   Star,
@@ -14,117 +14,19 @@ import {
   defaultNavItems,
 } from "@/components/navigation/FixedNavbar";
 import { usePathname } from "next/navigation";
-
-// Mock data for therapists
-const mockTherapists = [
-  {
-    id: "1",
-    name: "Dr. Sarah Johnson",
-    specialization: "Anxiety & Depression",
-    rating: 4.8,
-    reviewCount: 127,
-    location: "New York, NY",
-    languages: ["English", "Spanish"],
-    availability: "Available today",
-    hourlyRate: "$150",
-    avatar: "SJ",
-    isOnline: true,
-    experience: "8 years",
-    approach: "Cognitive Behavioral Therapy",
-    description:
-      "Specialized in treating anxiety disorders and depression with evidence-based approaches.",
-  },
-  {
-    id: "2",
-    name: "Dr. Michael Chen",
-    specialization: "Stress Management",
-    rating: 4.9,
-    reviewCount: 89,
-    location: "San Francisco, CA",
-    languages: ["English", "Mandarin"],
-    availability: "Available tomorrow",
-    hourlyRate: "$180",
-    avatar: "MC",
-    isOnline: false,
-    experience: "12 years",
-    approach: "Mindfulness-Based Therapy",
-    description:
-      "Expert in stress management and work-life balance with mindfulness techniques.",
-  },
-  {
-    id: "3",
-    name: "Dr. Emily Rodriguez",
-    specialization: "Family Therapy",
-    rating: 4.7,
-    reviewCount: 156,
-    location: "Los Angeles, CA",
-    languages: ["English", "Spanish"],
-    availability: "Available today",
-    hourlyRate: "$140",
-    avatar: "ER",
-    isOnline: true,
-    experience: "10 years",
-    approach: "Family Systems Therapy",
-    description:
-      "Dedicated to helping families improve communication and resolve conflicts.",
-  },
-  {
-    id: "4",
-    name: "Dr. David Thompson",
-    specialization: "Trauma & PTSD",
-    rating: 4.9,
-    reviewCount: 203,
-    location: "Chicago, IL",
-    languages: ["English"],
-    availability: "Available next week",
-    hourlyRate: "$200",
-    avatar: "DT",
-    isOnline: false,
-    experience: "15 years",
-    approach: "EMDR Therapy",
-    description:
-      "Specialized in trauma recovery and PTSD treatment with EMDR therapy.",
-  },
-  {
-    id: "5",
-    name: "Dr. Lisa Park",
-    specialization: "Relationship Counseling",
-    rating: 4.6,
-    reviewCount: 94,
-    location: "Seattle, WA",
-    languages: ["English", "Korean"],
-    availability: "Available today",
-    hourlyRate: "$160",
-    avatar: "LP",
-    isOnline: true,
-    experience: "6 years",
-    approach: "Gottman Method",
-    description:
-      "Focused on helping couples build stronger, healthier relationships.",
-  },
-  {
-    id: "6",
-    name: "Dr. James Wilson",
-    specialization: "Addiction Recovery",
-    rating: 4.8,
-    reviewCount: 178,
-    location: "Austin, TX",
-    languages: ["English"],
-    availability: "Available tomorrow",
-    hourlyRate: "$170",
-    avatar: "JW",
-    isOnline: false,
-    experience: "14 years",
-    approach: "Motivational Interviewing",
-    description: "Expert in addiction recovery and substance abuse treatment.",
-  },
-];
+import {
+  getTherapists,
+  searchTherapistsByName,
+} from "@/services/general-service";
 
 export default function TherapistsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialization, setSelectedSpecialization] = useState("all");
   const [selectedTherapist, setSelectedTherapist] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
+  const [therapists, setTherapists] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const pathname = usePathname();
 
   // Update navigation items to reflect current path
@@ -134,6 +36,63 @@ export default function TherapistsPage() {
       ? pathname === item.href || pathname.startsWith(item.href)
       : false,
   }));
+
+  // Fetch therapists on component mount
+  useEffect(() => {
+    const fetchTherapists = async () => {
+      try {
+        setLoading(true);
+        const data = await getTherapists();
+        setTherapists(data);
+        setError(null);
+      } catch (err) {
+        setError("Failed to load therapists");
+        console.error("Error fetching therapists:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTherapists();
+  }, []);
+
+  // Search therapists when search term changes
+  useEffect(() => {
+    const searchTherapists = async () => {
+      if (searchTerm.trim()) {
+        try {
+          setLoading(true);
+          const data = await searchTherapistsByName(searchTerm);
+          setTherapists(data);
+          setError(null);
+        } catch (err) {
+          setError("Failed to search therapists");
+          console.error("Error searching therapists:", err);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // If search term is empty, fetch all therapists
+        const fetchTherapists = async () => {
+          try {
+            setLoading(true);
+            const data = await getTherapists();
+            setTherapists(data);
+            setError(null);
+          } catch (err) {
+            setError("Failed to load therapists");
+            console.error("Error fetching therapists:", err);
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchTherapists();
+      }
+    };
+
+    const timeoutId = setTimeout(searchTherapists, 500); // Debounce search
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
 
   const specializations = [
     "all",
@@ -145,10 +104,14 @@ export default function TherapistsPage() {
     "Addiction Recovery",
   ];
 
-  const filteredTherapists = mockTherapists.filter((therapist) => {
+  const filteredTherapists = therapists.filter((therapist) => {
     const matchesSearch =
-      therapist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      therapist.specialization.toLowerCase().includes(searchTerm.toLowerCase());
+      therapist.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      therapist.specialization
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      therapist.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      therapist.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSpecialization =
       selectedSpecialization === "all" ||
       therapist.specialization === selectedSpecialization;
@@ -173,13 +136,13 @@ export default function TherapistsPage() {
           <div className="p-4 md:p-6">
             <div className="max-w-7xl mx-auto">
               {/* Header */}
-              <div className="mb-8">
+              <div className="mb-8 ml-4 md:ml-0">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                   Find Your Therapist
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Connect with licensed therapists who can help you on your mental
-                  wellness journey
+                  Connect with licensed therapists who can help you on your
+                  mental wellness journey
                 </p>
               </div>
 
@@ -213,76 +176,118 @@ export default function TherapistsPage() {
               {/* Results Count */}
               <div className="mb-6">
                 <p className="text-gray-600 dark:text-gray-400">
-                  {filteredTherapists.length} therapist
-                  {filteredTherapists.length !== 1 ? "s" : ""} found
+                  {loading
+                    ? "Loading..."
+                    : `${filteredTherapists.length} therapist${
+                        filteredTherapists.length !== 1 ? "s" : ""
+                      } found`}
                 </p>
               </div>
 
-              {/* Therapists Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                {filteredTherapists.map((therapist) => (
-                  <div
-                    key={therapist.id}
-                    onClick={() => handleTherapistClick(therapist)}
-                    className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
-                  >
-                    <div className="p-4 md:p-6">
-                      <div className="flex items-start space-x-3 md:space-x-4">
-                        <div className="relative">
-                          <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                            {therapist.avatar}
-                          </div>
-                          {therapist.isOnline && (
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green border-2 border-white dark:border-gray-800 rounded-full"></div>
-                          )}
-                        </div>
+              {/* Error State */}
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-red-600 dark:text-red-400">{error}</p>
+                </div>
+              )}
 
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                            {therapist.name}
-                          </h3>
-                          <p className="text-sm text-green font-medium mb-2">
-                            {therapist.specialization}
-                          </p>
-
-                          <div className="flex items-center space-x-2 mb-2">
-                            <div className="flex items-center">
-                              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                              <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">
-                                {therapist.rating}
-                              </span>
-                            </div>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                              ({therapist.reviewCount} reviews)
-                            </span>
-                          </div>
-
-                          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
-                            <MapPin className="w-4 h-4 mr-1" />
-                            {therapist.location}
-                          </div>
-
-                          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
-                            <Clock className="w-4 h-4 mr-1" />
-                            {therapist.availability}
-                          </div>
-
-                          <div className="flex items-center justify-between flex-wrap gap-2">
-                            <span className="text-lg font-semibold text-green">
-                              {therapist.hourlyRate}/hr
-                            </span>
-                            <button className="px-3 md:px-4 py-2 bg-green text-white rounded-lg hover:bg-green/80 transition-colors text-sm font-medium">
-                              Book Session
-                            </button>
+              {/* Loading State */}
+              {loading && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-4">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div
+                      key={i}
+                      className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 animate-pulse"
+                    >
+                      <div className="p-4 md:p-6">
+                        <div className="flex items-start space-x-3 md:space-x-4">
+                          <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
-              {filteredTherapists.length === 0 && (
+              {/* Therapists Grid */}
+              {!loading && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  {filteredTherapists.map((therapist) => (
+                    <div
+                      key={therapist.id}
+                      onClick={() => handleTherapistClick(therapist)}
+                      className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="p-4 md:p-6">
+                        <div className="flex items-start space-x-3 md:space-x-4">
+                          <div className="relative">
+                            <div className="w-16 h-16 bg-green rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                              {therapist.avatar ||
+                                `${therapist.first_name?.[0] || ""}${
+                                  therapist.last_name?.[0] || ""
+                                }`}
+                            </div>
+                            {therapist.isOnline && (
+                              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green border-2 border-white dark:border-gray-800 rounded-full"></div>
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                              {therapist.name ||
+                                `${therapist.first_name || ""} ${
+                                  therapist.last_name || ""
+                                }`}
+                            </h3>
+                            <p className="text-sm text-green font-medium mb-2">
+                              {therapist.specialization || "Therapist"}
+                            </p>
+
+                            <div className="flex items-center space-x-2 mb-2">
+                              <div className="flex items-center">
+                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                                <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">
+                                  {therapist.rating || "4.5"}
+                                </span>
+                              </div>
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                ({therapist.reviewCount || "0"} reviews)
+                              </span>
+                            </div>
+
+                            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
+                              <MapPin className="w-4 h-4 mr-1" />
+                              {therapist.location || "Location not specified"}
+                            </div>
+
+                            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
+                              <Clock className="w-4 h-4 mr-1" />
+                              {therapist.availability ||
+                                "Contact for availability"}
+                            </div>
+
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <span className="text-lg font-semibold text-green">
+                                ${therapist.hourlyRate || "150"}/hr
+                              </span>
+                              <button className="px-3 md:px-4 py-2 bg-green text-white rounded-lg hover:bg-green/80 transition-colors text-sm font-medium">
+                                Book Session
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {filteredTherapists.length === 0 && !loading && (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Search className="w-8 h-8 text-gray-400" />
@@ -306,7 +311,10 @@ export default function TherapistsPage() {
                       <div className="flex items-center space-x-4">
                         <div className="relative">
                           <div className="w-20 h-20 bg-green rounded-full flex items-center justify-center text-white font-semibold text-xl">
-                            {selectedTherapist.avatar}
+                            {selectedTherapist.avatar ||
+                              `${selectedTherapist.first_name?.[0] || ""}${
+                                selectedTherapist.last_name?.[0] || ""
+                              }`}
                           </div>
                           {selectedTherapist.isOnline && (
                             <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green border-2 border-white dark:border-gray-800 rounded-full"></div>
@@ -314,10 +322,13 @@ export default function TherapistsPage() {
                         </div>
                         <div>
                           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {selectedTherapist.name}
+                            {selectedTherapist.name ||
+                              `${selectedTherapist.first_name || ""} ${
+                                selectedTherapist.last_name || ""
+                              }`}
                           </h2>
                           <p className="text-lg text-green font-medium">
-                            {selectedTherapist.specialization}
+                            {selectedTherapist.specialization || "Therapist"}
                           </p>
                         </div>
                       </div>
@@ -347,7 +358,8 @@ export default function TherapistsPage() {
                           About
                         </h3>
                         <p className="text-gray-600 dark:text-gray-400 text-sm">
-                          {selectedTherapist.description}
+                          {selectedTherapist.description ||
+                            "No description available"}
                         </p>
                       </div>
                       <div>
@@ -360,7 +372,7 @@ export default function TherapistsPage() {
                               Experience:
                             </span>
                             <span className="text-gray-900 dark:text-white">
-                              {selectedTherapist.experience}
+                              {selectedTherapist.experience || "Not specified"}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -368,7 +380,7 @@ export default function TherapistsPage() {
                               Approach:
                             </span>
                             <span className="text-gray-900 dark:text-white">
-                              {selectedTherapist.approach}
+                              {selectedTherapist.approach || "Not specified"}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -376,7 +388,8 @@ export default function TherapistsPage() {
                               Languages:
                             </span>
                             <span className="text-gray-900 dark:text-white">
-                              {selectedTherapist.languages.join(", ")}
+                              {selectedTherapist.languages?.join(", ") ||
+                                "Not specified"}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -384,7 +397,7 @@ export default function TherapistsPage() {
                               Rate:
                             </span>
                             <span className="text-green font-semibold">
-                              {selectedTherapist.hourlyRate}/hr
+                              ${selectedTherapist.hourlyRate || "150"}/hr
                             </span>
                           </div>
                         </div>

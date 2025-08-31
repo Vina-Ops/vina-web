@@ -14,7 +14,8 @@ import {
   Brain,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import Logo from "@/components/logo";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface NavItem {
@@ -52,7 +53,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
       {/* Mobile menu button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+        className="md:hidden fixed top-4 right-4 z-50 p-2 bg-white dark:bg-white/70 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 dark:text-dark-green"
       >
         <svg
           className="w-6 h-6"
@@ -79,15 +80,25 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
 
       {/* Navigation */}
       <nav
-        className={`fixed top-0 left-0 h-full bg-white/95 backdrop-blur-md border-r border-gray-200 dark:bg-gray-900/95 dark:border-gray-700 shadow-sm z-50 transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-screen bg-white/95 backdrop-blur-md border-r border-gray-200 dark:bg-gray-900/95 dark:border-gray-700 shadow-sm z-50 transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 w-64 md:w-64`}
+        } md:translate-x-0 w-80 md:w-64`}
       >
         <div className="flex flex-col h-full">
           {/* Top section - Logo */}
-          <div className="flex-shrink-0 py-2 p-4 md:p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <div className="flex-shrink-0 p-4 dark:bg-white/70 md:p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-x-3 md:gap-x-4">
-              <Logo />
+              <Link href="/" className="">
+                <Image
+                  src={
+                    "https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-logo_jeyist.svg"
+                  }
+                  alt="Logo"
+                  width={40}
+                  height={40}
+                  // className="w-10 h-10"
+                />
+              </Link>
               <span className="text-sm font-medium text-green hidden sm:block">
                 Always Listening
               </span>
@@ -95,7 +106,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
             {/* Close button for mobile */}
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="md:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="md:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:text-dark-green dark:hover:bg-gray-800"
             >
               <svg
                 className="w-5 h-5"
@@ -114,7 +125,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
           </div>
 
           {/* Middle section - Navigation Items */}
-          <div className="flex-1 px-4 py-2">
+          <div className="flex-1 px-4 py-2 overflow-y-auto sticky top-0 py-4">
             {navItems.length > 0 && (
               <div className="space-y-2">
                 {navItems.map((item) => (
@@ -123,7 +134,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
                     onClick={item.onClick}
                     className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                       item.isActive
-                        ? "bg-green/20 font-bold text-green dark:bg-green-900/30 dark:text-green"
+                        ? "bg-green/20 font-bold text-green dark:bg-white/30 dark:text-white"
                         : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
                     }`}
                   >
@@ -136,7 +147,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
           </div>
 
           {/* Bottom section - Actions */}
-          <div className="flex-shrink-0 py-2 p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+          <div className="flex-shrink-0 py-2 p-4 border-t sticky bottom-0 border-gray-200 dark:border-gray-700 space-y-4">
             {/* Search Button */}
             {showSearch && onSearchClick && (
               <button
@@ -151,7 +162,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
 
             {/* Connection Status */}
             {showConnectionStatus && isConnected !== undefined && (
-              <div className="flex items-center space-x-3 px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="flex items-center space-x-3 px-4 py-3 bg-gray-50 dark:bg-white/70 rounded-lg">
                 <div
                   className={`w-2 h-2 rounded-full ${
                     isConnected ? "bg-green" : "bg-yellow-400"
@@ -214,7 +225,7 @@ export const defaultNavItems: NavItem[] = [
       // Navigate to chat page
       window.location.href = "/chat";
     },
-    isActive: true,
+    isActive: false,
   },
   {
     id: "chat-room",

@@ -23,8 +23,8 @@ function HomePageContent() {
     return (
       <BaseLayout background="https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-background_w4kipf.svg">
         {/* Main Content */}
-        <main className="flex-1 flex flex-col items-center justify-center px-4">
-          <h1 className="text-5xl font-bold text-gray-900 dark:text-whit mb-2 archivo">
+        <main className="flex-1 flex flex-col items-center justify-center px-4 pt-24">
+          <h1 className="text-2xl md:text-5xl font-bold text-gray-900 dark:text-whit mb-2 archivo">
             Vina
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-600 mb-8">
