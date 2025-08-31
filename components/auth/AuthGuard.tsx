@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  requiredRole?: "admin" | "therapist" | "user";
+  requiredRole?: "admin" | "therapist" | "customer";
   redirectTo?: string;
 }
 
@@ -43,8 +43,7 @@ export default function AuthGuard({
         case "therapist":
           router.push("/therapist");
           break;
-        case "user":
-        case "customer": // Treat customer as user
+        case "customer":
           router.push("/dashboard");
           break;
         default:
