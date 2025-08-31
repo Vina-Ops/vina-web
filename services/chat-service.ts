@@ -66,12 +66,12 @@ export class ChatWebSocketService {
   }
 
   private async connect(): Promise<void> {
-    console.log(
-      "Connect method called - isConnecting:",
-      this.isConnecting,
-      "readyState:",
-      this.ws?.readyState
-    );
+    // console.log(
+    //   "Connect method called - isConnecting:",
+    //   this.isConnecting,
+    //   "readyState:",
+    //   this.ws?.readyState
+    // );
     if (this.isConnecting || this.ws?.readyState === WebSocket.OPEN) {
       // console.log("Skipping connection - already connecting or connected");
       return;
@@ -90,29 +90,29 @@ export class ChatWebSocketService {
       if (token) {
         // Try different authentication approaches
         const wsUrl = this.getWebSocketUrlWithAuth(token);
-        console.log(
-          "🔗 Connecting to WebSocket with Authorization in query param:",
-          wsUrl
-        );
-        console.log("Token being used:", token.substring(0, 20) + "...");
+        // console.log(
+        //   "🔗 Connecting to WebSocket with Authorization in query param:",
+        //   wsUrl
+        // );
+        // console.log("Token being used:", token.substring(0, 20) + "...");
 
         this.ws = new WebSocket(wsUrl);
       } else {
         const wsUrl = this.getWebSocketUrl();
-        console.log(
-          "🔗 No auth token available, connecting without authentication:",
-          wsUrl
-        );
+        // console.log(
+        //   "🔗 No auth token available, connecting without authentication:",
+        //   wsUrl
+        // );
         this.ws = new WebSocket(wsUrl);
       }
 
       // Add connection state logging
-      console.log("🔍 WebSocket object created:", this.ws);
-      console.log("🔍 WebSocket URL:", this.ws.url);
-      console.log("🔍 WebSocket readyState:", this.ws.readyState);
+      // console.log("🔍 WebSocket object created:", this.ws);
+      // console.log("🔍 WebSocket URL:", this.ws.url);
+      // console.log("🔍 WebSocket readyState:", this.ws.readyState);
 
       this.ws.onopen = () => {
-        console.log("🎉 WebSocket connected successfully!");
+        // console.log("🎉 WebSocket connected successfully!");
         // console.log("WebSocket readyState:", this.ws?.readyState);
         this.isConnecting = false;
         this.reconnectAttempts = 0;
@@ -150,8 +150,8 @@ export class ChatWebSocketService {
       };
 
       this.ws.onclose = (event) => {
-        console.log("🔌 WebSocket disconnected:", event.code, event.reason);
-        console.log("Close event details:", event);
+        // console.log("🔌 WebSocket disconnected:", event.code, event.reason);
+        // console.log("Close event details:", event);
         this.isConnecting = false;
         this.onConnectionChangeHandler?.(false);
 
