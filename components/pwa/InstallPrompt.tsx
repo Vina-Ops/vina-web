@@ -59,7 +59,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
       <div className="flex items-center space-x-3">
         <div className="flex-shrink-0">
           <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-            <Download className="w-5 h-5 text-green-600 dark:text-green-400" />
+            <Download className="w-5 h-5 text-green dark:text-green" />
           </div>
         </div>
         <div className="flex-1">
@@ -75,7 +75,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
         <button
           onClick={handleInstall}
           disabled={isInstalling}
-          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white text-xs font-medium rounded-lg transition-colors flex items-center space-x-1"
+          className="px-3 py-1.5 bg-green hover:bg-green/70 disabled:bg-gray-400 text-green text-xs font-medium rounded-lg transition-colors flex items-center space-x-1"
         >
           {isInstalling ? (
             <>
@@ -119,7 +119,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
             <button
               onClick={handleInstall}
               disabled={isInstalling}
-              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+              className="w-full bg-green hover:bg-green/50 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
               {isInstalling ? (
                 <>
@@ -147,7 +147,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
 
   if (variant === "floating") {
     return (
-      <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 max-w-sm z-40">
+      <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 max-w-sm z-[70]">
         {content}
       </div>
     );

@@ -47,7 +47,7 @@ export const ThemeToggle = () => {
           />
 
           {/* Menu */}
-          <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[70]">
+          <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[80]">
             {themes.map((themeOption) => {
               const Icon = themeOption.icon;
               const isActive = theme === themeOption.value;
@@ -59,7 +59,7 @@ export const ThemeToggle = () => {
                     setTheme(themeOption.value);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
+                  className={`w-full flex z-[70] items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
                     isActive
                       ? "text-green dark:text-green bg-green-50 dark:bg-green-900/20"
                       : "text-gray-700 dark:text-gray-300"
