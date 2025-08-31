@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Search,
-  Star,
-  MapPin,
-  Clock,
-  MessageCircle,
-  Filter,
-} from "lucide-react";
+import { Search, MapPin, Clock, MessageCircle, Filter } from "lucide-react";
 import {
   FixedNavbar,
   defaultNavItems,
@@ -96,25 +89,44 @@ export default function TherapistsPage() {
 
   const specializations = [
     "all",
-    "Anxiety & Depression",
+    "Anxiety",
+    "Depression",
+    "Panic Attacks",
+    "Bipolar Disorder",
     "Stress Management",
     "Family Therapy",
     "Trauma & PTSD",
     "Relationship Counseling",
     "Addiction Recovery",
+    "Marriage & Family Therapy",
+    "Couples Counseling",
+    "Individual Therapy",
+    "Life Coaching",
+    "Mental Health",
+    "Behavioral Therapy",
+    "Counseling Psychology",
+    "Mental Health Counseling",
+    "Psychotherapy",
+    "Social Work",
+    "Wellness Coaching",
+    "Wellness Counseling",
   ];
 
   const filteredTherapists = therapists.filter((therapist) => {
+    const fullName = `${therapist.first_name || ""} ${
+      therapist.last_name || ""
+    }`.trim();
     const matchesSearch =
-      therapist.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      therapist.specialization
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
+      fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      therapist.specialties?.some((specialty: string) =>
+        specialty.toLowerCase().includes(searchTerm.toLowerCase())
+      ) ||
       therapist.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       therapist.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesSpecialization =
       selectedSpecialization === "all" ||
-      therapist.specialization === selectedSpecialization;
+      therapist.specialties?.includes(selectedSpecialization);
     return matchesSearch && matchesSpecialization;
   });
 
@@ -153,7 +165,7 @@ export default function TherapistsPage() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
                       type="text"
-                      placeholder="Search therapists by name or specialization..."
+                      placeholder="Search therapists by name or specialties..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green focus:border-transparent"
@@ -166,7 +178,7 @@ export default function TherapistsPage() {
                   >
                     {specializations.map((spec) => (
                       <option key={spec} value={spec}>
-                        {spec === "all" ? "All Specializations" : spec}
+                        {spec === "all" ? "All Specialties" : spec}
                       </option>
                     ))}
                   </select>
@@ -245,35 +257,25 @@ export default function TherapistsPage() {
                                 }`}
                             </h3>
                             <p className="text-sm text-green font-medium mb-2">
-                              {therapist.specialization || "Therapist"}
+                              {therapist.specialties?.join(", ") || "Therapist"}
                             </p>
-
-                            <div className="flex items-center space-x-2 mb-2">
-                              <div className="flex items-center">
-                                <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">
-                                  {therapist.rating || "4.5"}
-                                </span>
-                              </div>
-                              <span className="text-sm text-gray-500 dark:text-gray-400">
-                                ({therapist.reviewCount || "0"} reviews)
-                              </span>
-                            </div>
 
                             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
                               <MapPin className="w-4 h-4 mr-1" />
-                              {therapist.location || "Location not specified"}
+                              {therapist.years_of_experience
+                                ? `${therapist.years_of_experience} years experience`
+                                : "Experience not specified"}
                             </div>
 
                             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
                               <Clock className="w-4 h-4 mr-1" />
-                              {therapist.availability ||
-                                "Contact for availability"}
+                              {therapist.license_status ||
+                                "License status not specified"}
                             </div>
 
                             <div className="flex items-center justify-between flex-wrap gap-2">
                               <span className="text-lg font-semibold text-green">
-                                ${therapist.hourlyRate || "150"}/hr
+                                {therapist.specialties?.length || 0} specialties
                               </span>
                               <button className="px-3 md:px-4 py-2 bg-green text-white rounded-lg hover:bg-green/80 transition-colors text-sm font-medium">
                                 Book Session
@@ -305,7 +307,7 @@ export default function TherapistsPage() {
             {/* Therapist Detail Modal */}
             {showModal && selectedTherapist && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 md:p-4 z-50">
-                <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="bg-white dark:bg-gray-800 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
                   <div className="p-4 md:p-6">
                     <div className="flex items-start justify-between mb-6">
                       <div className="flex items-center space-x-4">
@@ -328,7 +330,8 @@ export default function TherapistsPage() {
                               }`}
                           </h2>
                           <p className="text-lg text-green font-medium">
-                            {selectedTherapist.specialization || "Therapist"}
+                            {selectedTherapist.specialties?.join(", ") ||
+                              "Therapist"}
                           </p>
                         </div>
                       </div>
@@ -358,8 +361,7 @@ export default function TherapistsPage() {
                           About
                         </h3>
                         <p className="text-gray-600 dark:text-gray-400 text-sm">
-                          {selectedTherapist.description ||
-                            "No description available"}
+                          {selectedTherapist.bio || "No description available"}
                         </p>
                       </div>
                       <div>
@@ -372,32 +374,52 @@ export default function TherapistsPage() {
                               Experience:
                             </span>
                             <span className="text-gray-900 dark:text-white">
-                              {selectedTherapist.experience || "Not specified"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 dark:text-gray-400">
-                              Approach:
-                            </span>
-                            <span className="text-gray-900 dark:text-white">
-                              {selectedTherapist.approach || "Not specified"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 dark:text-gray-400">
-                              Languages:
-                            </span>
-                            <span className="text-gray-900 dark:text-white">
-                              {selectedTherapist.languages?.join(", ") ||
+                              {selectedTherapist.years_of_experience ||
                                 "Not specified"}
                             </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600 dark:text-gray-400">
-                              Rate:
+                              Specialties:
                             </span>
-                            <span className="text-green font-semibold">
-                              ${selectedTherapist.hourlyRate || "150"}/hr
+                            <span className="text-gray-900 dark:text-white text-wrap break-words ml-4">
+                              {selectedTherapist.specialties?.join(", ") ||
+                                "Not specified"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">
+                              License Number:
+                            </span>
+                            <span className="text-gray-900 dark:text-white">
+                              {selectedTherapist.license_number ||
+                                "Not specified"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">
+                              License Status:
+                            </span>
+                            <span className="text-gray-900 dark:text-white">
+                              {selectedTherapist.license_status ||
+                                "Not specified"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">
+                              Licensing Body:
+                            </span>
+                            <span className="text-gray-900 dark:text-white">
+                              {selectedTherapist.licensing_body ||
+                                "Not specified"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">
+                              Tagline:
+                            </span>
+                            <span className="text-gray-900 dark:text-white">
+                              {selectedTherapist.tagline || "Not specified"}
                             </span>
                           </div>
                         </div>

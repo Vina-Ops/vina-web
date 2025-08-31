@@ -71,12 +71,12 @@ const LoginPage = () => {
               router.push(redirectPath);
             } else {
               // Fallback to dashboard if user profile fetch fails
-              router.push("/dashboard");
+              router.push("/home");
             }
           } catch (error) {
             console.error("Error fetching user profile:", error);
             // Fallback to dashboard
-            router.push("/dashboard");
+            router.push("/home");
           }
 
           localStorage.removeItem("2fa_user_id");
