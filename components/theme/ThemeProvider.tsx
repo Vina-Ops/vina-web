@@ -125,6 +125,15 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
-  if (!context) throw new Error("useTheme must be used within a ThemeProvider");
+  if (!context) {
+    // Return a default context instead of throwing an error
+    return {
+      theme: "light" as Theme,
+      resolvedTheme: "light" as "light" | "dark",
+      setTheme: () => {},
+      toggleTheme: () => {},
+      isSystem: false,
+    };
+  }
   return context;
 };
