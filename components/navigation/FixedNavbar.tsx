@@ -16,7 +16,7 @@ import {
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface NavItem {
   id: string;
@@ -47,7 +47,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
   showThemeToggle = true,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const pathname = usePathname();
   return (
     <>
       {/* Mobile menu button */}
@@ -133,7 +133,7 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
                     key={item.id}
                     onClick={item.onClick}
                     className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      item.isActive
+                      item.href === pathname
                         ? "bg-green/20 font-bold text-green dark:bg-white/30 dark:text-white"
                         : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
                     }`}
@@ -209,10 +209,10 @@ export const defaultNavItems: NavItem[] = [
     id: "home",
     label: "Home",
     icon: <Home className="w-6 h-6" />,
-    href: "/",
+    href: "/home",
     onClick: () => {
       // Navigate to home page
-      window.location.href = "/";
+      window.location.href = "/home";
     },
     isActive: false,
   },

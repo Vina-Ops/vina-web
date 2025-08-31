@@ -25,9 +25,9 @@ export const getRoleBasedRedirectPath = (user: User | null): string => {
     case "therapist":
       return "/therapist";
     case "customer":
-      return "/dashboard";
+      return "/home";
     default:
-      return "/dashboard";
+      return "/home";
   }
 };
 
@@ -78,7 +78,7 @@ export const getRolePageTitle = (role: UserRole): string => {
     case "therapist":
       return "Therapist Dashboard";
     case "customer":
-      return "Dashboard";
+      return "Home";
     default:
       return "Dashboard";
   }
