@@ -173,13 +173,13 @@ export default function TherapistsPage() {
           <div className="p-4 md:p-6">
             <div className="max-w-7xl mx-auto">
               {/* Header */}
-              <div className="mb-8">
+              <div className="mb-8 ml-4 md:ml-0">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                   Find Your Therapist
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Connect with licensed therapists who can help you on your mental
-                  wellness journey
+                  Connect with licensed therapists who can help you on your
+                  mental wellness journey
                 </p>
               </div>
 
