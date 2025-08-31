@@ -1,0 +1,160 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "dashboard": "Tableau de bord",
+    "chat": "Chat",
+    "therapists": "Thérapeutes",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "admin": "Administration",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "register": "S'inscrire"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "email": "Email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "continueWithGoogle": "Continuer avec Google",
+    "signUpWithEmail": "S'inscrire avec Email",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "loginSuccess": "Connexion réussie",
+    "registerSuccess": "Inscription réussie",
+    "logoutSuccess": "Déconnexion réussie"
+  },
+  "landing": {
+    "hero": {
+      "title": "Votre compagnon",
+      "subtitle": "de bien-être mental",
+      "description": "Vina est là pour toujours écouter, soutenir et vous guider à travers les défis de la vie avec des conversations compatissantes alimentées par l'IA.",
+      "startChatting": "Commencer à discuter maintenant",
+      "watchDemo": "Voir la démo",
+      "getStarted": "Commencer"
+    },
+    "features": {
+      "title": "Pourquoi choisir Vina ?",
+      "subtitle": "Découvrez l'avenir du soutien au bien-être mental avec notre compagnon IA avancé.",
+      "alwaysAvailable": {
+        "title": "Toujours disponible",
+        "description": "Obtenez du soutien quand vous en avez besoin, 24h/24 et 7j/7. Pas d'attente, pas de rendez-vous, juste une conversation compatissante instantanée."
+      },
+      "privacyFirst": {
+        "title": "Confidentialité d'abord",
+        "description": "Vos conversations sont privées et sécurisées. Nous utilisons un chiffrement avancé pour protéger votre parcours de bien-être mental."
+      },
+      "aiPowered": {
+        "title": "Alimenté par l'IA",
+        "description": "La technologie IA avancée fournit un soutien personnalisé, une compréhension et des conseils adaptés à vos besoins uniques."
+      }
+    },
+    "stats": {
+      "title": "Approuvé par des milliers",
+      "subtitle": "Rejoignez notre communauté grandissante d'utilisateurs trouvant soutien et croissance",
+      "activeUsers": "Utilisateurs actifs",
+      "conversations": "Conversations",
+      "satisfaction": "Satisfaction",
+      "availability": "Disponibilité"
+    },
+    "testimonials": {
+      "title": "Ce que disent nos utilisateurs",
+      "subtitle": "Vraies histoires de personnes qui ont trouvé du soutien avec Vina"
+    },
+    "cta": {
+      "title": "Prêt à commencer votre parcours de bien-être ?",
+      "subtitle": "Rejoignez des milliers d'utilisateurs qui ont trouvé soutien, compréhension et croissance avec Vina.",
+      "createAccount": "Créer un compte gratuit",
+      "tryWithoutSignup": "Essayer sans s'inscrire"
+    },
+    "trust": {
+      "available24_7": "Disponible 24h/24",
+      "privacyFirst": "Confidentialité d'abord",
+      "aiPowered": "Alimenté par l'IA"
+    }
+  },
+  "chat": {
+    "newMessage": "Tapez votre message...",
+    "send": "Envoyer",
+    "startConversation": "Commencer une conversation",
+    "noMessages": "Aucun message pour le moment",
+    "typing": "En train d'écrire...",
+    "online": "En ligne",
+    "offline": "Hors ligne"
+  },
+  "therapists": {
+    "title": "Trouvez votre thérapeute",
+    "searchPlaceholder": "Rechercher des thérapeutes...",
+    "filterBySpecialty": "Filtrer par spécialité",
+    "filterByExperience": "Filtrer par expérience",
+    "viewProfile": "Voir le profil",
+    "bookSession": "Réserver une séance",
+    "specialties": "Spécialités",
+    "experience": "Expérience",
+    "licenseStatus": "Statut de licence",
+    "yearsOfExperience": "Années d'expérience"
+  },
+  "profile": {
+    "title": "Profil",
+    "personalInfo": "Informations personnelles",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "email": "Email",
+    "phone": "Téléphone",
+    "dateOfBirth": "Date de naissance",
+    "gender": "Genre",
+    "bio": "Biographie",
+    "saveChanges": "Enregistrer les modifications",
+    "profileUpdated": "Profil mis à jour avec succès"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "account": "Compte",
+    "notifications": "Notifications",
+    "privacy": "Confidentialité",
+    "language": "Langue",
+    "theme": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "admin": {
+    "title": "Tableau de bord administrateur",
+    "users": "Utilisateurs",
+    "therapists": "Thérapeutes",
+    "reports": "Rapports",
+    "analytics": "Analyses"
+  },
+  "footer": {
+    "privacy": "Confidentialité",
+    "terms": "Conditions",
+    "support": "Support",
+    "about": "À propos",
+    "copyright": "© 2025 Vina. Tous droits réservés. Votre compagnon de bien-être mental."
+  }
+}

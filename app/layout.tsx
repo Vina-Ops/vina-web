@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { UserProvider } from "@/context/user-context";
 import { WebSocketProvider } from "@/context/websocket-context";
 import { PWAProvider } from "@/components/pwa/PWAProvider";
+import { LanguageProvider } from "@/context/language-context";
 
 export const metadata: Metadata = {
   title: "Vina - Mental Wellness Companion",
@@ -51,13 +52,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased bg-background-white dark:bg-dark-bg-50 text-black dark:text-white transition-colors duration-300">
-        <ThemeProvider>
-          <UserProvider>
-            <WebSocketProvider>
-              <PWAProvider>{children}</PWAProvider>
-            </WebSocketProvider>
-          </UserProvider>
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <UserProvider>
+              <WebSocketProvider>
+                <PWAProvider>{children}</PWAProvider>
+              </WebSocketProvider>
+            </UserProvider>
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

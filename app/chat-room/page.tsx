@@ -138,7 +138,7 @@ export default function ChatRoomPage() {
             {/* Chat Sessions Sidebar */}
             <div className="w-full lg:w-80 border-b lg:border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 lg:h-full">
               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-green mb-4 ml-4 md:ml-0">
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 ml-4 md:ml-0">
                   Chat Sessions
                 </h1>
 

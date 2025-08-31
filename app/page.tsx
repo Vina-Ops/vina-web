@@ -9,15 +9,18 @@ import { BaseLayout } from "@/components/layout/base-layout";
 import { AuthLayout } from "@/components/layout/authentication-layout";
 import { FcGoogle } from "react-icons/fc";
 import { useUser } from "@/context/user-context";
+import { useLanguage } from "@/context/language-context";
 import Logo from "@/components/logo";
 import { DynamicChat } from "@/components/ui/DynamicChat";
 import { PopupMessageBubbles } from "@/components/ui/PopupMessageBubbles";
+import { LanguageSwitcher } from "@/components/language/LanguageSwitcher";
 import CompositionAnimation from "@/components/loader";
 
 function HomePageContent() {
   const searchParams = useSearchParams();
   const isStart = searchParams.get("start") === "1";
   const { user } = useUser();
+  const { t } = useLanguage();
 
   if (isStart) {
     // Render your landing/start page UI
@@ -29,7 +32,7 @@ function HomePageContent() {
             Vina
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-600 mb-8">
-            Here To Always Listen
+            {t("auth.hereToListen")}
           </p>
           <div className="w-full max-w-md flex flex-col gap-4">
             {/* <Link href="/chat">
@@ -39,17 +42,17 @@ function HomePageContent() {
             </Link> */}
             <Link href="/auth/login">
               <button className="w-full py-2 rounded-lg bg-green text-white font-semibold text-lg shadow hover:bg-green-800 transition">
-                Log In
+                {t("auth.login")}
               </button>
             </Link>
             <button className="w-full py-2 mt-6 rounded-lg bg-[#F5F4F5] dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center gap-2 text-[#18181B] font-bold dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
               {/* Google SVG icon inline */}
               <FcGoogle className="w-5 h-5" />
-              Continue with Google
+              {t("auth.google")}
             </button>
             <Link href="/auth/register">
               <button className="w-full py-2 rounded-lg bg-[#F5F4F5] dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center gap-2 text-[#18181B] font-bold dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                <Icon name="Mail" className="w-5 h-5" /> Sign up with Email
+                <Icon name="Mail" className="w-5 h-5" /> {t("auth.email")}
               </button>
             </Link>
           </div>
@@ -71,20 +74,21 @@ function HomePageContent() {
             <Logo />
             <div className="hidden sm:block">
               <div className="text-xs text-gray-500 dark:text-gray-400 animate-pulse">
-                Always Listening
+                {t("nav.alwaysListening")}
               </div>
             </div>
           </div>
           <div className="flex items-center space-x-2 md:space-x-4">
+            <LanguageSwitcher />
             <ThemeToggle />
             <Link href="/auth/login">
               <button className="px-3 md:px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition hover:scale-105 text-sm md:text-base">
-                Sign In
+                {t("nav.login")}
               </button>
             </Link>
             <Link href="/?start=1">
               <button className="px-3 md:px-4 py-2 bg-green text-white rounded-lg hover:bg-green/80 transition transform hover:scale-105 shadow-lg hover:shadow-xl text-sm md:text-base">
-                Get Started
+                {t("nav.getStarted")}
               </button>
             </Link>
           </div>
@@ -123,26 +127,25 @@ function HomePageContent() {
             </div>
 
             <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight animate-fade-in">
-              Your Mental Wellness
+              {t("hero.title")}
               <span className="text-green-600 dark:text-green-400 block animate-pulse">
-                Companion
+                {t("hero.subtitle")}
               </span>
             </h1>
             <p className="text-lg md:text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-delay">
-              Vina is here to always listen, support, and guide you through
-              life's challenges with compassionate AI-powered conversations.
+              {t("hero.description")}
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
             <Link href="/chat">
               <button className="px-6 md:px-8 py-3 md:py-4 bg-green text-white text-base md:text-lg font-semibold rounded-xl hover:bg-green/80 transition-all transform hover:scale-105 shadow-lg">
-                Start Chatting Now
+                {t("hero.cta")}
               </button>
             </Link>
             <div className="relative group">
               <button className="px-6 md:px-8 py-3 md:py-4 border-2 border-green text-green dark:text-green-400 text-base md:text-lg font-semibold rounded-xl hover:bg-green/80 hover:text-white transition-all transform hover:scale-105">
-                Watch Demo
+                {t("hero.demo")}
               </button>
               <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
             </div>
@@ -152,15 +155,15 @@ function HomePageContent() {
           <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 text-gray-500 dark:text-gray-400 text-sm md:text-base">
             <div className="flex items-center space-x-2 hover:scale-110 transition-transform">
               <div className="w-2 h-2 bg-green rounded-full animate-pulse"></div>
-              <span>24/7 Available</span>
+              <span>{t("hero.available")}</span>
             </div>
             <div className="flex items-center space-x-2 hover:scale-110 transition-transform">
               <div className="w-2 h-2 bg-green rounded-full animate-pulse delay-300"></div>
-              <span>Privacy First</span>
+              <span>{t("hero.privacy")}</span>
             </div>
             <div className="flex items-center space-x-2 hover:scale-110 transition-transform">
               <div className="w-2 h-2 bg-green rounded-full animate-pulse delay-700"></div>
-              <span>AI Powered</span>
+              <span>{t("hero.aiPowered")}</span>
             </div>
           </div>
         </div>
@@ -187,11 +190,10 @@ function HomePageContent() {
         <div className="mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-fade-in">
-              Why Choose Vina?
+              {t("features.title")}
             </h2>
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto animate-fade-in-delay">
-              Experience the future of mental wellness support with our advanced
-              AI companion.
+              {t("features.subtitle")}
             </p>
           </div>
 
@@ -214,11 +216,10 @@ function HomePageContent() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-300 mb-4 group-hover:text-light-green transition-colors">
-                Always Available
+                {t("features.alwaysAvailable.title")}
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Get support whenever you need it, 24/7. No waiting, no
-                appointments, just instant compassionate conversation.
+                {t("features.alwaysAvailable.description")}
               </p>
             </div>
 
@@ -240,11 +241,10 @@ function HomePageContent() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-300 mb-4 group-hover:text-light-green transition-colors">
-                Privacy First
+                {t("features.privacyFirst.title")}
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Your conversations are private and secure. We use advanced
-                encryption to protect your mental wellness journey.
+                {t("features.privacyFirst.description")}
               </p>
             </div>
 
@@ -266,11 +266,10 @@ function HomePageContent() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-300 mb-4 group-hover:text-light-green transition-colors">
-                AI Powered
+                {t("features.aiPowered.title")}
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Advanced AI technology provides personalized support,
-                understanding, and guidance tailored to your unique needs.
+                {t("features.aiPowered.description")}
               </p>
             </div>
           </div>
@@ -288,11 +287,10 @@ function HomePageContent() {
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6 animate-fade-in">
-            Ready to Start Your Wellness Journey?
+            {t("cta.title")}
           </h2>
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 animate-fade-in-delay">
-            Join thousands of users who have found support, understanding, and
-            growth with Vina.
+            {t("cta.description")}
           </p>
 
           {/* Dynamic Chat Preview */}
@@ -303,7 +301,7 @@ function HomePageContent() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/register">
               <button className="px-6 md:px-8 py-3 md:py-4 bg-green text-white text-base md:text-lg font-semibold rounded-xl hover:bg-green/80 transition-all transform hover:scale-105 shadow-lg">
-                Create Free Account
+                {t("cta.button")}
               </button>
             </Link>
             {/* <Link href="/chat">
@@ -325,10 +323,10 @@ function HomePageContent() {
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-fade-in">
-              Trusted by Thousands
+              {t("stats.title")}
             </h2>
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 animate-fade-in-delay">
-              Join our growing community of users finding support and growth
+              {t("stats.subtitle")}
             </p>
           </div>
 
@@ -342,7 +340,7 @@ function HomePageContent() {
                 <div className="absolute -top-2 -right-2 w-4 h-4 bg-green rounded-full animate-ping"></div>
               </div>
               <div className="text-gray-600 dark:text-gray-300 font-medium">
-                Active Users
+                {t("stats.users")}
               </div>
             </div>
 
@@ -355,7 +353,7 @@ function HomePageContent() {
                 <div className="absolute -top-2 -right-2 w-4 h-4 bg-green rounded-full animate-ping delay-500"></div>
               </div>
               <div className="text-gray-600 dark:text-gray-300 font-medium">
-                Conversations
+                {t("stats.conversations")}
               </div>
             </div>
 
@@ -368,7 +366,7 @@ function HomePageContent() {
                 <div className="absolute -top-2 -right-2 w-4 h-4 bg-green rounded-full animate-ping delay-1000"></div>
               </div>
               <div className="text-gray-600 dark:text-gray-300 font-medium">
-                Satisfaction
+                {t("stats.satisfaction")}
               </div>
             </div>
 
@@ -381,7 +379,7 @@ function HomePageContent() {
                 <div className="absolute -top-2 -right-2 w-4 h-4 bg-green rounded-full animate-ping delay-1500"></div>
               </div>
               <div className="text-gray-600 dark:text-gray-300 font-medium">
-                Availability
+                {t("stats.availability")}
               </div>
             </div>
           </div>
@@ -399,10 +397,10 @@ function HomePageContent() {
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-fade-in">
-              What Our Users Say
+              {t("testimonials.title")}
             </h2>
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 animate-fade-in-delay">
-              Real stories from people who found support with Vina
+              {t("testimonials.subtitle")}
             </p>
           </div>
 
@@ -415,15 +413,15 @@ function HomePageContent() {
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900 dark:text-white">
-                    Sarah M.
+                    {t("testimonials.sarah.name")}
                   </div>
-                  <div className="text-sm text-gray-500">Student</div>
+                  <div className="text-sm text-gray-500">
+                    {t("testimonials.sarah.role")}
+                  </div>
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-300 italic">
-                "Vina has been my constant companion during stressful exam
-                periods. The AI really understands and provides genuine
-                support."
+                "{t("testimonials.sarah.text")}"
               </p>
               <div className="flex text-yellow-400 dark:text-gray-600 mt-4">
                 <span className="text-xl">★★★★★</span>
@@ -438,14 +436,15 @@ function HomePageContent() {
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900 dark:text-white">
-                    Mike R.
+                    {t("testimonials.mike.name")}
                   </div>
-                  <div className="text-sm text-gray-500">Professional</div>
+                  <div className="text-sm text-gray-500">
+                    {t("testimonials.mike.role")}
+                  </div>
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-300 italic">
-                "Working from home was isolating until I found Vina. Now I have
-                someone to talk to whenever I need it."
+                "{t("testimonials.mike.text")}"
               </p>
               <div className="flex text-yellow-400 dark:text-gray-600 mt-4">
                 <span className="text-xl">★★★★★</span>
@@ -460,14 +459,15 @@ function HomePageContent() {
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900 dark:text-white">
-                    Emma L.
+                    {t("testimonials.emma.name")}
                   </div>
-                  <div className="text-sm text-gray-500">Parent</div>
+                  <div className="text-sm text-gray-500">
+                    {t("testimonials.emma.role")}
+                  </div>
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-300 italic">
-                "As a busy parent, I don't always have time for therapy. Vina
-                fills that gap perfectly with 24/7 availability."
+                "{t("testimonials.emma.text")}"
               </p>
               <div className="flex text-yellow-400 dark:text-gray-600 mt-4">
                 <span className="text-xl">★★★★★</span>
@@ -512,33 +512,30 @@ function HomePageContent() {
                 href="#"
                 className="hover:text-green-600 dark:hover:text-green-400 transition"
               >
-                Privacy
+                {t("footer.privacy")}
               </a>
               <a
                 href="#"
                 className="hover:text-green-600 dark:hover:text-green-400 transition"
               >
-                Terms
+                {t("footer.terms")}
               </a>
               <a
                 href="#"
                 className="hover:text-green-600 dark:hover:text-green-400 transition"
               >
-                Support
+                {t("footer.support")}
               </a>
               <a
                 href="#"
                 className="hover:text-green-600 dark:hover:text-green-400 transition"
               >
-                About
+                {t("footer.about")}
               </a>
             </div>
           </div>
           <div className="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 text-sm md:text-base">
-            <p>
-              &copy; 2025 Vina. All rights reserved. Your mental wellness
-              companion.
-            </p>
+            <p>{t("footer.copyright")}</p>
           </div>
         </div>
       </footer>

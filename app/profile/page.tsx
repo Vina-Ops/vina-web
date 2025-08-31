@@ -154,7 +154,7 @@ export default function ProfilePage() {
               <div className="mb-8 ml-4 md:ml-0">
                 <div>
                   <div className="flex items-start justify-between">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-green mb-2">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                       Profile
                     </h1>
 

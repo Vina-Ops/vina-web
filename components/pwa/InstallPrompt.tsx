@@ -56,10 +56,10 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
 
   const content = (
     <div className="flex items-center justify-between">
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-6">
         <div className="flex-shrink-0">
           <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-            <Download className="w-5 h-5 text-green dark:text-green" />
+            <Download className="w-5 h-5 text-green dark:text-white" />
           </div>
         </div>
         <div className="flex-1">
@@ -71,11 +71,12 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
           </p>
         </div>
       </div>
-      <div className="flex items-center space-x-2">
+
+      <div className="flex items-center space-x-2 pl-5">
         <button
           onClick={handleInstall}
           disabled={isInstalling}
-          className="px-3 py-1.5 bg-green hover:bg-green/70 disabled:bg-gray-400 text-green text-xs font-medium rounded-lg transition-colors flex items-center space-x-1"
+          className="px-3 py-1.5 bg-green hover:bg-green/70 dark:text-gray-900 dark:bg-white dark:hover:bg-white/70 disabled:bg-gray-400 text-white text-xs font-medium rounded-lg transition-colors flex items-center space-x-1"
         >
           {isInstalling ? (
             <>
@@ -102,10 +103,10 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
   if (variant === "modal") {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-lg max-w-sm w-full p-6 shadow-xl">
+        <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 shadow-xl">
           <div className="text-center mb-4">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Download className="w-8 h-8 text-green-600 dark:text-green-400" />
+              <Download className="w-8 h-8 text-green-600 dark:text-white" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               Install Vina App
@@ -115,11 +116,12 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
               access and quick launch.
             </p>
           </div>
+
           <div className="space-y-3">
             <button
               onClick={handleInstall}
               disabled={isInstalling}
-              className="w-full bg-green hover:bg-green/50 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+              className="w-full bg-green hover:bg-green/50 dark:text-gray-900 dark:bg-gray-200 dark:hover:bg-gray-300 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
               {isInstalling ? (
                 <>
@@ -133,9 +135,10 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
                 </>
               )}
             </button>
+
             <button
               onClick={handleDismiss}
-              className="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium py-2 px-4 rounded-lg transition-colors"
+              className="w-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               Maybe Later
             </button>
@@ -147,7 +150,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
 
   if (variant === "floating") {
     return (
-      <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 max-w-sm z-[70]">
+      <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 dark:text-white p-4 max-w-lg z-[70]">
         {content}
       </div>
     );
@@ -156,7 +159,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
   // Default banner variant
   return (
     <div
-      className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 ${className}`}
+      className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 dark:text-white px-4 py-3 ${className}`}
     >
       {content}
     </div>

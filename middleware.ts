@@ -26,18 +26,10 @@ const publicRoutes = [
   "/api/get-cookie",
   "/api/get-refresh-cookie",
   "/offline",
-  "/site.webmanifest",
-  "/manifest.json",
-  "/sw.js",
 ];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // Special handling for root path
-  if (pathname === "/") {
-    return NextResponse.next();
-  }
 
   // Check if the route is public
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
@@ -58,15 +50,6 @@ export function middleware(request: NextRequest) {
       ?.replace("Bearer ", "");
 
     const token = accessToken || authToken || authHeader;
-
-    // Debug logging
-    // console.log("Middleware Debug:", {
-    //   pathname,
-    //   accessToken: accessToken ? "exists" : "missing",
-    //   authToken: authToken ? "exists" : "missing",
-    //   authHeader: authHeader ? "exists" : "missing",
-    //   hasToken: !!token,
-    // });
 
     if (!token) {
       // Redirect to login if no token
@@ -91,7 +74,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - sw.js (service worker)
+     * - site.webmanifest (PWA manifest)
+     * - manifest.json (PWA manifest)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|sw.js|site.webmanifest|manifest.json).*)",
   ],
 };
