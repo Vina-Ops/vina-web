@@ -3,8 +3,10 @@ import { useTheme } from "./ThemeProvider";
 import { Sun, Moon, Monitor } from "lucide-react";
 
 export const ThemeToggle = () => {
-  const { theme, resolvedTheme, setTheme, isSystem } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Always call useTheme, but handle the error in the component
+  const { theme, resolvedTheme, setTheme, isSystem } = useTheme();
 
   const themes = [
     { value: "light", label: "Light", icon: Sun },
