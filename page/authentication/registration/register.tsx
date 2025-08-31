@@ -246,9 +246,9 @@ const RegisterPage = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -40 }}
       transition={{ duration: 0.4, type: "spring" }}
-      className="w-full max-w-lg dark:bg-gray-900 rounded-lg space-y-6 flex flex-col items-center"
+      className="w-full max-w-lg rounded-lg space-y-6 flex flex-col items-center"
     >
-      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-dark-green">
         Create New account
       </h2>
       <form className="w-full space-y-4" onSubmit={handleSubmit}>
@@ -381,7 +381,7 @@ const RegisterPage = () => {
           Create Account
         </Button>
       </form>
-      <div className="flex justify-center text-sm text-gray-600 dark:text-gray-300 mt-4">
+      <div className="flex justify-center text-sm text-gray-600 dark:text-dark-green mt-4">
         <Link href="/auth/login" className="hover:underline">
           Already have an account?
         </Link>

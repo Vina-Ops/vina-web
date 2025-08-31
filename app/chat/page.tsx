@@ -125,6 +125,7 @@ export default function ChatPage() {
           style={{
             backgroundImage: `url("https://res.cloudinary.com/ddynvenje/image/upload/v1751293217/vina/vina-background_w4kipf.svg")`,
             backgroundSize: "cover",
+            backgroundAttachment: "fixed",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
           }}

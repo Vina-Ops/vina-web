@@ -5,7 +5,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 // Create the axios instance for the API client
 const apiClient = axios.create({
   baseURL: `${
-    process.env.ENVIRONMENT === "development"
+    process.env.NEXT_PUBLIC_ENVIRONMENT === "development"
       ? process.env.NEXT_PUBLIC_API_URL
       : process.env.NEXT_PUBLIC_API_URL_PROD
   }`,
@@ -28,7 +28,7 @@ const refreshToken = async () => {
     // console.log(response.status);
 
     if (response.status === 401) {
-      window.location.href = "/login";
+      window.location.href = "/auth/login";
       throw new Error(response?.data?.detail || "An error occurred");
     }
 
@@ -116,14 +116,92 @@ apiClient.interceptors.response.use(
 
 // API functions
 
-// Create an organization
-export const createOrganization = (organizationData: Record<string, any>) =>
-  request("post", "/organization/add", organizationData, {
-    headers: { "Content-Type": "application/json" },
-  });
+// Therapist-related API functions
+export const getTherapists = async (): Promise<any[]> => {
+  try {
+    const response = await apiClient.get("/users/therapists");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching therapists:", error);
+    throw error;
+  }
+};
 
-// Create a volunteer
-export const createVolunteer = (volunteerData: Record<string, any>) =>
-  request("post", "/volunteer/", volunteerData, {
-    headers: { "Content-Type": "application/json" },
-  });
+export const getTherapistByUuid = async (uuid: string): Promise<any> => {
+  try {
+    const response = await apiClient.get(`/users/therapists/${uuid}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching therapist by UUID:", error);
+    throw error;
+  }
+};
+
+export const searchTherapistsByName = async (name: string): Promise<any[]> => {
+  try {
+    const response = await apiClient.get(
+      `/users/therapists/single-search?name=${encodeURIComponent(name)}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error searching therapists by name:", error);
+    throw error;
+  }
+};
+
+export const getUserProfileByUuid = async (uuid: string): Promise<any> => {
+  try {
+    const response = await apiClient.get(`/users/${uuid}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user profile by UUID:", error);
+    throw error;
+  }
+};
+
+// Admin functions
+export const registerAdmin = async (adminData: {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  dob: string;
+}): Promise<any> => {
+  try {
+    const response = await apiClient.post("/auth/register-admin", adminData);
+    return response.data;
+  } catch (error) {
+    console.error("Error registering admin:", error);
+    throw error;
+  }
+};
+
+export const registerTherapist = async (therapistData: {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  dob: string;
+}): Promise<any> => {
+  try {
+    const response = await apiClient.post(
+      "/auth/register-therapist",
+      therapistData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error registering therapist:", error);
+    throw error;
+  }
+};
+
+// Therapy chat rooms functions
+export const getMyTherapySessions = async (): Promise<any[]> => {
+  try {
+    const response = await apiClient.get("/therapy-chat-rooms/my-sessions");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching therapy sessions:", error);
+    throw error;
+  }
+};

@@ -85,8 +85,8 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="w-full max-w-lg dark:bg-gray-900 space-y-6">
-      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+    <div className="w-full max-w-lg  space-y-6">
+      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-dark-green">
         Log In
       </h2>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -112,7 +112,7 @@ const LoginPage = () => {
         </Button>
       </form>
 
-      <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300 mt-4">
+      <div className="flex justify-between text-sm text-gray-600 dark:text-dark-green mt-4">
         <Link href="/auth/forgot-password" className="hover:underline">
           Forgot your password?
         </Link>

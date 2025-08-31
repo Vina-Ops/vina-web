@@ -186,10 +186,26 @@ export default function SettingsPage() {
             <select
               value={item.value as string}
               onChange={(e) => handleSettingChange(item.id, e.target.value)}
-              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green focus:border-transparent"
+              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green focus:border-transparent w-full"
+              style={{
+                width: "100%",
+                padding: "4px 8px",
+                fontSize: "14px",
+                border: "1px solid #d1d5db",
+                borderRadius: "6px",
+                backgroundColor: "white",
+                WebkitAppearance: "none",
+                MozAppearance: "none",
+                appearance: "none",
+                backgroundImage: "none",
+              }}
             >
               {item.options?.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option
+                  key={option.value}
+                  value={option.value}
+                  className="text-gray-900 dark:text-white w-96"
+                >
                   {option.label}
                 </option>
               ))}
@@ -211,7 +227,7 @@ export default function SettingsPage() {
       <div className="flex flex-col flex-1 md:ml-64">
         <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
           <div className="p-4 md:p-6">
-            <div className="max-w-4xl mx-auto">
+            <div className="">
               {/* Header */}
               <div className="mb-8 ml-4 md:ml-0">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
