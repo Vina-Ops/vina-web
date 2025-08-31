@@ -365,7 +365,7 @@ export default function ActivityLogPage() {
                 >
                   <div className="flex items-start space-x-4">
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                      <div className="w-10 h-10 bg-blue-100 dark:bg-dark-green/50 rounded-full flex items-center justify-center">
                         <StatusIcon
                           className={`h-5 w-5 ${statusColors[log.status]}`}
                         />

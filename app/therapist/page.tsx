@@ -16,6 +16,7 @@ import {
   UserCheck,
   User,
 } from "lucide-react";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 interface StatCardProps {
   title: string;
@@ -134,7 +135,7 @@ const RecentSessions: React.FC<RecentSessionProps> = ({ sessions }) => (
   </div>
 );
 
-export default function TherapistDashboard() {
+function TherapistDashboardContent() {
   const stats = [
     {
       title: "Active Patients",
@@ -389,5 +390,13 @@ export default function TherapistDashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TherapistDashboard() {
+  return (
+    <ProtectedRoute allowedRoles={["therapist"]}>
+      <TherapistDashboardContent />
+    </ProtectedRoute>
   );
 }

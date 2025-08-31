@@ -13,6 +13,7 @@ import {
   BarChart3,
   Settings,
 } from "lucide-react";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 interface StatCardProps {
   title: string;
@@ -33,7 +34,7 @@ const StatCard: React.FC<StatCardProps> = ({
     <div className="p-5">
       <div className="flex items-center">
         <div className="flex-shrink-0">
-          <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white">
+          <div className="w-8 h-8 bg-dark-green/50 rounded-md flex items-center justify-center text-white">
             {icon}
           </div>
         </div>
@@ -94,7 +95,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => (
                 ) : null}
                 <div className="relative flex space-x-3">
                   <div>
-                    <span className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white dark:ring-gray-800">
+                    <span className="h-8 w-8 rounded-full bg-dark-green/50 flex items-center justify-center ring-8 ring-white dark:ring-gray-800">
                       <Activity className="h-4 w-4 text-white" />
                     </span>
                   </div>
@@ -121,7 +122,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => (
   </div>
 );
 
-export default function AdminDashboard() {
+function AdminDashboardContent() {
   const stats = [
     {
       title: "Total Users",
@@ -240,9 +241,9 @@ export default function AdminDashboard() {
             Quick Actions
           </h3>
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <button className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <button className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-dark-green/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
               <div>
-                <span className="rounded-lg inline-flex p-3 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 ring-4 ring-white dark:ring-gray-800">
+                <span className="rounded-lg inline-flex p-3 bg-dark-green/50 dark:bg-dark-green/90 text-white dark:text-olive-green ring-4 ring-white dark:ring-white">
                   <UserCheck className="h-6 w-6" />
                 </span>
               </div>
@@ -257,9 +258,9 @@ export default function AdminDashboard() {
               </div>
             </button>
 
-            <button className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <button className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-dark-green/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
               <div>
-                <span className="rounded-lg inline-flex p-3 bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300 ring-4 ring-white dark:ring-gray-800">
+                <span className="rounded-lg inline-flex p-3 bg-dark-green/50 dark:bg-dark-green/90 text-white dark:text-olive-green ring-4 ring-white dark:ring-white">
                   <Users className="h-6 w-6" />
                 </span>
               </div>
@@ -274,9 +275,9 @@ export default function AdminDashboard() {
               </div>
             </button>
 
-            <button className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <button className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-dark-green/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
               <div>
-                <span className="rounded-lg inline-flex p-3 bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-300 ring-4 ring-white dark:ring-gray-800">
+                <span className="rounded-lg inline-flex p-3 bg-dark-green/50 dark:bg-dark-green/90 text-white dark:text-olive-green ring-4 ring-white dark:ring-white">
                   <BarChart3 className="h-6 w-6" />
                 </span>
               </div>
@@ -291,9 +292,9 @@ export default function AdminDashboard() {
               </div>
             </button>
 
-            <button className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-500 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+            <button className="relative group bg-white dark:bg-gray-700 p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-dark-green/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
               <div>
-                <span className="rounded-lg inline-flex p-3 bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 ring-4 ring-white dark:ring-gray-800">
+                <span className="rounded-lg inline-flex p-3 bg-dark-green/50 dark:bg-dark-green/90 text-white dark:text-olive-green ring-4 ring-white dark:ring-white">
                   <Settings className="h-6 w-6" />
                 </span>
               </div>
@@ -311,5 +312,13 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <AdminDashboardContent />
+    </ProtectedRoute>
   );
 }

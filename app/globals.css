@@ -19,6 +19,70 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme transition styles */
+@layer base {
+  /* Smooth transitions for theme changes */
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: color 0.3s ease, background-color 0.3s ease,
+      border-color 0.3s ease, box-shadow 0.3s ease !important;
+  }
+
+  /* Prevent flash of unstyled content */
+  html {
+    color-scheme: light dark;
+  }
+
+  /* Base styles for light and dark modes */
+  :root {
+    --color-primary: #013f25;
+    --color-primary-light: #83cd20;
+    --color-background: #fafffa;
+    --color-surface: #ffffff;
+    --color-text: #272727;
+    --color-text-secondary: #6b788e;
+    --color-border: #e5e7eb;
+    --color-border-light: #f3f4f6;
+  }
+
+  .dark {
+    --color-primary: #83cd20;
+    --color-primary-light: #013f25;
+    --color-background: #0a0a0a;
+    --color-surface: #1a1a1a;
+    --color-text: #ffffff;
+    --color-text-secondary: #a3a3a3;
+    --color-border: #374151;
+    --color-border-light: #1f2937;
+  }
+
+  /* Ensure proper contrast ratios */
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Focus styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Selection styles */
+  ::selection {
+    background-color: var(--color-primary);
+    color: white;
+  }
+
+  ::-moz-selection {
+    background-color: var(--color-primary);
+    color: white;
+  }
+}
+
 @layer utilities {
   /* Custom animations */
   .animate-fade-in {

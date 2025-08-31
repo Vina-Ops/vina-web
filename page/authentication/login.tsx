@@ -11,12 +11,15 @@ import useApi from "@/hooks/unauthenticated-api";
 import toast from "react-hot-toast";
 import { useTopToast } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
+import { getRoleBasedRedirectPath, User } from "@/utils/role-routing";
+import { useUser } from "@/context/user-context";
 
 const LoginPage = () => {
   const { callApi, loading, data, error } = useApi(loginUser);
   const { showToast } = useTopToast();
   const router = useRouter();
   const { register, handleSubmit, setValue } = useForm();
+  const { setUser } = useUser();
 
   const onSubmit = async (formData: any) => {
     const { email, password } = formData;
@@ -46,9 +49,36 @@ const LoginPage = () => {
         });
 
         if (data.ok) {
-          // toast.success("Login successful!");
-          // Optionally fetch user details and redirect as needed
-          router.push("/chat");
+          // Fetch user profile to get role information
+          try {
+            const userResponse = await fetch(
+              "https://vina-ai.onrender.com/auth/me",
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${(response as any).access_token}`,
+                },
+              }
+            );
+
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              setUser(userData);
+
+              // Get role-based redirect path
+              const redirectPath = getRoleBasedRedirectPath(userData as User);
+              router.push(redirectPath);
+            } else {
+              // Fallback to dashboard if user profile fetch fails
+              router.push("/dashboard");
+            }
+          } catch (error) {
+            console.error("Error fetching user profile:", error);
+            // Fallback to dashboard
+            router.push("/dashboard");
+          }
+
           localStorage.removeItem("2fa_user_id");
         }
       };

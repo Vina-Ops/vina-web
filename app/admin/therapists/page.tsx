@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Plus,
   Search,
@@ -20,91 +20,98 @@ import {
   X,
   Save,
 } from "lucide-react";
-import { registerTherapist } from "@/services/general-service";
+import { getTherapists, registerTherapist } from "@/services/general-service";
+import { useTopToast } from "@/components/ui/toast";
 
 interface Therapist {
   id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  phone: string;
+  phone_number: string;
   specialization: string;
   location: string;
   status: "active" | "pending" | "inactive";
   rating: number;
   sessionsCompleted: number;
   joinDate: string;
-  avatar: string;
+  image: string;
 }
 
 const mockTherapists: Therapist[] = [
   {
     id: "1",
-    name: "Dr. Sarah Johnson",
+    first_name: "Dr. Sarah",
+    last_name: "Johnson",
     email: "sarah.johnson@therapy.com",
-    phone: "+1 (555) 123-4567",
+    phone_number: "+1 (555) 123-4567",
     specialization: "Anxiety & Depression",
     location: "New York, NY",
     status: "active",
     rating: 4.8,
     sessionsCompleted: 156,
     joinDate: "2023-01-15",
-    avatar:
+    image:
       "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
   },
   {
     id: "2",
-    name: "Dr. Michael Chen",
+    first_name: "Dr. Michael",
+    last_name: "Chen",
     email: "michael.chen@therapy.com",
-    phone: "+1 (555) 234-5678",
+    phone_number: "+1 (555) 234-5678",
     specialization: "Trauma & PTSD",
     location: "Los Angeles, CA",
     status: "pending",
     rating: 0,
     sessionsCompleted: 0,
     joinDate: "2024-01-20",
-    avatar:
+    image:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
   },
   {
     id: "3",
-    name: "Dr. Emily Rodriguez",
+    first_name: "Dr. Emily",
+    last_name: "Rodriguez",
     email: "emily.rodriguez@therapy.com",
-    phone: "+1 (555) 345-6789",
+    phone_number: "+1 (555) 345-6789",
     specialization: "Couples Therapy",
     location: "Chicago, IL",
     status: "active",
     rating: 4.9,
     sessionsCompleted: 203,
     joinDate: "2022-08-10",
-    avatar:
+    image:
       "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
   },
   {
     id: "4",
-    name: "Dr. James Wilson",
+    first_name: "Dr. James",
+    last_name: "Wilson",
     email: "james.wilson@therapy.com",
-    phone: "+1 (555) 456-7890",
+    phone_number: "+1 (555) 456-7890",
     specialization: "Addiction Recovery",
     location: "Houston, TX",
     status: "inactive",
     rating: 4.6,
     sessionsCompleted: 89,
     joinDate: "2023-03-22",
-    avatar:
+    image:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
   },
   {
     id: "5",
-    name: "Dr. Lisa Thompson",
+    first_name: "Dr. Lisa",
+    last_name: "Thompson",
     email: "lisa.thompson@therapy.com",
-    phone: "+1 (555) 567-8901",
+    phone_number: "+1 (555) 567-8901",
     specialization: "Child & Adolescent",
     location: "Miami, FL",
     status: "active",
     rating: 4.7,
     sessionsCompleted: 134,
     joinDate: "2023-06-05",
-    avatar:
+    image:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
   },
 ];
@@ -129,6 +136,7 @@ export default function TherapistsPage() {
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(
     null
   );
+  const { showToast } = useTopToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
     email: "",
@@ -148,9 +156,20 @@ export default function TherapistsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
+  const fetchTherapists = async () => {
+    const data = await getTherapists();
+    setTherapists(data);
+  };
+
+  useEffect(() => {
+    fetchTherapists();
+  }, []);
+
   const filteredTherapists = therapists.filter((therapist) => {
     const matchesSearch =
-      therapist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (therapist.first_name + " " + therapist.last_name)
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       therapist.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       therapist.specialization.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
@@ -177,24 +196,25 @@ export default function TherapistsPage() {
     try {
       setIsCreating(true);
       setCreateError(null);
-      
+
       const response = await registerTherapist(createForm);
-      
+
       // Add the new therapist to the list (you might want to fetch the updated list instead)
       const newTherapist: Therapist = {
         id: response.id || Date.now().toString(),
-        name: `${createForm.first_name} ${createForm.last_name}`,
+        first_name: createForm.first_name,
+        last_name: createForm.last_name,
         email: createForm.email,
-        phone: "",
+        phone_number: "",
         specialization: "",
         location: "",
         status: "pending",
         rating: 0,
         sessionsCompleted: 0,
-        joinDate: new Date().toISOString().split('T')[0],
-        avatar: "",
+        joinDate: new Date().toISOString().split("T")[0],
+        image: "",
       };
-      
+
       setTherapists([...therapists, newTherapist]);
       setShowCreateModal(false);
       setCreateForm({
@@ -212,26 +232,32 @@ export default function TherapistsPage() {
         years_of_experience: 0,
         specialties: [],
       });
+      showToast("Therapist created successfully");
     } catch (error: any) {
-      setCreateError(error.response?.data?.message || "Failed to create therapist");
+      setCreateError(
+        error.response?.data?.detail || "Failed to create therapist"
+      );
+      showToast(error.response?.data?.detail || "Failed to create therapist", {
+        type: "error",
+      });
     } finally {
       setIsCreating(false);
     }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setCreateForm(prev => ({
+    setCreateForm((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleSpecialtyToggle = (specialty: string) => {
-    setCreateForm(prev => ({
+    setCreateForm((prev) => ({
       ...prev,
       specialties: prev.specialties.includes(specialty)
-        ? prev.specialties.filter(s => s !== specialty)
-        : [...prev.specialties, specialty]
+        ? prev.specialties.filter((s) => s !== specialty)
+        : [...prev.specialties, specialty],
     }));
   };
 
@@ -247,9 +273,9 @@ export default function TherapistsPage() {
             Manage therapist accounts, applications, and profiles
           </p>
         </div>
-        <button 
+        <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white dark:bg-green bg-dark-green/50 hover:bg-dark-green/70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dark-green/50"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Therapist
@@ -270,7 +296,7 @@ export default function TherapistsPage() {
                 placeholder="Search therapists..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
               />
             </div>
 
@@ -279,7 +305,7 @@ export default function TherapistsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-dark-green/50 focus:border-dark-green/50"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -308,12 +334,18 @@ export default function TherapistsPage() {
                 <div className="flex items-center space-x-4">
                   <img
                     className="h-12 w-12 rounded-full object-cover"
-                    src={therapist.avatar}
-                    alt={therapist.name}
+                    src={
+                      therapist.image ||
+                      "https://ui-avatars.com/api/?name=" +
+                        therapist.first_name +
+                        " " +
+                        therapist.last_name
+                    }
+                    alt={therapist.first_name + " " + therapist.last_name}
                   />
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                      {therapist.name}
+                      {therapist.first_name + " " + therapist.last_name}
                     </h3>
                     <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                       <span className="flex items-center">
@@ -322,7 +354,7 @@ export default function TherapistsPage() {
                       </span>
                       <span className="flex items-center">
                         <Phone className="h-4 w-4 mr-1" />
-                        {therapist.phone}
+                        {therapist.phone_number}
                       </span>
                       <span className="flex items-center">
                         <MapPin className="h-4 w-4 mr-1" />
@@ -388,7 +420,7 @@ export default function TherapistsPage() {
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <UserCheck className="h-6 w-6 text-green-600" />
+                <UserCheck className="h-6 w-6 text-dark-green" />
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
@@ -470,8 +502,8 @@ export default function TherapistsPage() {
 
       {/* Create Therapist Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-screen w-full z-50">
+          <div className="relative top-10 h-[80vh] overflow-y-auto mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">
@@ -487,11 +519,18 @@ export default function TherapistsPage() {
 
               {createError && (
                 <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                  <p className="text-red-600 dark:text-red-400 text-sm">{createError}</p>
+                  <p className="text-red-600 dark:text-red-400 text-sm">
+                    {createError}
+                  </p>
                 </div>
               )}
 
-              <form onSubmit={(e) => { e.preventDefault(); handleCreateTherapist(); }}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleCreateTherapist();
+                }}
+              >
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -501,8 +540,10 @@ export default function TherapistsPage() {
                       type="email"
                       required
                       value={createForm.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
                       placeholder="therapist@example.com"
                     />
                   </div>
@@ -515,8 +556,10 @@ export default function TherapistsPage() {
                       type="password"
                       required
                       value={createForm.password}
-                      onChange={(e) => handleInputChange("password", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onChange={(e) =>
+                        handleInputChange("password", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
                       placeholder="Enter password"
                     />
                   </div>
@@ -530,8 +573,10 @@ export default function TherapistsPage() {
                         type="text"
                         required
                         value={createForm.first_name}
-                        onChange={(e) => handleInputChange("first_name", e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        onChange={(e) =>
+                          handleInputChange("first_name", e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
                         placeholder="John"
                       />
                     </div>
@@ -544,169 +589,214 @@ export default function TherapistsPage() {
                         type="text"
                         required
                         value={createForm.last_name}
-                        onChange={(e) => handleInputChange("last_name", e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        onChange={(e) =>
+                          handleInputChange("last_name", e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
                         placeholder="Doe"
                       />
                     </div>
                   </div>
 
-                                     <div>
-                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                       Gender *
-                     </label>
-                     <select
-                       required
-                       value={createForm.gender}
-                       onChange={(e) => handleInputChange("gender", e.target.value)}
-                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                     >
-                       <option value="">Select Gender</option>
-                       <option value="male">Male</option>
-                       <option value="female">Female</option>
-                       <option value="other">Other</option>
-                     </select>
-                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Gender *
+                    </label>
+                    <select
+                      required
+                      value={createForm.gender}
+                      onChange={(e) =>
+                        handleInputChange("gender", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
 
-                   <div>
-                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                       Date of Birth *
-                     </label>
-                     <input
-                       type="date"
-                       required
-                       value={createForm.dob}
-                       onChange={(e) => handleInputChange("dob", e.target.value)}
-                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                     />
-                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Date of Birth *
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={createForm.dob}
+                      onChange={(e) => handleInputChange("dob", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
+                    />
+                  </div>
 
-                   <div>
-                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                       Tagline
-                     </label>
-                     <input
-                       type="text"
-                       value={createForm.tagline}
-                       onChange={(e) => handleInputChange("tagline", e.target.value)}
-                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       placeholder="Brief professional tagline"
-                       maxLength={100}
-                     />
-                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Tagline
+                    </label>
+                    <input
+                      type="text"
+                      value={createForm.tagline}
+                      onChange={(e) =>
+                        handleInputChange("tagline", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
+                      placeholder="Brief professional tagline"
+                      maxLength={100}
+                    />
+                  </div>
 
-                   <div>
-                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                       Bio
-                     </label>
-                     <textarea
-                       value={createForm.bio}
-                       onChange={(e) => handleInputChange("bio", e.target.value)}
-                       rows={3}
-                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                       placeholder="Professional bio and background"
-                     />
-                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Bio
+                    </label>
+                    <textarea
+                      value={createForm.bio}
+                      onChange={(e) => handleInputChange("bio", e.target.value)}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent resize-none"
+                      placeholder="Professional bio and background"
+                    />
+                  </div>
 
-                   <div className="grid grid-cols-2 gap-3">
-                     <div>
-                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                         License Number
-                       </label>
-                       <input
-                         type="text"
-                         value={createForm.license_number}
-                         onChange={(e) => handleInputChange("license_number", e.target.value)}
-                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                         placeholder="License number"
-                         maxLength={20}
-                       />
-                     </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        License Number
+                      </label>
+                      <input
+                        type="text"
+                        value={createForm.license_number}
+                        onChange={(e) =>
+                          handleInputChange("license_number", e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
+                        placeholder="License number"
+                        maxLength={20}
+                      />
+                    </div>
 
-                     <div>
-                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                         License Status
-                       </label>
-                       <select
-                         value={createForm.license_status}
-                         onChange={(e) => handleInputChange("license_status", e.target.value)}
-                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       >
-                         <option value="active">Active</option>
-                         <option value="suspended">Suspended</option>
-                         <option value="expired">Expired</option>
-                         <option value="under_review">Under Review</option>
-                         <option value="none">None</option>
-                       </select>
-                     </div>
-                   </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        License Status
+                      </label>
+                      <select
+                        value={createForm.license_status}
+                        onChange={(e) =>
+                          handleInputChange("license_status", e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
+                      >
+                        <option value="active">Active</option>
+                        <option value="suspended">Suspended</option>
+                        <option value="expired">Expired</option>
+                        <option value="under_review">Under Review</option>
+                        <option value="none">None</option>
+                      </select>
+                    </div>
+                  </div>
 
-                   <div>
-                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                       Licensing Body
-                     </label>
-                     <input
-                       type="text"
-                       value={createForm.licensing_body}
-                       onChange={(e) => handleInputChange("licensing_body", e.target.value)}
-                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       placeholder="Licensing organization"
-                       maxLength={255}
-                     />
-                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Licensing Body
+                    </label>
+                    <input
+                      type="text"
+                      value={createForm.licensing_body}
+                      onChange={(e) =>
+                        handleInputChange("licensing_body", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
+                      placeholder="Licensing organization"
+                      maxLength={255}
+                    />
+                  </div>
 
-                   <div>
-                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                       Years of Experience
-                     </label>
-                     <input
-                       type="number"
-                       min="0"
-                       value={createForm.years_of_experience}
-                       onChange={(e) => handleInputChange("years_of_experience", e.target.value)}
-                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       placeholder="0"
-                     />
-                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Years of Experience
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={createForm.years_of_experience}
+                      onChange={(e) =>
+                        handleInputChange("years_of_experience", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-dark-green/50 focus:border-transparent"
+                      placeholder="0"
+                    />
+                  </div>
 
-                   <div>
-                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                       Specialties
-                     </label>
-                     <div className="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-gray-700">
-                       <div className="grid grid-cols-2 gap-2">
-                         {[
-                           "Anxiety", "Depression", "Bipolar Disorder", "Panic Attacks",
-                           "Grief & Loss", "Anger Management", "Seasonal Affective Disorder (SAD)",
-                           "Post-Traumatic Stress Disorder (PTSD)", "Complex PTSD (C-PTSD)",
-                           "Childhood Trauma", "Sexual Abuse Recovery", "Domestic Violence Support",
-                           "Couples Therapy", "Family Therapy", "Communication Issues",
-                           "Divorce & Separation", "Codependency", "Parenting Challenges",
-                           "Self-Esteem & Confidence", "Life Purpose & Direction",
-                           "Body Image Issues", "Spiritual & Existential Issues", "Burnout",
-                           "Career Counseling", "Work-Life Balance", "Impostor Syndrome",
-                           "Academic/Student Stress", "Addiction (alcohol, drugs)",
-                           "Gambling Disorder", "Internet/Social Media Addiction",
-                           "Self-Harm", "Obsessive-Compulsive Disorder (OCD)",
-                           "Teen Anxiety/Depression", "Behavioral Issues in Children",
-                           "ADHD in Children or Teens", "School-Related Stress",
-                           "Social Skills & Peer Relationships", "Chronic Illness Support",
-                           "Insomnia & Sleep Issues", "Eating Disorders (Anorexia, Bulimia, BED)",
-                           "Mindfulness & Stress Management"
-                         ].map((specialty) => (
-                           <label key={specialty} className="flex items-center space-x-2 text-sm">
-                             <input
-                               type="checkbox"
-                               checked={createForm.specialties.includes(specialty)}
-                               onChange={() => handleSpecialtyToggle(specialty)}
-                               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                             />
-                             <span className="text-gray-700 dark:text-gray-300">{specialty}</span>
-                           </label>
-                         ))}
-                       </div>
-                     </div>
-                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Specialties
+                    </label>
+                    <div className="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-gray-700">
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          "Anxiety",
+                          "Depression",
+                          "Bipolar Disorder",
+                          "Panic Attacks",
+                          "Grief & Loss",
+                          "Anger Management",
+                          "Seasonal Affective Disorder (SAD)",
+                          "Post-Traumatic Stress Disorder (PTSD)",
+                          "Complex PTSD (C-PTSD)",
+                          "Childhood Trauma",
+                          "Sexual Abuse Recovery",
+                          "Domestic Violence Support",
+                          "Couples Therapy",
+                          "Family Therapy",
+                          "Communication Issues",
+                          "Divorce & Separation",
+                          "Codependency",
+                          "Parenting Challenges",
+                          "Self-Esteem & Confidence",
+                          "Life Purpose & Direction",
+                          "Body Image Issues",
+                          "Spiritual & Existential Issues",
+                          "Burnout",
+                          "Career Counseling",
+                          "Work-Life Balance",
+                          "Impostor Syndrome",
+                          "Academic/Student Stress",
+                          "Addiction (alcohol, drugs)",
+                          "Gambling Disorder",
+                          "Internet/Social Media Addiction",
+                          "Self-Harm",
+                          "Obsessive-Compulsive Disorder (OCD)",
+                          "Teen Anxiety/Depression",
+                          "Behavioral Issues in Children",
+                          "ADHD in Children or Teens",
+                          "School-Related Stress",
+                          "Social Skills & Peer Relationships",
+                          "Chronic Illness Support",
+                          "Insomnia & Sleep Issues",
+                          "Eating Disorders (Anorexia, Bulimia, BED)",
+                          "Mindfulness & Stress Management",
+                        ].map((specialty) => (
+                          <label
+                            key={specialty}
+                            className="flex items-center space-x-2 text-sm"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={createForm.specialties.includes(
+                                specialty
+                              )}
+                              onChange={() => handleSpecialtyToggle(specialty)}
+                              className="rounded border-gray-300 text-dark-green focus:ring-dark-green/50"
+                            />
+                            <span className="text-gray-700 dark:text-gray-300">
+                              {specialty}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex justify-end space-x-3 mt-6">
@@ -720,7 +810,7 @@ export default function TherapistsPage() {
                   <button
                     type="submit"
                     disabled={isCreating}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-4 py-2 bg-dark-green/50 text-white rounded-md hover:bg-dark-green/70 focus:ring-2 focus:ring-dark-green/50 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {isCreating ? (
                       <div className="flex items-center">
