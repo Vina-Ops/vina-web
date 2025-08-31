@@ -14,7 +14,6 @@ const config = {
         "light-green": "#F3FFF1",
         "leaf-green": "#307C31",
         "olive-green": "#83CD20",
-        green: "#013F25",
         greener: "#27391c",
         "dark-green": "#034834",
         white: "#FFFFFF",
