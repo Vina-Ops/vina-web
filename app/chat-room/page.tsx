@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Filter,
@@ -18,10 +19,17 @@ import { getMyTherapySessions } from "@/services/general-service";
 
 // Interface for therapy session data
 interface TherapySession {
-  id: string;
-  therapist_name?: string;
-  therapist_first_name?: string;
-  therapist_last_name?: string;
+  room_id: string;
+  client: {
+    id: string;
+    role: string;
+    name: string;
+  };
+  therapist: {
+    id: string;
+    role: string;
+    name: string;
+  };
   last_message?: string;
   last_message_timestamp?: string;
   unread_count?: number;
@@ -32,6 +40,7 @@ interface TherapySession {
 }
 
 export default function ChatRoomPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
@@ -56,7 +65,7 @@ export default function ChatRoomPage() {
 
     // For other pages, check if current path starts with the href + "/"
     // This ensures /chat-room matches /chat-room/123 but not /chat-room-settings
-    const isActive = pathname.startsWith(item.href + "/");
+    const isActive = pathname?.startsWith(item.href + "/");
 
     return { ...item, isActive };
   });
@@ -82,10 +91,7 @@ export default function ChatRoomPage() {
 
   // Helper function to get therapist name
   const getTherapistName = (session: TherapySession) => {
-    if (session.therapist_name) return session.therapist_name;
-    if (session.therapist_first_name && session.therapist_last_name) {
-      return `Dr. ${session.therapist_first_name} ${session.therapist_last_name}`;
-    }
+    if (session.therapist?.name) return session.therapist.name;
     return "Unknown Therapist";
   };
 
@@ -94,7 +100,7 @@ export default function ChatRoomPage() {
     const name = getTherapistName(session);
     return name
       .split(" ")
-      .map((n) => n[0])
+      .map((n: string) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
@@ -138,7 +144,7 @@ export default function ChatRoomPage() {
             {/* Chat Sessions Sidebar */}
             <div className="w-full lg:w-80 border-b lg:border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 lg:h-full">
               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-green mb-4 ml-4 md:ml-0">
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 ml-4 md:ml-0">
                   Chat Sessions
                 </h1>
 
@@ -227,10 +233,13 @@ export default function ChatRoomPage() {
                 ) : (
                   filteredSessions.map((session) => (
                     <div
-                      key={session.id}
-                      onClick={() => setSelectedSession(session.id)}
+                      key={session.room_id}
+                      onClick={() => {
+                        setSelectedSession(session.room_id);
+                        router.push(`/chat-room/${session.room_id}`);
+                      }}
                       className={`p-4 border-b border-gray-100 dark:border-gray-700 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                        selectedSession === session.id
+                        selectedSession === session.room_id
                           ? "bg-green/10 border-green/20"
                           : ""
                       }`}

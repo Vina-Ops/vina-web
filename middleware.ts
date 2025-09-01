@@ -25,6 +25,7 @@ const publicRoutes = [
   "/api/remove-cookie",
   "/api/get-cookie",
   "/api/get-refresh-cookie",
+  "/offline",
 ];
 
 export function middleware(request: NextRequest) {
@@ -41,23 +42,15 @@ export function middleware(request: NextRequest) {
   );
 
   if (protectedRoute) {
-    // Get the token from cookies or headers
+    // Get the token from cookies or headers (support legacy names too)
     const accessToken = request.cookies.get("access_token")?.value;
+    const legacyAccessToken = request.cookies.get("accessToken")?.value;
     const authToken = request.cookies.get("authToken")?.value;
     const authHeader = request.headers
       .get("authorization")
       ?.replace("Bearer ", "");
 
-    const token = accessToken || authToken || authHeader;
-
-    // Debug logging
-    // console.log("Middleware Debug:", {
-    //   pathname,
-    //   accessToken: accessToken ? "exists" : "missing",
-    //   authToken: authToken ? "exists" : "missing",
-    //   authHeader: authHeader ? "exists" : "missing",
-    //   hasToken: !!token,
-    // });
+    const token = accessToken || legacyAccessToken || authToken || authHeader;
 
     if (!token) {
       // Redirect to login if no token
@@ -82,7 +75,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - sw.js (service worker)
+     * - site.webmanifest (PWA manifest)
+     * - manifest.json (PWA manifest)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|sw.js|site.webmanifest|manifest.json).*)",
   ],
 };

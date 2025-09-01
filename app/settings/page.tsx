@@ -12,12 +12,79 @@ import {
   Smartphone,
   Mail,
   Save,
+  AlertTriangle,
 } from "lucide-react";
 import {
   FixedNavbar,
   defaultNavItems,
 } from "@/components/navigation/FixedNavbar";
 import { usePathname } from "next/navigation";
+
+// DeleteChatsModal Component
+const DeleteChatsModal: React.FC = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const { deleteChatWithAI } = await import("@/services/general-service");
+      await deleteChatWithAI();
+      setShowModal(false);
+      alert("All your chats with Vina have been deleted.");
+    } catch (error) {
+      alert("Failed to delete chats. Please try again or contact support.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <>
+      <button
+        className="mt-6 flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow focus:outline-none focus:ring-2 focus:ring-red-400"
+        onClick={() => setShowModal(true)}
+      >
+        <AlertTriangle className="h-5 w-5" />
+        Delete My Chats with Vina
+      </button>
+
+      {showModal && (
+        <div className="fixed inset-0 z-[9998] backdrop-blur-md flex items-center justify-center bg-black/40">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-md w-full p-6 relative">
+            <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-400" />
+              Delete All Chats
+            </h3>
+            <p className="mt-3 text-gray-700 dark:text-gray-200">
+              Are you sure you want to delete{" "}
+              <b className="font-bold uppercase text-sm">
+                all your chats with Vina
+              </b>
+              ? This action cannot be undone.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                onClick={() => setShowModal(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 interface SettingItem {
   id: string;
@@ -47,7 +114,7 @@ export default function SettingsPage() {
   const updatedNavItems = defaultNavItems.map((item) => ({
     ...item,
     isActive: item.href
-      ? pathname === item.href || pathname.startsWith(item.href)
+      ? pathname === item.href || pathname?.startsWith(item.href)
       : false,
   }));
 
@@ -186,7 +253,7 @@ export default function SettingsPage() {
             <select
               value={item.value as string}
               onChange={(e) => handleSettingChange(item.id, e.target.value)}
-              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green focus:border-transparent w-full"
+              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green focus:border-transparent w-full relative z-[9999]"
               style={{
                 width: "100%",
                 padding: "4px 8px",
@@ -198,6 +265,7 @@ export default function SettingsPage() {
                 MozAppearance: "none",
                 appearance: "none",
                 backgroundImage: "none",
+                zIndex: 999,
               }}
             >
               {item.options?.map((option) => (
@@ -230,7 +298,7 @@ export default function SettingsPage() {
             <div className="">
               {/* Header */}
               <div className="mb-8 ml-4 md:ml-0">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-green mb-2">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                   Settings
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -255,6 +323,30 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Danger Zone */}
+              <div className="mt-8">
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <div className="px-4 py-5 sm:p-6">
+                    <div className="flex items-center">
+                      <AlertTriangle className="h-5 w-5 text-red-400" />
+
+                      <h3 className="ml-2 text-lg leading-6 font-medium text-red-800 dark:text-red-200">
+                        Danger Zone
+                      </h3>
+                    </div>
+                    <div className="mt-4 text-sm text-red-700 dark:text-red-300">
+                      <p>
+                        These actions are irreversible and will affect all users
+                        on the platform.
+                      </p>
+                    </div>
+
+                    {/* Delete My Chats Modal Button and Modal */}
+                    <DeleteChatsModal />
+                  </div>
+                </div>
               </div>
 
               {/* Save Button */}

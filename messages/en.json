@@ -1,0 +1,160 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "chat": "Chat",
+    "therapists": "Therapists",
+    "profile": "Profile",
+    "settings": "Settings",
+    "admin": "Admin",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "continueWithGoogle": "Continue with Google",
+    "signUpWithEmail": "Sign up with Email",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "loginSuccess": "Login successful",
+    "registerSuccess": "Registration successful",
+    "logoutSuccess": "Logout successful"
+  },
+  "landing": {
+    "hero": {
+      "title": "Your Mental Wellness",
+      "subtitle": "Companion",
+      "description": "Vina is here to always listen, support, and guide you through life's challenges with compassionate AI-powered conversations.",
+      "startChatting": "Start Chatting Now",
+      "watchDemo": "Watch Demo",
+      "getStarted": "Get Started"
+    },
+    "features": {
+      "title": "Why Choose Vina?",
+      "subtitle": "Experience the future of mental wellness support with our advanced AI companion.",
+      "alwaysAvailable": {
+        "title": "Always Available",
+        "description": "Get support whenever you need it, 24/7. No waiting, no appointments, just instant compassionate conversation."
+      },
+      "privacyFirst": {
+        "title": "Privacy First",
+        "description": "Your conversations are private and secure. We use advanced encryption to protect your mental wellness journey."
+      },
+      "aiPowered": {
+        "title": "AI Powered",
+        "description": "Advanced AI technology provides personalized support, understanding, and guidance tailored to your unique needs."
+      }
+    },
+    "stats": {
+      "title": "Trusted by Thousands",
+      "subtitle": "Join our growing community of users finding support and growth",
+      "activeUsers": "Active Users",
+      "conversations": "Conversations",
+      "satisfaction": "Satisfaction",
+      "availability": "Availability"
+    },
+    "testimonials": {
+      "title": "What Our Users Say",
+      "subtitle": "Real stories from people who found support with Vina"
+    },
+    "cta": {
+      "title": "Ready to Start Your Wellness Journey?",
+      "subtitle": "Join thousands of users who have found support, understanding, and growth with Vina.",
+      "createAccount": "Create Free Account",
+      "tryWithoutSignup": "Try Without Signing Up"
+    },
+    "trust": {
+      "available24_7": "24/7 Available",
+      "privacyFirst": "Privacy First",
+      "aiPowered": "AI Powered"
+    }
+  },
+  "chat": {
+    "newMessage": "Type your message...",
+    "send": "Send",
+    "startConversation": "Start a conversation",
+    "noMessages": "No messages yet",
+    "typing": "Typing...",
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "therapists": {
+    "title": "Find Your Therapist",
+    "searchPlaceholder": "Search therapists...",
+    "filterBySpecialty": "Filter by specialty",
+    "filterByExperience": "Filter by experience",
+    "viewProfile": "View Profile",
+    "bookSession": "Book Session",
+    "specialties": "Specialties",
+    "experience": "Experience",
+    "licenseStatus": "License Status",
+    "yearsOfExperience": "Years of Experience"
+  },
+  "profile": {
+    "title": "Profile",
+    "personalInfo": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "dateOfBirth": "Date of Birth",
+    "gender": "Gender",
+    "bio": "Bio",
+    "saveChanges": "Save Changes",
+    "profileUpdated": "Profile updated successfully"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "users": "Users",
+    "therapists": "Therapists",
+    "reports": "Reports",
+    "analytics": "Analytics"
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "support": "Support",
+    "about": "About",
+    "copyright": "© 2025 Vina. All rights reserved. Your mental wellness companion."
+  }
+}

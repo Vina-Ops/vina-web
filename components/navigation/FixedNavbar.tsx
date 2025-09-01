@@ -12,11 +12,14 @@ import {
   Users,
   UserRoundCog,
   Brain,
+  LogOut,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { removeToken } from "@/helpers/logout";
+import { useUser } from "@/context/user-context";
 
 interface NavItem {
   id: string;
@@ -48,6 +51,18 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { setUser } = useUser();
+
+  const handleLogout = async () => {
+    try {
+      await removeToken();
+      setUser(null as any);
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
   return (
     <>
       {/* Mobile menu button */}
@@ -196,6 +211,18 @@ export const FixedNavbar: React.FC<FixedNavbarProps> = ({
                 <ThemeToggle />
               </div>
             )}
+
+            {/* Logout */}
+            <div className="px-4 overflow-visible">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center space-x-3 px-4 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="text-sm font-medium">Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </nav>

@@ -89,7 +89,7 @@ export default function UserDashboard() {
         showConnectionStatus={true}
         showThemeToggle={true}
       />
-      <div className="flex flex-col flex-1 md:ml-64 p-4 md:p-6 pb-10">
+      <div className="flex flex-col flex-1 md:ml-64 p-4 md:p-6 pb-10 mb-10">
         <div className="space-y-6">
           {/* Header */}
           <div>
@@ -337,6 +337,8 @@ export default function UserDashboard() {
               </div>
             </div>
           </div>
+
+          <div className="pt-5"></div>
         </div>
       </div>
     </div>

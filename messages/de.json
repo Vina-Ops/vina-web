@@ -1,0 +1,160 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "add": "Hinzufügen",
+    "search": "Suchen",
+    "filter": "Filter",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "submit": "Absenden",
+    "confirm": "Bestätigen",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "dashboard": "Dashboard",
+    "chat": "Chat",
+    "therapists": "Therapeuten",
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "admin": "Administration",
+    "logout": "Abmelden",
+    "login": "Anmelden",
+    "register": "Registrieren"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "forgotPassword": "Passwort vergessen?",
+    "resetPassword": "Passwort zurücksetzen",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "continueWithGoogle": "Mit Google fortfahren",
+    "signUpWithEmail": "Mit E-Mail registrieren",
+    "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+    "dontHaveAccount": "Haben Sie noch kein Konto?",
+    "loginSuccess": "Anmeldung erfolgreich",
+    "registerSuccess": "Registrierung erfolgreich",
+    "logoutSuccess": "Abmeldung erfolgreich"
+  },
+  "landing": {
+    "hero": {
+      "title": "Ihr Begleiter für",
+      "subtitle": "psychisches Wohlbefinden",
+      "description": "Vina ist hier, um immer zuzuhören, zu unterstützen und Sie durch die Herausforderungen des Lebens mit mitfühlenden KI-gestützten Gesprächen zu führen.",
+      "startChatting": "Jetzt chatten beginnen",
+      "watchDemo": "Demo ansehen",
+      "getStarted": "Loslegen"
+    },
+    "features": {
+      "title": "Warum Vina wählen?",
+      "subtitle": "Erleben Sie die Zukunft der psychischen Gesundheitsunterstützung mit unserem fortschrittlichen KI-Begleiter.",
+      "alwaysAvailable": {
+        "title": "Immer verfügbar",
+        "description": "Erhalten Sie Unterstützung, wann immer Sie sie brauchen, 24/7. Kein Warten, keine Termine, nur sofortige mitfühlende Gespräche."
+      },
+      "privacyFirst": {
+        "title": "Datenschutz zuerst",
+        "description": "Ihre Gespräche sind privat und sicher. Wir verwenden fortschrittliche Verschlüsselung, um Ihre psychische Gesundheitsreise zu schützen."
+      },
+      "aiPowered": {
+        "title": "KI-gestützt",
+        "description": "Fortschrittliche KI-Technologie bietet personalisierte Unterstützung, Verständnis und Beratung, die auf Ihre einzigartigen Bedürfnisse zugeschnitten ist."
+      }
+    },
+    "stats": {
+      "title": "Vertraut von Tausenden",
+      "subtitle": "Schließen Sie sich unserer wachsenden Community von Nutzern an, die Unterstützung und Wachstum finden",
+      "activeUsers": "Aktive Nutzer",
+      "conversations": "Gespräche",
+      "satisfaction": "Zufriedenheit",
+      "availability": "Verfügbarkeit"
+    },
+    "testimonials": {
+      "title": "Was unsere Nutzer sagen",
+      "subtitle": "Echte Geschichten von Menschen, die mit Vina Unterstützung gefunden haben"
+    },
+    "cta": {
+      "title": "Bereit, Ihre Wohlfühlreise zu beginnen?",
+      "subtitle": "Schließen Sie sich Tausenden von Nutzern an, die mit Vina Unterstützung, Verständnis und Wachstum gefunden haben.",
+      "createAccount": "Kostenloses Konto erstellen",
+      "tryWithoutSignup": "Ohne Anmeldung ausprobieren"
+    },
+    "trust": {
+      "available24_7": "24/7 verfügbar",
+      "privacyFirst": "Datenschutz zuerst",
+      "aiPowered": "KI-gestützt"
+    }
+  },
+  "chat": {
+    "newMessage": "Geben Sie Ihre Nachricht ein...",
+    "send": "Senden",
+    "startConversation": "Gespräch beginnen",
+    "noMessages": "Noch keine Nachrichten",
+    "typing": "Schreibt...",
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "therapists": {
+    "title": "Finden Sie Ihren Therapeuten",
+    "searchPlaceholder": "Therapeuten suchen...",
+    "filterBySpecialty": "Nach Fachgebiet filtern",
+    "filterByExperience": "Nach Erfahrung filtern",
+    "viewProfile": "Profil anzeigen",
+    "bookSession": "Sitzung buchen",
+    "specialties": "Fachgebiete",
+    "experience": "Erfahrung",
+    "licenseStatus": "Lizenzstatus",
+    "yearsOfExperience": "Jahre Erfahrung"
+  },
+  "profile": {
+    "title": "Profil",
+    "personalInfo": "Persönliche Informationen",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "dateOfBirth": "Geburtsdatum",
+    "gender": "Geschlecht",
+    "bio": "Biografie",
+    "saveChanges": "Änderungen speichern",
+    "profileUpdated": "Profil erfolgreich aktualisiert"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "account": "Konto",
+    "notifications": "Benachrichtigungen",
+    "privacy": "Datenschutz",
+    "language": "Sprache",
+    "theme": "Design",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "admin": {
+    "title": "Admin-Dashboard",
+    "users": "Nutzer",
+    "therapists": "Therapeuten",
+    "reports": "Berichte",
+    "analytics": "Analysen"
+  },
+  "footer": {
+    "privacy": "Datenschutz",
+    "terms": "Bedingungen",
+    "support": "Support",
+    "about": "Über uns",
+    "copyright": "© 2025 Vina. Alle Rechte vorbehalten. Ihr Begleiter für psychisches Wohlbefinden."
+  }
+}

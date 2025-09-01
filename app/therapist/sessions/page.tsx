@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -15,7 +15,21 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
+  Send,
+  Phone,
+  Video,
+  X,
 } from "lucide-react";
+import { ChatMessages } from "@/components/chat/ChatMessages";
+import { ChatInput } from "@/components/chat/ChatInput";
+import { useChatWebSocket } from "@/hooks/use-chat-websocket";
+import { Message } from "@/types/chat";
+import VideoCall from "@/components/chat/VideoCall";
+import IncomingCall from "@/components/chat/IncomingCall";
+import { useChatVideoCall } from "@/hooks/useChatVideoCall";
+import { CallParticipant } from "@/services/video-call-service";
+import { useUser } from "@/context/user-context";
+import { fetchToken } from "@/helpers/get-token";
 
 interface Session {
   id: string;
@@ -32,75 +46,7 @@ interface Session {
   sessionNotes?: string;
 }
 
-const mockSessions: Session[] = [
-  {
-    id: "1",
-    patientName: "John Doe",
-    patientId: "patient_123",
-    date: "2024-01-20",
-    time: "14:00",
-    duration: 45,
-    status: "completed",
-    type: "individual",
-    rating: 5,
-    patientAvatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    sessionNotes:
-      "Discussed anxiety management techniques. Patient showed good progress with breathing exercises.",
-  },
-  {
-    id: "2",
-    patientName: "Jane Smith",
-    patientId: "patient_124",
-    date: "2024-01-20",
-    time: "16:00",
-    duration: 60,
-    status: "active",
-    type: "individual",
-    patientAvatar:
-      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-  },
-  {
-    id: "3",
-    patientName: "Mike & Sarah Johnson",
-    patientId: "patient_125",
-    date: "2024-01-21",
-    time: "10:00",
-    duration: 90,
-    status: "scheduled",
-    type: "couples",
-    patientAvatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-  },
-  {
-    id: "4",
-    patientName: "David Brown",
-    patientId: "patient_126",
-    date: "2024-01-19",
-    time: "15:30",
-    duration: 45,
-    status: "completed",
-    type: "individual",
-    rating: 4,
-    patientAvatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-    sessionNotes:
-      "Focused on depression treatment. Patient reported improved mood this week.",
-  },
-  {
-    id: "5",
-    patientName: "Emily Davis",
-    patientId: "patient_127",
-    date: "2024-01-18",
-    time: "11:00",
-    duration: 60,
-    status: "cancelled",
-    type: "individual",
-    patientAvatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-    notes: "Patient requested cancellation due to illness",
-  },
-];
+const mockSessions: Session[] = [];
 
 const statusColors = {
   scheduled: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
@@ -128,11 +74,95 @@ const typeColors = {
 };
 
 export default function TherapistSessionsPage() {
+  const { user } = useUser();
   const [sessions, setSessions] = useState<Session[]>(mockSessions);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+
+  // Chat functionality
+  const [showChat, setShowChat] = useState(false);
+  const [currentChatSession, setCurrentChatSession] = useState<Session | null>(
+    null
+  );
+  const [tokens, setTokens] = useState<string | undefined>(undefined);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [chatMessage, setChatMessage] = useState("");
+
+  // Chat WebSocket hook
+  const { messages, isTyping, sendMessage } = useChatWebSocket();
+
+  // Video call integration
+  const {
+    callState,
+    remoteStreams,
+    incomingCall,
+    currentRoomId,
+    isConnecting,
+    startCall,
+    acceptCall,
+    rejectCall,
+    endCall,
+    toggleMute,
+    toggleVideo,
+    toggleScreenShare,
+    createChatRoom,
+    connectToExistingRoom,
+  } = useChatVideoCall({
+    currentUserId: (user as any)?.id || "",
+    roomId: currentChatSession?.id || "",
+    token: tokens || undefined,
+  });
+
+  // Fetch token on component mount
+  useEffect(() => {
+    const getToken = async () => {
+      try {
+        const token = await fetchToken();
+        setTokens(token);
+      } catch (error) {
+        console.error("Failed to fetch token:", error);
+      }
+    };
+    getToken();
+  }, []);
+
+  const handleOpenChat = (session: Session) => {
+    setCurrentChatSession(session);
+    setShowChat(true);
+  };
+
+  const handleCloseChat = () => {
+    setShowChat(false);
+    setCurrentChatSession(null);
+  };
+
+  const handleStartVideoCall = async () => {
+    if (!currentChatSession) return;
+
+    try {
+      const roomId = await createChatRoom(currentChatSession.patientId);
+      console.log("Video call room created:", roomId);
+    } catch (error) {
+      console.error("Failed to start video call:", error);
+    }
+  };
+
+  const handleSendChatMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (chatMessage.trim()) {
+      sendMessage(chatMessage.trim());
+      setChatMessage("");
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendChatMessage(e);
+    }
+  };
 
   const filteredSessions = sessions.filter((session) => {
     const matchesSearch = session.patientName
@@ -211,7 +241,7 @@ export default function TherapistSessionsPage() {
                     Total Sessions
                   </dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                    {sessions.length}
+                    {sessions.length || 0}
                   </dd>
                 </dl>
               </div>
@@ -231,7 +261,7 @@ export default function TherapistSessionsPage() {
                     Active
                   </dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                    {sessions.filter((s) => s.status === "active").length}
+                    {sessions.filter((s) => s.status === "active").length || 0}
                   </dd>
                 </dl>
               </div>
@@ -251,7 +281,8 @@ export default function TherapistSessionsPage() {
                     Completed
                   </dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                    {sessions.filter((s) => s.status === "completed").length}
+                    {sessions.filter((s) => s.status === "completed").length ||
+                      0}
                   </dd>
                 </dl>
               </div>
@@ -337,7 +368,7 @@ export default function TherapistSessionsPage() {
 
             {/* Results Count */}
             <div className="flex items-center justify-end text-sm text-gray-500 dark:text-gray-400">
-              {filteredSessions.length} of {sessions.length} sessions
+              {filteredSessions.length} of {sessions.length || 0} sessions
             </div>
           </div>
         </div>
@@ -439,6 +470,13 @@ export default function TherapistSessionsPage() {
                       </button>
                     )}
                     <button
+                      onClick={() => handleOpenChat(session)}
+                      className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md"
+                      title="Open Chat"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                    </button>
+                    <button
                       onClick={() => setSelectedSession(session)}
                       className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       title="View Details"
@@ -453,17 +491,158 @@ export default function TherapistSessionsPage() {
 
           {filteredSessions.length === 0 && (
             <div className="text-center py-12">
-              <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
+              <Calendar className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-                No sessions found
+                {sessions.length === 0
+                  ? "No sessions scheduled"
+                  : "No sessions found"}
               </h3>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Try adjusting your search or filter criteria.
+                {sessions.length === 0
+                  ? "Get started by scheduling your first therapy session."
+                  : "Try adjusting your search or filter criteria."}
               </p>
             </div>
           )}
         </div>
       </div>
+
+      {/* Chat Interface */}
+      {showChat && currentChatSession && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          <div className="absolute inset-0 flex">
+            <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 shadow-xl">
+              {/* Chat Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center space-x-3">
+                  <img
+                    className="h-10 w-10 rounded-full object-cover"
+                    src={currentChatSession.patientAvatar}
+                    alt={currentChatSession.patientName}
+                  />
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                      {currentChatSession.patientName}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Session: {formatDate(currentChatSession.date)} at{" "}
+                      {formatTime(currentChatSession.time)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={handleStartVideoCall}
+                    className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md"
+                    title="Start Video Call"
+                  >
+                    <Video className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={handleCloseChat}
+                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md"
+                    title="Close Chat"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Chat Messages */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="space-y-4">
+                  {/* Welcome message */}
+                  <div className="flex justify-center">
+                    <div className="bg-gray-100 dark:bg-gray-700 rounded-lg px-4 py-2 text-sm text-gray-600 dark:text-gray-300">
+                      Session started with {currentChatSession.patientName}
+                    </div>
+                  </div>
+
+                  {/* Chat Messages */}
+                  {messages.length > 0 ? (
+                    <ChatMessages
+                      messages={messages}
+                      isTyping={isTyping}
+                      messagesEndRef={messagesEndRef}
+                    />
+                  ) : (
+                    <div className="text-center py-8">
+                      <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        Chat with {currentChatSession.patientName}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Start a conversation or begin a video call to provide
+                        therapy support.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Chat Input */}
+              <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+                <form
+                  onSubmit={handleSendChatMessage}
+                  className="flex items-end gap-3"
+                >
+                  <div className="flex-1 relative">
+                    <textarea
+                      value={chatMessage}
+                      onChange={(e) => setChatMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Type your message..."
+                      className="w-full resize-none rounded-lg border py-2 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                      rows={1}
+                      style={{
+                        minHeight: "44px",
+                        maxHeight: "100px",
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!chatMessage.trim()}
+                    className="flex h-11 w-11 items-center justify-center rounded-lg bg-green-600 text-white transition-colors hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    title="Send Message"
+                  >
+                    <Send className="h-5 w-5" />
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Call Component */}
+      {callState.isInCall && (
+        <VideoCall
+          isOpen={callState.isInCall}
+          onClose={() => endCall()}
+          participants={Array.from(remoteStreams.keys()).map((userId) => ({
+            id: userId,
+            name: currentChatSession?.patientName || "Patient",
+            avatar: currentChatSession?.patientAvatar || "",
+            isTherapist: false,
+            isMuted: false,
+            isVideoEnabled: true,
+          }))}
+          currentUserId={(user as any)?.id || ""}
+        />
+      )}
+
+      {/* Incoming Call Component */}
+      {incomingCall.isVisible && incomingCall.caller && (
+        <IncomingCall
+          isVisible={incomingCall.isVisible}
+          caller={incomingCall.caller}
+          onAccept={() => acceptCall()}
+          onReject={() => rejectCall()}
+        />
+      )}
 
       {/* Session Details Modal */}
       {selectedSession && (

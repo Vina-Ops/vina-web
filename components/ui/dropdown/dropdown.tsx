@@ -248,7 +248,7 @@ export const Dropdown = React.forwardRef<HTMLDivElement, DropdownProps>(
           <div
             ref={menuRef}
             className={cn(
-              "absolute z-50 min-w-[200px] rounded-md border border-gray-200 bg-white shadow-lg",
+              "absolute z-[9999] min-w-[200px] rounded-md border border-gray-200 bg-white shadow-lg",
               placementStyles[placement]
             )}
             style={{ width: menuWidth }}

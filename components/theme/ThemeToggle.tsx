@@ -41,13 +41,13 @@ export const ThemeToggle = () => {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-50"
+            className="fixed relative inset-0 z-[9998]"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
 
           {/* Menu */}
-          <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[80]">
+          <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
             {themes.map((themeOption) => {
               const Icon = themeOption.icon;
               const isActive = theme === themeOption.value;
