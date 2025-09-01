@@ -13,7 +13,6 @@ import {
   BarChart3,
   Settings,
 } from "lucide-react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 interface StatCardProps {
   title: string;
@@ -316,9 +315,5 @@ function AdminDashboardContent() {
 }
 
 export default function AdminDashboard() {
-  return (
-    <ProtectedRoute allowedRoles={["admin"]}>
-      <AdminDashboardContent />
-    </ProtectedRoute>
-  );
+  return <AdminDashboardContent />;
 }

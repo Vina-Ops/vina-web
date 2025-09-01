@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
   Filter,
@@ -19,10 +20,9 @@ import {
   Phone,
   Video,
   X,
+  Loader2,
 } from "lucide-react";
 import { ChatMessages } from "@/components/chat/ChatMessages";
-import { ChatInput } from "@/components/chat/ChatInput";
-import { useChatWebSocket } from "@/hooks/use-chat-websocket";
 import { Message } from "@/types/chat";
 import VideoCall from "@/components/chat/VideoCall";
 import IncomingCall from "@/components/chat/IncomingCall";
@@ -30,6 +30,9 @@ import { useChatVideoCall } from "@/hooks/useChatVideoCall";
 import { CallParticipant } from "@/services/video-call-service";
 import { useUser } from "@/context/user-context";
 import { fetchToken } from "@/helpers/get-token";
+import { getMyTherapySessions } from "@/services/general-service";
+import notificationSound from "@/utils/notification-sound";
+import { useNotification } from "@/context/notification-context";
 
 interface Session {
   id: string;
@@ -74,12 +77,17 @@ const typeColors = {
 };
 
 export default function TherapistSessionsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useUser();
+  const { settings } = useNotification();
   const [sessions, setSessions] = useState<Session[]>(mockSessions);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Chat functionality
   const [showChat, setShowChat] = useState(false);
@@ -89,9 +97,29 @@ export default function TherapistSessionsPage() {
   const [tokens, setTokens] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [chatMessage, setChatMessage] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [wsConnected, setWsConnected] = useState(false);
+  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
+  const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
-  // Chat WebSocket hook
-  const { messages, isTyping, sendMessage } = useChatWebSocket();
+  // URL state management utility
+  // Usage: updateUrlParams({ chat: sessionId }) to open chat
+  //        updateUrlParams({ chat: null }) to close chat
+  const updateUrlParams = (params: { [key: string]: string | null }) => {
+    const newSearchParams = new URLSearchParams(searchParams?.toString() || "");
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null) {
+        newSearchParams.delete(key);
+      } else {
+        newSearchParams.set(key, value);
+      }
+    });
+
+    const newUrl = `${window.location.pathname}?${newSearchParams.toString()}`;
+    router.replace(newUrl, { scroll: false });
+  };
 
   // Video call integration
   const {
@@ -128,14 +156,181 @@ export default function TherapistSessionsPage() {
     getToken();
   }, []);
 
+  // Connect to therapist chat WS for selected room using unified payloads
+  useEffect(() => {
+    if (!tokens || !currentChatSession || !user || !showChat) return;
+
+    const roomId = currentChatSession.id;
+    const baseUrl =
+      process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
+    const wsUrl = `${baseUrl}/safe-space/${roomId}?userId=${
+      (user as any)?.id
+    }&roomId=${roomId}&token=${tokens}`;
+
+    console.log("Creating therapist chat WebSocket connection to:", wsUrl);
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      setWsConnection(ws);
+      setWsConnected(true);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (
+          data &&
+          typeof data === "object" &&
+          "content" in data &&
+          ("sender" in data || "timestamp" in data)
+        ) {
+          const incoming: Message = {
+            id: data.id || `${Date.now()}`,
+            content: data.content,
+            sender: data.sender === (user as any)?.id ? "user" : "ai",
+            timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
+          };
+          setMessages((prev) => [...prev, incoming]);
+        }
+      } catch (err) {
+        console.error("Error parsing WS message:", err);
+      }
+    };
+
+    ws.onclose = (event) => {
+      console.log("Therapist chat WebSocket closed:", event.code, event.reason);
+      setWsConnected(false);
+      setWsConnection(null);
+    };
+
+    ws.onerror = (error) => {
+      console.error("Therapist chat WebSocket error:", error);
+      setWsConnected(false);
+      setWsConnection(null);
+    };
+
+    return () => {
+      // Only close if the WebSocket is actually connected or connecting
+      if (
+        ws &&
+        (ws.readyState === WebSocket.OPEN ||
+          ws.readyState === WebSocket.CONNECTING)
+      ) {
+        ws.close();
+      }
+      setWsConnection(null);
+      setWsConnected(false);
+    };
+  }, [tokens, currentChatSession, user, showChat]);
+
+  // Play notification sound for new messages in therapist chat
+  useEffect(() => {
+    if (messages.length > previousMessageCount && previousMessageCount > 0) {
+      // Only play sound for incoming messages (not the first load)
+      const newMessages = messages.slice(previousMessageCount);
+      const hasIncomingMessages = newMessages.some(
+        (msg) => msg.sender === "ai"
+      );
+
+      if (hasIncomingMessages && settings.soundEnabled) {
+        notificationSound.play(settings.volume);
+      }
+    }
+    setPreviousMessageCount(messages.length);
+  }, [messages, previousMessageCount]);
+
+  // Fetch therapy sessions from API and map to local Session type
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getMyTherapySessions();
+
+        const mapped: Session[] = (data || []).map((s: any) => {
+          const isTherapist = (user as any)?.role === "therapist";
+          const otherParty = isTherapist ? s?.client : s?.therapist;
+          const name = otherParty?.name || "Unknown";
+          const id = otherParty?.id?.toString?.() || "";
+          const createdAt = s?.created_at || new Date().toISOString();
+          const dateObj = new Date(createdAt);
+          const dateStr = dateObj.toISOString().slice(0, 10);
+          const timeStr = dateObj.toTimeString().slice(0, 5);
+          const statusRaw = (s?.status || "active").toLowerCase();
+          const allowedStatuses = [
+            "scheduled",
+            "active",
+            "completed",
+            "cancelled",
+            "no-show",
+          ];
+          const status = (
+            allowedStatuses.includes(statusRaw) ? statusRaw : "active"
+          ) as Session["status"];
+
+          return {
+            id:
+              s?.room_id?.toString?.() ||
+              id ||
+              Math.random().toString(36).slice(2),
+            patientName: name,
+            patientId: id,
+            date: dateStr,
+            time: timeStr,
+            duration: 60,
+            status,
+            type: "individual",
+            notes: undefined,
+            rating: undefined,
+            patientAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              name
+            )}&background=EAF7F0&color=013F25`,
+            sessionNotes: s?.last_message || undefined,
+          } as Session;
+        });
+
+        setSessions(mapped);
+      } catch (err: any) {
+        console.error("Error fetching therapy sessions:", err);
+        setError(err?.message || "Failed to load sessions");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSessions();
+  }, [user]);
+
+  // Initialize chat state from URL parameters
+  useEffect(() => {
+    const chatSessionId = searchParams?.get("chat");
+    if (chatSessionId && sessions.length > 0) {
+      const session = sessions.find((s) => s.id === chatSessionId);
+      if (session) {
+        setCurrentChatSession(session);
+        setShowChat(true);
+        setMessages([]);
+      }
+    } else if (!chatSessionId) {
+      // If no chat parameter in URL, close chat if it's open
+      setShowChat(false);
+      setCurrentChatSession(null);
+    }
+  }, [searchParams, sessions]);
+
   const handleOpenChat = (session: Session) => {
     setCurrentChatSession(session);
     setShowChat(true);
+    setMessages([]);
+    // Update URL to include chat session ID
+    updateUrlParams({ chat: session.id });
   };
 
   const handleCloseChat = () => {
     setShowChat(false);
     setCurrentChatSession(null);
+    // Remove chat parameter from URL
+    updateUrlParams({ chat: null });
   };
 
   const handleStartVideoCall = async () => {
@@ -151,10 +346,23 @@ export default function TherapistSessionsPage() {
 
   const handleSendChatMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (chatMessage.trim()) {
-      sendMessage(chatMessage.trim());
-      setChatMessage("");
+    const content = chatMessage.trim();
+    if (!content) return;
+
+    // optimistic UI
+    const outgoing: Message = {
+      id: `${Date.now()}`,
+      content,
+      sender: "user",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, outgoing]);
+
+    // send unified format
+    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+      wsConnection.send(JSON.stringify({ content }));
     }
+    setChatMessage("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -377,6 +585,17 @@ export default function TherapistSessionsPage() {
       {/* Sessions List */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
+          {loading && (
+            <div className="flex items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+              <Loader2 className="h-5 w-5 mr-2 animate-spin" /> Loading
+              sessions...
+            </div>
+          )}
+          {error && !loading && (
+            <div className="text-center py-6 text-red-600 dark:text-red-400">
+              {error}
+            </div>
+          )}
           <div className="space-y-4">
             {filteredSessions.map((session) => (
               <div

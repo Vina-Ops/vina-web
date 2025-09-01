@@ -16,26 +16,22 @@ export async function POST(req: Request) {
     const { accessToken, refreshToken, rememberMe } = await req.json();
 
     if (accessToken && refreshToken) {
-      // Set maxAge only if rememberMe is true
+      // Always set maxAge for persistent cookies (avoid session cookies)
       const accessTokenOptions: any = {
         httpOnly: true,
         secure: process.env.NODE_ENV !== "development",
         sameSite: "strict",
         path: "/",
+        maxAge: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 24, // 7 days if rememberMe, 1 day otherwise
       };
-      if (rememberMe) {
-        accessTokenOptions.maxAge = 60 * 60; // 1 hour
-      }
 
       const refreshTokenOptions: any = {
         httpOnly: true,
         secure: process.env.NODE_ENV !== "development",
         sameSite: "strict",
         path: "/",
+        maxAge: rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7, // 30 days if rememberMe, 7 days otherwise
       };
-      if (rememberMe) {
-        refreshTokenOptions.maxAge = 60 * 60 * 24 * 30; // 30 days
-      }
 
       const accessTokenSerialized = serialize(
         "access_token",
