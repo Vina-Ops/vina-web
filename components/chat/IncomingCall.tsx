@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Phone, PhoneOff, Video } from "lucide-react";
 import { CallParticipant } from "@/services/video-call-service";
+import notificationSound from "@/utils/notification-sound";
+import { useNotification } from "@/context/notification-context";
 
 interface IncomingCallProps {
   isVisible: boolean;
@@ -17,6 +19,15 @@ export default function IncomingCall({
   onAccept,
   onReject,
 }: IncomingCallProps) {
+  const { settings } = useNotification();
+  
+  // Play incoming call sound when call becomes visible
+  useEffect(() => {
+    if (isVisible && settings.incomingCallSoundEnabled) {
+      notificationSound.playIncomingCall(settings.volume);
+    }
+  }, [isVisible, settings.incomingCallSoundEnabled, settings.volume]);
+
   if (!isVisible) return null;
 
   return (

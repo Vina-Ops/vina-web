@@ -83,8 +83,8 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({
     const maxY = window.innerHeight - (promptRef.current?.offsetHeight || 100);
 
     setPosition({
-      x: Math.max(0, Math.min(newX, maxX)),
-      y: Math.max(0, Math.min(newY, maxY)),
+      x: Math.max(-0, Math.min(newX, maxX)),
+      y: Math.max(-0, Math.min(newY, maxY)),
     });
   };
 

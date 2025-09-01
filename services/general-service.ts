@@ -42,6 +42,7 @@ const refreshToken = async () => {
       body: JSON.stringify({
         accessToken: (response as any)?.access_token,
         refreshToken: (response as any)?.refresh_token,
+        rememberMe: true, // Always persist cookies to avoid logout on refresh
       }),
     });
 

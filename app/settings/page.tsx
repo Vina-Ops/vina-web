@@ -13,12 +13,14 @@ import {
   Mail,
   Save,
   AlertTriangle,
+  Phone,
 } from "lucide-react";
 import {
   FixedNavbar,
   defaultNavItems,
 } from "@/components/navigation/FixedNavbar";
 import { usePathname } from "next/navigation";
+import { useNotification } from "@/context/notification-context";
 
 // DeleteChatsModal Component
 const DeleteChatsModal: React.FC = () => {
@@ -91,19 +93,23 @@ interface SettingItem {
   title: string;
   description: string;
   icon: React.ReactNode;
-  type: "toggle" | "select" | "input";
+  type: "toggle" | "select" | "input" | "range";
   value?: any;
   options?: { label: string; value: string }[];
+  onChange?: (value: any) => void;
+  min?: number;
+  max?: number;
+  step?: number;
   danger?: boolean;
 }
 
 export default function SettingsPage() {
+  const { settings: notificationSettings, toggleSound, toggleIncomingCallSound, setVolume } = useNotification();
   const [settings, setSettings] = useState({
     notifications: true,
     emailUpdates: true,
     darkMode: false,
     language: "en",
-    soundEnabled: true,
     privacyMode: false,
     autoSave: true,
     twoFactorAuth: false,
@@ -151,7 +157,29 @@ export default function SettingsPage() {
           description: "Play sound for new messages and notifications",
           icon: <Volume2 className="w-5 h-5" />,
           type: "toggle",
-          value: settings.soundEnabled,
+          value: notificationSettings.soundEnabled,
+          onChange: toggleSound,
+        },
+        {
+          id: "incomingCallSound",
+          title: "Incoming Call Sounds",
+          description: "Play sound for incoming video calls",
+          icon: <Phone className="w-5 h-5" />,
+          type: "toggle",
+          value: notificationSettings.incomingCallSoundEnabled,
+          onChange: toggleIncomingCallSound,
+        },
+        {
+          id: "volume",
+          title: "Notification Volume",
+          description: "Adjust the volume of notification sounds",
+          icon: <Volume2 className="w-5 h-5" />,
+          type: "range",
+          value: notificationSettings.volume,
+          onChange: setVolume,
+          min: 0,
+          max: 1,
+          step: 0.1,
         },
       ],
     },
@@ -235,9 +263,13 @@ export default function SettingsPage() {
         <div className="flex items-center">
           {item.type === "toggle" && (
             <button
-              onClick={() =>
-                handleSettingChange(item.id, !(item.value as boolean))
-              }
+              onClick={() => {
+                if (item.onChange) {
+                  item.onChange(!(item.value as boolean));
+                } else {
+                  handleSettingChange(item.id, !(item.value as boolean));
+                }
+              }}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green focus:ring-offset-2 ${
                 item.value ? "bg-green" : "bg-gray-200 dark:bg-gray-700"
               }`}
@@ -278,6 +310,31 @@ export default function SettingsPage() {
                 </option>
               ))}
             </select>
+          )}
+          {item.type === "range" && (
+            <div className="flex items-center space-x-3">
+              <input
+                type="range"
+                min={item.min || 0}
+                max={item.max || 1}
+                step={item.step || 0.1}
+                value={item.value as number}
+                onChange={(e) => {
+                  if (item.onChange) {
+                    item.onChange(parseFloat(e.target.value));
+                  } else {
+                    handleSettingChange(item.id, parseFloat(e.target.value));
+                  }
+                }}
+                className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                style={{
+                  background: `linear-gradient(to right, #013F25 0%, #013F25 ${(item.value as number) * 100}%, #e5e7eb ${(item.value as number) * 100}%, #e5e7eb 100%)`
+                }}
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-400 w-8 text-center">
+                {Math.round((item.value as number) * 100)}%
+              </span>
+            </div>
           )}
         </div>
       </div>

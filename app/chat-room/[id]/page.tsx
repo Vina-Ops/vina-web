@@ -31,6 +31,8 @@ import {
   getMyTherapySessions,
 } from "@/services/general-service";
 import { User } from "iconsax-react";
+import notificationSound from "@/utils/notification-sound";
+import { useNotification } from "@/context/notification-context";
 
 interface Message {
   id: string;
@@ -57,6 +59,7 @@ export default function ChatSessionPage() {
   const pathname = usePathname();
 
   const { user } = useUser();
+  const { settings } = useNotification();
   const [tokens, setTokens] = useState<string | undefined>(undefined);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -68,6 +71,7 @@ export default function ChatSessionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
+  const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
   const chatId = params?.id as string;
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -214,6 +218,7 @@ export default function ChatSessionPage() {
       (user as any)?.id
     }&roomId=${chatId}&token=${tokens}`;
 
+    console.log("Creating chat room WebSocket connection to:", wsUrl);
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -233,55 +238,98 @@ export default function ChatSessionPage() {
       try {
         const data = JSON.parse(event.data);
 
+        // New unified format: { sender: "uuid", timestamp: time, content: "abc" }
+        if (
+          typeof data === "object" &&
+          data !== null &&
+          "content" in data &&
+          ("sender" in data || "timestamp" in data)
+        ) {
+          const incoming: Message = {
+            id: data.id || Date.now().toString(),
+            content: data.content,
+            sender: data.sender === (user as any)?.id ? "user" : "therapist",
+            timestamp:
+              data.timestamp ||
+              new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            type: "text",
+            isRead: data.sender === (user as any)?.id,
+          };
+          setMessages((prev) => [...prev, incoming]);
+
+          // Play notification sound for incoming messages
+          if (data.sender !== (user as any)?.id && settings.soundEnabled) {
+            notificationSound.play(settings.volume);
+          }
+
+          return;
+        }
+
+        // Legacy typed messages fallback
         switch (data.type) {
           case "new-message":
-            const newMessage: Message = {
-              id: data.id || Date.now().toString(),
-              content: data.content,
-              sender: data.sender === (user as any)?.id ? "user" : "therapist",
-              timestamp:
-                data.timestamp ||
-                new Date().toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-              type: "text",
-              isRead: data.sender === (user as any)?.id,
-            };
-            setMessages((prev) => [...prev, newMessage]);
-            break;
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: data.id || Date.now().toString(),
+                content: data.content,
+                sender:
+                  data.sender === (user as any)?.id ? "user" : "therapist",
+                timestamp:
+                  data.timestamp ||
+                  new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                type: "text",
+                isRead: data.sender === (user as any)?.id,
+              },
+            ]);
 
+            // Play notification sound for incoming messages
+            if (data.sender !== (user as any)?.id && settings.soundEnabled) {
+              notificationSound.play(settings.volume);
+            }
+            break;
           case "user-typing":
             setIsTyping(data.isTyping);
             break;
-
           case "user-joined":
             console.log("User joined chat:", data);
             break;
-
           default:
-            console.log("Unknown message type:", data.type);
+            console.log("Unknown message format:", data);
         }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
       }
     };
 
-    ws.onclose = () => {
-      console.log("Disconnected from chat WebSocket");
+    ws.onclose = (event) => {
+      console.log("Chat room WebSocket closed:", event.code, event.reason);
       setWsConnection(null);
       setWsConnected(false);
     };
 
     ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
+      console.error("Chat room WebSocket error:", error);
       setError("Connection error");
       setWsConnection(null);
       setWsConnected(false);
     };
 
     return () => {
-      ws.close();
+      // Only close if the WebSocket is actually connected or connecting
+      if (
+        ws &&
+        (ws.readyState === WebSocket.OPEN ||
+          ws.readyState === WebSocket.CONNECTING)
+      ) {
+        ws.close();
+      }
       setWsConnection(null);
     };
   }, [tokens, chatId, user]);
@@ -312,19 +360,10 @@ export default function ChatSessionPage() {
       // Add message to local state immediately
       setMessages((prev) => [...prev, message]);
 
-      // Send message via WebSocket
-      const messageData = {
-        type: "send-message",
-        data: {
-          roomId: chatId,
-          content: newMessage,
-          sender: (user as any)?.id,
-          timestamp: new Date().toISOString(),
-        },
-      };
-
-      wsConnection.send(JSON.stringify(messageData));
-      console.log("Sent message via WebSocket:", messageData);
+      // Send message via WebSocket in new format: { content: "abc" }
+      const payload = { content: newMessage };
+      wsConnection.send(JSON.stringify(payload));
+      console.log("Sent message via WebSocket:", payload);
 
       setNewMessage("");
     } else if (!wsConnection) {

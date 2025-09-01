@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { Message } from "@/types/chat";
 import { getChatWebSocketService } from "@/services/chat-service";
+import notificationSound from "@/utils/notification-sound";
+import { useNotification } from "@/context/notification-context";
 
 export const useChatWebSocket = () => {
+  const { settings } = useNotification();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -18,6 +21,11 @@ export const useChatWebSocket = () => {
       return newMessages;
     });
     setIsTyping(false);
+    
+    // Play notification sound for incoming AI messages
+    if (message.sender === 'ai' && settings.soundEnabled) {
+      notificationSound.play(settings.volume);
+    }
   }, []);
 
   // Handle typing indicators

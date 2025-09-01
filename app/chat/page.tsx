@@ -14,13 +14,17 @@ import { getChatWebSocketService } from "@/services/chat-service";
 import { Message } from "@/types/chat";
 import { ConnectionLoading } from "@/components/ui/ConnectionLoading";
 import { DateHeader } from "@/components/chat/DateHeader";
+import notificationSound from "@/utils/notification-sound";
+import { useNotification } from "@/context/notification-context";
 
 export default function ChatPage() {
   const { messages, isTyping, isConnecting, error, sendMessage, clearError } =
     useChatWebSocket();
   const { isConnected } = useWebSocket();
+  const { settings } = useNotification();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
   // console.log("ChatPage: isConnected from WebSocket context:", isConnected);
 
@@ -40,6 +44,20 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Play notification sound for new messages
+  useEffect(() => {
+    if (messages.length > previousMessageCount && previousMessageCount > 0) {
+      // Only play sound for incoming messages (not the first load)
+      const newMessages = messages.slice(previousMessageCount);
+      const hasIncomingMessages = newMessages.some(msg => msg.sender === 'ai');
+      
+      if (hasIncomingMessages && settings.soundEnabled) {
+        notificationSound.play(settings.volume);
+      }
+    }
+    setPreviousMessageCount(messages.length);
+  }, [messages, previousMessageCount]);
 
   const handleSendMessage = (content: string | Message) => {
     sendMessage(content);

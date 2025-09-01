@@ -25,6 +25,7 @@ const publicRoutes = [
   "/api/remove-cookie",
   "/api/get-cookie",
   "/api/get-refresh-cookie",
+  "/api/debug-cookies",
   "/offline",
 ];
 

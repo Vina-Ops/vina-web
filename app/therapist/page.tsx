@@ -16,7 +16,6 @@ import {
   UserCheck,
   User,
 } from "lucide-react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 interface StatCardProps {
   title: string;
@@ -394,9 +393,5 @@ function TherapistDashboardContent() {
 }
 
 export default function TherapistDashboard() {
-  return (
-    <ProtectedRoute allowedRoles={["therapist"]}>
-      <TherapistDashboardContent />
-    </ProtectedRoute>
-  );
+  return <TherapistDashboardContent />;
 }

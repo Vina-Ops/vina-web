@@ -6,6 +6,7 @@ import { WebSocketProvider } from "@/context/websocket-context";
 import { PWAProvider } from "@/components/pwa/PWAProvider";
 import { LanguageProvider } from "@/context/language-context";
 import { TopToastProvider } from "@/components/ui/toast";
+import { NotificationProvider } from "@/context/notification-context";
 
 export const metadata: Metadata = {
   title: "Vina - Mental Wellness Companion",
@@ -58,7 +59,9 @@ export default function RootLayout({
             <ThemeProvider>
               <UserProvider>
                 <WebSocketProvider>
-                  <PWAProvider>{children}</PWAProvider>
+                  <NotificationProvider>
+                    <PWAProvider>{children}</PWAProvider>
+                  </NotificationProvider>
                 </WebSocketProvider>
               </UserProvider>
             </ThemeProvider>
