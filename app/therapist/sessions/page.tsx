@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
@@ -76,7 +76,8 @@ const typeColors = {
     "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300",
 };
 
-export default function TherapistSessionsPage() {
+// Main component that uses useSearchParams
+function TherapistSessionsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useUser();
@@ -954,5 +955,13 @@ export default function TherapistSessionsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function TherapistSessionsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TherapistSessionsContent />
+    </Suspense>
   );
 }
