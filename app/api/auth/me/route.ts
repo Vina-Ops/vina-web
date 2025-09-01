@@ -4,7 +4,11 @@ import { cookies } from "next/headers";
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
+    // Prefer new standardized name, but support legacy names
+    const accessToken =
+      cookieStore.get("access_token")?.value ||
+      cookieStore.get("accessToken")?.value ||
+      cookieStore.get("authToken")?.value;
 
     if (!accessToken) {
       return NextResponse.json(

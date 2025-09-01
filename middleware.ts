@@ -42,14 +42,15 @@ export function middleware(request: NextRequest) {
   );
 
   if (protectedRoute) {
-    // Get the token from cookies or headers
+    // Get the token from cookies or headers (support legacy names too)
     const accessToken = request.cookies.get("access_token")?.value;
+    const legacyAccessToken = request.cookies.get("accessToken")?.value;
     const authToken = request.cookies.get("authToken")?.value;
     const authHeader = request.headers
       .get("authorization")
       ?.replace("Bearer ", "");
 
-    const token = accessToken || authToken || authHeader;
+    const token = accessToken || legacyAccessToken || authToken || authHeader;
 
     if (!token) {
       // Redirect to login if no token
