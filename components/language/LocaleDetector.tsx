@@ -17,7 +17,8 @@ export const LocaleDetector = () => {
     if (storedPreference && locales.includes(storedPreference as any)) {
       if (storedPreference !== currentLocale) {
         // Remove the current locale from the pathname
-        const pathWithoutLocale = pathname.replace(`/${currentLocale}`, "");
+        const pathWithoutLocale =
+          pathname?.replace(`/${currentLocale}`, "") || "";
 
         // Navigate to the stored preference
         if (storedPreference === "en") {

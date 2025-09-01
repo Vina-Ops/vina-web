@@ -248,7 +248,7 @@ export function Autocomplete({
         <div
           ref={dropdownRef}
           className={cn(
-            "absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg",
+            "absolute z-[9999] mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg",
             dropdownClassName
           )}
           style={{ maxHeight }}

@@ -18,7 +18,7 @@ import CompositionAnimation from "@/components/loader";
 
 function HomePageContent() {
   const searchParams = useSearchParams();
-  const isStart = searchParams.get("start") === "1";
+  const isStart = searchParams?.get("start") === "1";
   const { user } = useUser();
   const { t } = useLanguage();
 

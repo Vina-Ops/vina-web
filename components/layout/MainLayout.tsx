@@ -20,7 +20,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const hideNavbarPaths = ["/auth/login", "/auth/register", "/", "/?start=1"];
 
   const shouldHideNavbar = hideNavbarPaths.some(
-    (path) => pathname === path || pathname.startsWith(path.replace("?", ""))
+    (path) => pathname === path || pathname?.startsWith(path.replace("?", ""))
   );
 
   if (shouldHideNavbar || loading || !user) {
@@ -31,7 +31,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const updatedNavItems = defaultNavItems.map((item) => ({
     ...item,
     isActive: item.href
-      ? pathname === item.href || pathname.startsWith(item.href)
+      ? pathname === item.href || pathname?.startsWith(item.href)
       : false,
   }));
 

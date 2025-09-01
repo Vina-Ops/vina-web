@@ -60,7 +60,7 @@ export default function ProfilePage() {
       isActive = true;
     }
     // Handle sub-pages (but not for home)
-    else if (item.href !== "/" && pathname.startsWith(item.href + "/")) {
+    else if (item.href !== "/" && pathname?.startsWith(item.href + "/")) {
       isActive = true;
     }
 

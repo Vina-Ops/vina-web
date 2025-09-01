@@ -20,6 +20,17 @@ import {
   File,
   X,
 } from "lucide-react";
+import VideoCall from "@/components/chat/VideoCall";
+import IncomingCall from "@/components/chat/IncomingCall";
+import { useChatVideoCall } from "@/hooks/useChatVideoCall";
+import { CallParticipant } from "@/services/video-call-service";
+import { useUser } from "@/context/user-context";
+import { fetchToken } from "@/helpers/get-token";
+import {
+  getTherapistByUuid,
+  getMyTherapySessions,
+} from "@/services/general-service";
+import { User } from "iconsax-react";
 
 interface Message {
   id: string;
@@ -40,119 +51,252 @@ interface ChatParticipant {
   lastSeen: string;
 }
 
-const mockMessages: Message[] = [
-  {
-    id: "1",
-    content: "Hello! How are you feeling today?",
-    sender: "therapist",
-    timestamp: "10:30 AM",
-    type: "text",
-    isRead: true,
-  },
-  {
-    id: "2",
-    content: "Hi Dr. Sarah, I'm feeling a bit anxious today.",
-    sender: "user",
-    timestamp: "10:32 AM",
-    type: "text",
-    isRead: true,
-  },
-  {
-    id: "3",
-    content:
-      "I understand. Can you tell me more about what's causing the anxiety?",
-    sender: "therapist",
-    timestamp: "10:33 AM",
-    type: "text",
-    isRead: true,
-  },
-  {
-    id: "4",
-    content:
-      "I have a big presentation at work tomorrow and I'm worried I'll mess up.",
-    sender: "user",
-    timestamp: "10:35 AM",
-    type: "text",
-    isRead: true,
-  },
-  {
-    id: "5",
-    content:
-      "That's a common source of anxiety. Let's work through some breathing exercises together.",
-    sender: "therapist",
-    timestamp: "10:36 AM",
-    type: "text",
-    isRead: false,
-  },
-];
-
-const mockParticipant: ChatParticipant = {
-  id: "1",
-  name: "Dr. Sarah Johnson",
-  avatar:
-    "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face",
-  isOnline: true,
-  isTherapist: true,
-  specialization: "Anxiety & Depression",
-  lastSeen: "2 minutes ago",
-};
-
 export default function ChatSessionPage() {
   const params = useParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
+
+  const { user } = useUser();
+  const [tokens, setTokens] = useState<string | undefined>(undefined);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+  const [showVideoCall, setShowVideoCall] = useState(false);
+  const [therapist, setTherapist] = useState<ChatParticipant | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [wsConnected, setWsConnected] = useState(false);
+
+  const chatId = params?.id as string;
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const chatId = params.id as string;
+  // Video call integration with complete flow
+  const {
+    callState,
+    remoteStreams,
+    incomingCall,
+    currentRoomId,
+    isConnecting,
+    startCall,
+    acceptCall,
+    rejectCall,
+    endCall,
+    toggleMute,
+    toggleVideo,
+    toggleScreenShare,
+    createChatRoom,
+    connectToExistingRoom,
+  } = useChatVideoCall({
+    currentUserId: (user as any)?.id || "", // Type assertion for user ID
+    roomId: chatId, // Use the chat room ID from URL
+    token: tokens || undefined, // Add token for authentication
+  });
 
   // Update navigation items to reflect current path
   const updatedNavItems = defaultNavItems.map((item) => ({
     ...item,
     isActive: item.href
-      ? pathname === item.href || pathname.startsWith(item.href)
+      ? pathname === item.href || pathname?.startsWith(item.href)
       : false,
   }));
+
+  // Fetch token on component mount
+  useEffect(() => {
+    const getToken = async () => {
+      try {
+        const token = await fetchToken();
+        setTokens(token);
+      } catch (error) {
+        console.error("Failed to fetch token:", error);
+      }
+    };
+    getToken();
+  }, []);
+
+  // Fetch therapist information
+  useEffect(() => {
+    const fetchTherapistInfo = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // First, get the therapy sessions to find the therapist ID for this chat room
+        console.log(
+          "Fetching therapy sessions to find therapist for room:",
+          chatId
+        );
+        const sessions = await getMyTherapySessions();
+        console.log("All therapy sessions:", sessions);
+
+        // Find the session that matches our chat room ID
+        const currentSession = sessions.find(
+          (session) => session.room_id === chatId
+        );
+
+        if (!currentSession) {
+          throw new Error("Chat room not found in therapy sessions");
+        }
+
+        console.log("Found current session:", currentSession);
+        const therapistId = currentSession.therapist.id;
+        console.log("Therapist ID from session:", therapistId);
+
+        // Now fetch the therapist details using the correct therapist ID
+        const therapistData = await getTherapistByUuid(therapistId);
+        console.log("Therapist data received:", therapistData);
+
+        if (!therapistData || !therapistData.id) {
+          throw new Error("Invalid therapist data received");
+        }
+
+        // Construct name from various possible fields
+        let therapistName = "";
+        if (therapistData.first_name || therapistData.last_name) {
+          therapistName = `${therapistData.first_name || ""} ${
+            therapistData.last_name || ""
+          }`.trim();
+        } else if (therapistData.name) {
+          therapistName = therapistData.name;
+        } else if (therapistData.full_name) {
+          therapistName = therapistData.full_name;
+        }
+
+        if (!therapistName) {
+          throw new Error("Therapist name not found in data");
+        }
+
+        const therapistInfo: ChatParticipant = {
+          id: therapistData.id,
+          name: therapistName,
+          avatar:
+            therapistData.profile_image ||
+            therapistData.image_url ||
+            therapistData.avatar ||
+            "",
+          isOnline: true, // You might want to get this from WebSocket
+          isTherapist: true,
+          specialization:
+            therapistData.specialties?.join(", ") ||
+            therapistData.specialization ||
+            "",
+          lastSeen: "2 minutes ago",
+        };
+
+        console.log("Processed therapist info:", therapistInfo);
+        setTherapist(therapistInfo);
+      } catch (err) {
+        console.error("Failed to fetch therapist info:", err);
+        setError("Failed to load therapist information");
+        setTherapist(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (chatId) {
+      fetchTherapistInfo();
+    }
+  }, [chatId]);
+
+  // WebSocket connection state
+  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
+
+  // WebSocket message handling
+  useEffect(() => {
+    if (!tokens || !chatId || !user) return;
+
+    // Set up WebSocket connection for chat messages
+    const baseUrl =
+      process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
+    const wsUrl = `${baseUrl}/safe-space/${chatId}?userId=${
+      (user as any)?.id
+    }&roomId=${chatId}&token=${tokens}`;
+
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log("Connected to chat WebSocket");
+      setWsConnection(ws);
+      setWsConnected(true);
+      // Send join room message
+      ws.send(
+        JSON.stringify({
+          type: "join-room",
+          data: { roomId: chatId },
+        })
+      );
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        switch (data.type) {
+          case "new-message":
+            const newMessage: Message = {
+              id: data.id || Date.now().toString(),
+              content: data.content,
+              sender: data.sender === (user as any)?.id ? "user" : "therapist",
+              timestamp:
+                data.timestamp ||
+                new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+              type: "text",
+              isRead: data.sender === (user as any)?.id,
+            };
+            setMessages((prev) => [...prev, newMessage]);
+            break;
+
+          case "user-typing":
+            setIsTyping(data.isTyping);
+            break;
+
+          case "user-joined":
+            console.log("User joined chat:", data);
+            break;
+
+          default:
+            console.log("Unknown message type:", data.type);
+        }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log("Disconnected from chat WebSocket");
+      setWsConnection(null);
+      setWsConnected(false);
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      setError("Connection error");
+      setWsConnection(null);
+      setWsConnected(false);
+    };
+
+    return () => {
+      ws.close();
+      setWsConnection(null);
+    };
+  }, [tokens, chatId, user]);
 
   useEffect(() => {
     // Scroll to bottom when new messages arrive
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    // Simulate typing indicator
-    if (
-      messages.length > 0 &&
-      messages[messages.length - 1].sender === "user"
-    ) {
-      setIsTyping(true);
-      const timer = setTimeout(() => {
-        setIsTyping(false);
-        // Simulate therapist response
-        const therapistResponse: Message = {
-          id: Date.now().toString(),
-          content:
-            "Thank you for sharing that with me. I'm here to support you.",
-          sender: "therapist",
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          type: "text",
-          isRead: false,
-        };
-        setMessages((prev) => [...prev, therapistResponse]);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [messages]);
-
   const handleSendMessage = () => {
-    if (newMessage.trim()) {
+    if (
+      newMessage.trim() &&
+      wsConnection &&
+      wsConnection.readyState === WebSocket.OPEN
+    ) {
       const message: Message = {
         id: Date.now().toString(),
         content: newMessage,
@@ -164,8 +308,28 @@ export default function ChatSessionPage() {
         type: "text",
         isRead: false,
       };
+
+      // Add message to local state immediately
       setMessages((prev) => [...prev, message]);
+
+      // Send message via WebSocket
+      const messageData = {
+        type: "send-message",
+        data: {
+          roomId: chatId,
+          content: newMessage,
+          sender: (user as any)?.id,
+          timestamp: new Date().toISOString(),
+        },
+      };
+
+      wsConnection.send(JSON.stringify(messageData));
+      console.log("Sent message via WebSocket:", messageData);
+
       setNewMessage("");
+    } else if (!wsConnection) {
+      console.warn("WebSocket not connected");
+      setError("Connection lost. Please refresh the page.");
     }
   };
 
@@ -186,6 +350,85 @@ export default function ChatSessionPage() {
     // Handle voice message recording
     // console.log("Record voice message");
   };
+
+  const handleStartVideoCall = async () => {
+    if (!therapist) return;
+
+    const participants: CallParticipant[] = [
+      {
+        id: therapist.id,
+        name: therapist.name,
+        avatar: therapist.avatar,
+        isTherapist: therapist.isTherapist,
+        isMuted: false,
+        isVideoEnabled: true,
+      },
+    ];
+
+    try {
+      const success = await startCall(participants);
+      if (success) {
+        setShowVideoCall(true);
+      } else {
+        alert(
+          "Failed to start video call. Please check your camera and microphone permissions."
+        );
+      }
+    } catch (error) {
+      console.error("Error starting video call:", error);
+      alert("Failed to start video call. Please try again.");
+    }
+  };
+
+  const handleAcceptCall = async () => {
+    try {
+      const success = await acceptCall();
+      if (success) {
+        setShowVideoCall(true);
+      }
+    } catch (error) {
+      console.error("Error accepting call:", error);
+      alert("Failed to accept call. Please try again.");
+    }
+  };
+
+  const handleRejectCall = () => {
+    rejectCall();
+  };
+
+  const handleCloseVideoCall = () => {
+    setShowVideoCall(false);
+    endCall();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading chat...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !therapist) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">
+            {error || "Failed to load chat room data"}
+          </p>
+          <button
+            onClick={() => router.back()}
+            className="px-4 py-2 bg-green text-white rounded hover:bg-green/70"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen">
@@ -209,34 +452,57 @@ export default function ChatSessionPage() {
                     <ArrowLeft className="h-5 w-5" />
                   </button>
                   <div className="relative">
-                    <img
-                      className="h-10 w-10 rounded-full object-cover"
-                      src={mockParticipant.avatar}
-                      alt={`${mockParticipant.name} avatar`}
-                    />
+                    {therapist?.avatar ? (
+                      <img
+                        className="h-10 w-10 rounded-full object-cover"
+                        src={therapist?.avatar}
+                        alt={`${therapist?.name} avatar`}
+                      />
+                    ) : (
+                      <div className="h-10 w-10 flex justify-center items-center rounded-full m-auto bg-green">
+                        <User
+                          className="h-7 w-7 text-white"
+                          color="white"
+                          variant="Bold"
+                        />
+                      </div>
+                    )}
                     <div
                       className={`absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white ${
-                        mockParticipant.isOnline
-                          ? "bg-green-400"
-                          : "bg-gray-400"
+                        therapist?.isOnline ? "bg-green-400" : "bg-gray-400"
                       }`}
                     />
                   </div>
                   <div>
                     <h2 className="text-lg font-medium text-gray-900 dark:text-white">
-                      {mockParticipant.name}
+                      {therapist?.name}
                     </h2>
-                    {mockParticipant.isTherapist &&
-                      mockParticipant.specialization && (
-                        <p className="text-sm text-blue-600 dark:text-blue-400">
-                          {mockParticipant.specialization}
-                        </p>
-                      )}
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {mockParticipant.isOnline
-                        ? "Online"
-                        : "Last seen " + mockParticipant.lastSeen}
-                    </p>
+                    {therapist?.isTherapist && therapist?.specialization && (
+                      <p className="text-sm text-green dark:text-white">
+                        {therapist.specialization}
+                      </p>
+                    )}
+
+                    <div className="flex items-center space-x-4">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {therapist?.isOnline
+                          ? "Online"
+                          : "Last seen " + therapist?.lastSeen}
+                      </p>
+
+                      <p className="text-2xl px-0.5 w-px h-px py-0.5 bg-gray-600 text-white rounded-md"></p>
+
+                      <div className="flex items-center space-x-2">
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            wsConnected ? "bg-green" : "bg-red-400"
+                          }`}
+                        ></div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {wsConnected ? "Connected" : "Disconnected"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -244,7 +510,10 @@ export default function ChatSessionPage() {
                   <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <Phone className="h-5 w-5" />
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <button
+                    onClick={handleStartVideoCall}
+                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  >
                     <Video className="h-5 w-5" />
                   </button>
                   <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -256,40 +525,48 @@ export default function ChatSessionPage() {
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
+              {messages.length === 0 ? (
+                <div className="text-center text-gray-500 mt-8">
+                  <p>No messages yet. Start the conversation!</p>
+                </div>
+              ) : (
+                messages.map((message) => (
                   <div
-                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                    key={message.id}
+                    className={`flex ${
                       message.sender === "user"
-                        ? "bg-blue-600 text-white"
-                        : message.sender === "therapist"
-                        ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700"
-                        : "bg-green-600 text-white"
+                        ? "justify-end"
+                        : "justify-start"
                     }`}
                   >
-                    <p className="text-sm">{message.content}</p>
-                    <p
-                      className={`text-xs mt-1 ${
+                    <div
+                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                         message.sender === "user"
-                          ? "text-blue-100"
-                          : "text-gray-500 dark:text-gray-400"
+                          ? "bg-green text-white"
+                          : message.sender === "therapist"
+                          ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700"
+                          : "bg-green-600 text-white"
                       }`}
                     >
-                      {message.timestamp}
-                      {message.sender === "user" && (
-                        <span className="ml-2">
-                          {message.isRead ? "✓✓" : "✓"}
-                        </span>
-                      )}
-                    </p>
+                      <p className="text-sm">{message.content}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          message.sender === "user"
+                            ? "text-green-100"
+                            : "text-gray-500 dark:text-gray-400"
+                        }`}
+                      >
+                        {message.timestamp}
+                        {message.sender === "user" && (
+                          <span className="ml-2">
+                            {message.isRead ? "✓✓" : "✓"}
+                          </span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
 
               {isTyping && (
                 <div className="flex justify-start">
@@ -352,7 +629,7 @@ export default function ChatSessionPage() {
                     onKeyPress={handleKeyPress}
                     placeholder="Type a message..."
                     rows={1}
-                    className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                    className="block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-0.5 focus:ring-green focus:border-green resize-none"
                     style={{ minHeight: "40px", maxHeight: "120px" }}
                   />
                 </div>
@@ -377,7 +654,7 @@ export default function ChatSessionPage() {
                 <button
                   onClick={handleSendMessage}
                   disabled={!newMessage.trim()}
-                  className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="p-2 bg-green text-white rounded-md hover:bg-green/70 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   <Send className="h-5 w-5" />
                 </button>
@@ -423,6 +700,33 @@ export default function ChatSessionPage() {
           </div>
         </main>
       </div>
+
+      {/* Video Call Component */}
+      {therapist && (
+        <VideoCall
+          isOpen={showVideoCall}
+          onClose={handleCloseVideoCall}
+          participants={[
+            {
+              id: therapist.id,
+              name: therapist.name,
+              avatar: therapist.avatar,
+              isTherapist: therapist.isTherapist,
+              isMuted: false,
+              isVideoEnabled: true,
+            },
+          ]}
+          currentUserId="current-user-id"
+        />
+      )}
+
+      {/* Incoming Call Component */}
+      <IncomingCall
+        isVisible={incomingCall.isVisible}
+        caller={incomingCall.caller!}
+        onAccept={handleAcceptCall}
+        onReject={handleRejectCall}
+      />
     </div>
   );
 }

@@ -10,7 +10,10 @@ import { usePathname } from "next/navigation";
 import {
   getTherapists,
   searchTherapistsByName,
+  chatWithTherapist,
 } from "@/services/general-service";
+import { useRouter } from "next/navigation";
+import { useTopToast } from "@/components/ui/toast";
 
 export default function TherapistsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,13 +23,16 @@ export default function TherapistsPage() {
   const [therapists, setTherapists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [chatLoading, setChatLoading] = useState(false);
+  const { showToast } = useTopToast();
   const pathname = usePathname();
+  const router = useRouter();
 
   // Update navigation items to reflect current path
   const updatedNavItems = defaultNavItems.map((item) => ({
     ...item,
     isActive: item.href
-      ? pathname === item.href || pathname.startsWith(item.href)
+      ? pathname === item.href || pathname?.startsWith(item.href)
       : false,
   }));
 
@@ -133,6 +139,36 @@ export default function TherapistsPage() {
   const handleTherapistClick = (therapist: any) => {
     setSelectedTherapist(therapist);
     setShowModal(true);
+  };
+
+  const handleChatClick = async (therapist: any) => {
+    try {
+      setChatLoading(true);
+      // setShowModal(false);
+
+      // Create chat room with therapist
+      const response = await chatWithTherapist(therapist.id);
+      const roomId =
+        response.data?.room_id || response.room_id || response.data?.id;
+
+      if (!roomId) {
+        throw new Error("Failed to get room ID from response");
+      }
+
+      console.log(`✅ Chat room created: ${roomId}`);
+
+      showToast("Chat room created successfully", { type: "success" });
+
+      // Navigate to chat room
+      router.push(`/chat-room/${roomId}`);
+    } catch (error) {
+      console.error("Failed to create chat room:", error);
+      showToast("Failed to start chat. Please try again.", { type: "error" });
+      setShowModal(true); // Reopen modal on error
+    } finally {
+      setChatLoading(false);
+      setShowModal(false);
+    }
   };
 
   return (
@@ -427,11 +463,19 @@ export default function TherapistsPage() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-                      <button className="flex-1 px-4 py-3 bg-green text-white rounded-lg hover:bg-green/80 transition-colors font-medium">
+                      <button className="flex-1 lg:w-fit px-4 py-3 bg-green text-white rounded-lg hover:bg-green/80 transition-colors font-medium">
                         Book Session
                       </button>
-                      <button className="px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <MessageCircle className="w-5 h-5" />
+                      <button
+                        className="px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed z-10 relative"
+                        onClick={() => handleChatClick(selectedTherapist)}
+                        disabled={chatLoading}
+                      >
+                        {chatLoading ? (
+                          <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                        ) : (
+                          <MessageCircle className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                   </div>

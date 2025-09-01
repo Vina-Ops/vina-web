@@ -205,3 +205,33 @@ export const getMyTherapySessions = async (): Promise<any[]> => {
     throw error;
   }
 };
+
+// Delete chat with AI
+export const deleteChatWithAI = async (): Promise<any> => {
+  try {
+    const response = await apiClient.delete(`/chat-messages/my-conversations`);
+
+    if (response.status === 401) {
+      window.location.href = "/auth/login";
+      throw new Error(response?.data?.detail || "An error occurred");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting chat with AI:", error);
+    throw error;
+  }
+};
+
+// Video call service functions
+export const chatWithTherapist = async (therapistId: string): Promise<any> => {
+  try {
+    const response = await apiClient.post(
+      `/therapy-chat-rooms/create-by-client/${therapistId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error starting chat with therapist:", error);
+    throw error;
+  }
+};

@@ -13,7 +13,7 @@ import { useTopToast } from "@/components/ui/toast";
 const CODE_LENGTH = 6;
 
 const VerifyCodePage = () => {
-  const email = useSearchParams().get("email");
+  const email = useSearchParams()?.get("email") || "";
   const [code, setCode] = useState(Array(CODE_LENGTH).fill(""));
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState("");
