@@ -2,9 +2,9 @@
 export const peerConfig = {
   // Production: Use a public PeerJS server or your own hosted server
   production: {
-    host: "vina-ai.vercel.app", // Example public server
+    host: "vina-ai.vercel.app", 
     port: 443,
-    path: "/peerjs",
+    path: "/",
     secure: true,
   },
 
