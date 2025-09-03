@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"peerjs --port 9000\" \"next dev\"",
+"dev": "concurrently \"peerjs --port 9000 --path /\" \"next dev\"",
     "dev:no-pwa": "NEXT_PUBLIC_DISABLE_PWA=true next dev --turbopack",
     "build": "next build",
-    "start": "concurrently \"peerjs --port 9000\" \"next start\"",
+"start": "concurrently \"peerjs --port 9000 --path /\" \"next dev\"",
     "lint": "next lint",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

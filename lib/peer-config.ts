@@ -20,7 +20,7 @@ export const peerConfig = {
   alternative: {
     host: "peerjs-server.herokuapp.com",
     port: 443,
-    path: "/peerjs",
+    path: "/",
     secure: true,
   },
 
@@ -28,7 +28,7 @@ export const peerConfig = {
   custom: {
     host: process.env.NEXT_PUBLIC_PEER_HOST || "peerjs-server.herokuapp.com",
     port: parseInt(process.env.NEXT_PUBLIC_PEER_PORT || "443"),
-    path: process.env.NEXT_PUBLIC_PEER_PATH || "/peerjs",
+    path: process.env.NEXT_PUBLIC_PEER_PATH || "/",
     secure: process.env.NEXT_PUBLIC_PEER_PORT !== "9000", // Default to secure for public servers
   },
 
