@@ -165,7 +165,7 @@ const RegisterPage = () => {
         });
 
         // console.log(response);
-        setUser(response);
+        setUser(response as any);
 
         const otpPayload = {
           email: email,

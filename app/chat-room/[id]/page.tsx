@@ -22,8 +22,7 @@ import {
 } from "lucide-react";
 import VideoCall from "@/components/chat/VideoCall";
 import IncomingCall from "@/components/chat/IncomingCall";
-import { useChatVideoCall } from "@/hooks/useChatVideoCall";
-import { CallParticipant } from "@/services/video-call-service";
+import { usePeerVideoCall, CallParticipant } from "@/hooks/usePeerVideoCall";
 import { useUser } from "@/context/user-context";
 import { fetchToken } from "@/helpers/get-token";
 import {
@@ -41,6 +40,7 @@ interface Message {
   timestamp: string;
   type: "text" | "image" | "file" | "audio";
   isRead: boolean;
+  status?: "sending" | "sent" | "delivered" | "failed";
 }
 
 interface ChatParticipant {
@@ -72,6 +72,9 @@ export default function ChatSessionPage() {
   const [error, setError] = useState<string | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
+  const [pendingMessages, setPendingMessages] = useState<Set<string>>(
+    new Set()
+  );
 
   const chatId = params?.id as string;
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -79,10 +82,12 @@ export default function ChatSessionPage() {
   // Video call integration with complete flow
   const {
     callState,
+    localStream,
     remoteStreams,
     incomingCall,
     currentRoomId,
     isConnecting,
+    networkStats,
     startCall,
     acceptCall,
     rejectCall,
@@ -90,12 +95,13 @@ export default function ChatSessionPage() {
     toggleMute,
     toggleVideo,
     toggleScreenShare,
+    startRecording,
+    stopRecording,
     createChatRoom,
     connectToExistingRoom,
-  } = useChatVideoCall({
+  } = usePeerVideoCall({
     currentUserId: (user as any)?.id || "", // Type assertion for user ID
     roomId: chatId, // Use the chat room ID from URL
-    token: tokens || undefined, // Add token for authentication
   });
 
   // Update navigation items to reflect current path
@@ -126,13 +132,7 @@ export default function ChatSessionPage() {
         setLoading(true);
         setError(null);
 
-        // First, get the therapy sessions to find the therapist ID for this chat room
-        console.log(
-          "Fetching therapy sessions to find therapist for room:",
-          chatId
-        );
         const sessions = await getMyTherapySessions();
-        console.log("All therapy sessions:", sessions);
 
         // Find the session that matches our chat room ID
         const currentSession = sessions.find(
@@ -143,13 +143,10 @@ export default function ChatSessionPage() {
           throw new Error("Chat room not found in therapy sessions");
         }
 
-        console.log("Found current session:", currentSession);
         const therapistId = currentSession.therapist.id;
-        console.log("Therapist ID from session:", therapistId);
 
         // Now fetch the therapist details using the correct therapist ID
         const therapistData = await getTherapistByUuid(therapistId);
-        console.log("Therapist data received:", therapistData);
 
         if (!therapistData || !therapistData.id) {
           throw new Error("Invalid therapist data received");
@@ -188,7 +185,6 @@ export default function ChatSessionPage() {
           lastSeen: "2 minutes ago",
         };
 
-        console.log("Processed therapist info:", therapistInfo);
         setTherapist(therapistInfo);
       } catch (err) {
         console.error("Failed to fetch therapist info:", err);
@@ -214,9 +210,7 @@ export default function ChatSessionPage() {
     // Set up WebSocket connection for chat messages
     const baseUrl =
       process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
-    const wsUrl = `${baseUrl}/safe-space/${chatId}?userId=${
-      (user as any)?.id
-    }&roomId=${chatId}&token=${tokens}`;
+    const wsUrl = `${baseUrl}/safe-space/${chatId}?token=${tokens}`;
 
     console.log("Creating chat room WebSocket connection to:", wsUrl);
     const ws = new WebSocket(wsUrl);
@@ -226,42 +220,84 @@ export default function ChatSessionPage() {
       setWsConnection(ws);
       setWsConnected(true);
       // Send join room message
-      ws.send(
-        JSON.stringify({
-          type: "join-room",
-          data: { roomId: chatId },
-        })
-      );
+      // ws.send(
+      //   JSON.stringify({
+      //     type: "join-room",
+      //     data: { roomId: chatId },
+      //   })
+      // );
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        console.log("WebSocket received message:", data);
 
         // New unified format: { sender: "uuid", timestamp: time, content: "abc" }
         if (
           typeof data === "object" &&
           data !== null &&
           "content" in data &&
-          ("sender" in data || "timestamp" in data)
+          "sender" in data &&
+          "timestamp" in data
         ) {
-          const incoming: Message = {
-            id: data.id || Date.now().toString(),
-            content: data.content,
-            sender: data.sender === (user as any)?.id ? "user" : "therapist",
-            timestamp:
-              data.timestamp ||
-              new Date().toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-            type: "text",
-            isRead: data.sender === (user as any)?.id,
-          };
-          setMessages((prev) => [...prev, incoming]);
+          // Determine if the message is from the current user or the therapist
+          const isFromCurrentUser = data.sender === (user as any)?.id;
+          const messageSender = isFromCurrentUser ? "user" : "therapist";
 
-          // Play notification sound for incoming messages
-          if (data.sender !== (user as any)?.id && settings.soundEnabled) {
+          // Check if this message is already in our state (to prevent duplicates)
+          const isDuplicate = messages.some(
+            (msg) =>
+              msg.content === data.content &&
+              Math.abs(
+                new Date(msg.timestamp).getTime() -
+                  new Date(data.timestamp).getTime()
+              ) < 1000 // Within 1 second
+          );
+
+          if (!isDuplicate) {
+            const incoming: Message = {
+              id: data.id || Date.now().toString(),
+              content: data.content,
+              sender: messageSender,
+              timestamp:
+                data.timestamp ||
+                new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+              type: "text",
+              isRead: isFromCurrentUser,
+            };
+            setMessages((prev) => [...prev, incoming]);
+          }
+
+          // If this is a confirmation of our own message, mark it as delivered
+          if (isFromCurrentUser) {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.content === data.content && msg.status === "sending"
+                  ? { ...msg, status: "delivered" as const }
+                  : msg
+              )
+            );
+            // Remove from pending messages
+            setPendingMessages((prev) => {
+              const newSet = new Set(prev);
+              messages.forEach((msg) => {
+                if (
+                  msg.content === data.content &&
+                  msg.status === "delivered"
+                ) {
+                  newSet.delete(msg.id);
+                }
+              });
+              return newSet;
+            });
+          }
+
+          // Play notification sound for incoming messages (from therapist)
+          if (!isFromCurrentUser && settings.soundEnabled) {
             notificationSound.play(settings.volume);
           }
 
@@ -339,14 +375,51 @@ export default function ChatSessionPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleRetryMessage = (message: Message) => {
+    if (!wsConnection || wsConnection.readyState !== WebSocket.OPEN) {
+      setError("Connection lost. Please refresh the page.");
+      return;
+    }
+
+    // Update message status back to sending
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === message.id ? { ...msg, status: "sending" as const } : msg
+      )
+    );
+    setPendingMessages((prev) => new Set(prev).add(message.id));
+
+    // Resend the message
+    const payload = { content: message.content };
+    wsConnection.send(JSON.stringify(payload));
+    console.log("Retrying message:", payload);
+
+    // Set timeout again
+    setTimeout(() => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === message.id && msg.status === "sending"
+            ? { ...msg, status: "failed" as const }
+            : msg
+        )
+      );
+      setPendingMessages((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(message.id);
+        return newSet;
+      });
+    }, 10000);
+  };
+
   const handleSendMessage = () => {
     if (
       newMessage.trim() &&
       wsConnection &&
       wsConnection.readyState === WebSocket.OPEN
     ) {
+      const messageId = Date.now().toString();
       const message: Message = {
-        id: Date.now().toString(),
+        id: messageId,
         content: newMessage,
         sender: "user",
         timestamp: new Date().toLocaleTimeString([], {
@@ -355,15 +428,34 @@ export default function ChatSessionPage() {
         }),
         type: "text",
         isRead: false,
+        status: "sending",
       };
 
       // Add message to local state immediately
       setMessages((prev) => [...prev, message]);
+      setPendingMessages((prev) => new Set(prev).add(messageId));
 
-      // Send message via WebSocket in new format: { content: "abc" }
+      // Send message via WebSocket in unified format: { content: "message" }
       const payload = { content: newMessage };
       wsConnection.send(JSON.stringify(payload));
       console.log("Sent message via WebSocket:", payload);
+      console.log("Current user ID:", (user as any)?.id);
+
+      // Set timeout to mark message as failed if no confirmation received
+      setTimeout(() => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === messageId && msg.status === "sending"
+              ? { ...msg, status: "failed" as const }
+              : msg
+          )
+        );
+        setPendingMessages((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(messageId);
+          return newSet;
+        });
+      }, 10000); // 10 seconds timeout
 
       setNewMessage("");
     } else if (!wsConnection) {
@@ -562,6 +654,32 @@ export default function ChatSessionPage() {
               </div>
             </div>
 
+            {/* Connection Status */}
+            <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Connection Status:
+                </span>
+                <span
+                  className={`flex items-center ${
+                    wsConnected ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full mr-2 ${
+                      wsConnected ? "bg-green-600" : "bg-red-600"
+                    }`}
+                  ></span>
+                  {wsConnected ? "Connected" : "Disconnected"}
+                </span>
+                {pendingMessages.size > 0 && (
+                  <span className="text-orange-600 text-xs">
+                    {pendingMessages.size} pending
+                  </span>
+                )}
+              </div>
+            </div>
+
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 ? (
@@ -595,7 +713,29 @@ export default function ChatSessionPage() {
                             : "text-gray-500 dark:text-gray-400"
                         }`}
                       >
-                        {message.timestamp}
+                        {new Date(message.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                        {message.sender === "user" && message.status && (
+                          <span className="ml-2 text-xs">
+                            {message.status === "sending" && "⏳"}
+                            {message.status === "sent" && "✓"}
+                            {message.status === "delivered" && "✓✓"}
+                            {message.status === "failed" && (
+                              <span className="flex items-center">
+                                ❌
+                                <button
+                                  onClick={() => handleRetryMessage(message)}
+                                  className="ml-1 text-blue-500 hover:text-blue-700"
+                                  title="Retry message"
+                                >
+                                  🔄
+                                </button>
+                              </span>
+                            )}
+                          </span>
+                        )}
                         {message.sender === "user" && (
                           <span className="ml-2">
                             {message.isRead ? "✓✓" : "✓"}
@@ -747,15 +887,42 @@ export default function ChatSessionPage() {
           onClose={handleCloseVideoCall}
           participants={[
             {
+              id: user?.id || "",
+              name: user?.name || "User",
+              avatar: user?.avatar || "/default-avatar.png",
+              isTherapist: false,
+              isMuted: callState.isMuted,
+              isVideoEnabled: callState.isVideoEnabled,
+            },
+            {
               id: therapist.id,
               name: therapist.name,
-              avatar: therapist.avatar,
-              isTherapist: therapist.isTherapist,
+              avatar: therapist.avatar || "/default-avatar.png",
+              isTherapist: true,
               isMuted: false,
               isVideoEnabled: true,
             },
           ]}
-          currentUserId="current-user-id"
+          currentUserId={user?.id || ""}
+          localStream={localStream}
+          remoteStreams={remoteStreams}
+          onToggleMute={toggleMute}
+          onToggleVideo={toggleVideo}
+          onToggleScreenShare={toggleScreenShare}
+          onStartRecording={startRecording}
+          onStopRecording={stopRecording}
+          isMuted={callState.isMuted}
+          isVideoEnabled={callState.isVideoEnabled}
+          isScreenSharing={callState.isScreenSharing}
+          isRecording={callState.isRecording}
+          callDuration={callState.callDuration}
+          recordingDuration={callState.recordingDuration}
+          networkStats={networkStats}
+          // Ringing overlay props
+          isCallOutgoing={callState.isCallOutgoing}
+          isCallIncoming={callState.isCallIncoming}
+          onAccept={handleAcceptCall}
+          onReject={handleRejectCall}
         />
       )}
 

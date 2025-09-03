@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Video, Phone, PhoneOff } from "lucide-react";
 import VideoCall from "./VideoCall";
 import IncomingCall from "./IncomingCall";
-import { CallParticipant } from "@/services/video-call-service";
+import { CallParticipant } from "@/hooks/usePeerVideoCall";
 
 export default function VideoCallDemo() {
   const [showVideoCall, setShowVideoCall] = useState(false);
@@ -138,6 +138,31 @@ export default function VideoCallDemo() {
         onClose={handleCloseVideoCall}
         participants={mockParticipants}
         currentUserId="demo-user-id"
+        localStream={null}
+        remoteStreams={new Map()}
+        onToggleMute={() => {}}
+        onToggleVideo={() => {}}
+        onToggleScreenShare={() => {}}
+        onStartRecording={() => {}}
+        onStopRecording={() => {}}
+        isMuted={false}
+        isVideoEnabled={true}
+        isScreenSharing={false}
+        isRecording={false}
+        callDuration={0}
+        recordingDuration={0}
+        networkStats={{
+          bitrate: 0,
+          packetLoss: 0,
+          latency: 0,
+          resolution: "0x0",
+          frameRate: 0,
+        }}
+        // Ringing overlay props
+        isCallOutgoing={false}
+        isCallIncoming={false}
+        onAccept={() => {}}
+        onReject={() => {}}
       />
 
       {/* Incoming Call Component */}
@@ -150,4 +175,3 @@ export default function VideoCallDemo() {
     </div>
   );
 }
-

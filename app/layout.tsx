@@ -11,12 +11,18 @@ import { NotificationProvider } from "@/context/notification-context";
 export const metadata: Metadata = {
   title: "Vina - Mental Wellness Companion",
   description: "Your AI companion for mental wellness and emotional support",
-  manifest: "/site.webmanifest",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Vina",
-  },
+  // Only include PWA metadata in production or when PWA is enabled
+  ...(process.env.NODE_ENV === "production" ||
+  process.env.NEXT_PUBLIC_DISABLE_PWA !== "true"
+    ? {
+        manifest: "/site.webmanifest",
+        appleWebApp: {
+          capable: true,
+          statusBarStyle: "default",
+          title: "Vina",
+        },
+      }
+    : {}),
   formatDetection: {
     telephone: false,
   },

@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useChatVideoCall } from "@/hooks/useChatVideoCall";
+import { usePeerVideoCall } from "@/hooks/usePeerVideoCall";
 import { getTherapists, chatWithTherapist } from "@/services/general-service";
 import VideoCall from "@/components/chat/VideoCall";
 import IncomingCall from "@/components/chat/IncomingCall";
-import { CallParticipant } from "@/services/video-call-service";
+import { CallParticipant } from "@/hooks/usePeerVideoCall";
 
 // Complete flow: Find Therapist → Create Chat → Connect WS → Video Call
 export default function CompleteTherapistFlow() {
@@ -32,7 +32,7 @@ export default function CompleteTherapistFlow() {
     toggleScreenShare,
     createChatRoom,
     connectToExistingRoom,
-  } = useChatVideoCall({
+  } = usePeerVideoCall({
     currentUserId,
     therapistId: selectedTherapist?.id,
     roomId: roomId || undefined,
@@ -346,6 +346,31 @@ export default function CompleteTherapistFlow() {
             : []
         }
         currentUserId={currentUserId}
+        localStream={null}
+        remoteStreams={new Map()}
+        onToggleMute={() => {}}
+        onToggleVideo={() => {}}
+        onToggleScreenShare={() => {}}
+        onStartRecording={() => {}}
+        onStopRecording={() => {}}
+        isMuted={false}
+        isVideoEnabled={true}
+        isScreenSharing={false}
+        isRecording={false}
+        callDuration={0}
+        recordingDuration={0}
+        networkStats={{
+          bitrate: 0,
+          packetLoss: 0,
+          latency: 0,
+          resolution: "0x0",
+          frameRate: 0,
+        }}
+        // Ringing overlay props
+        isCallOutgoing={false}
+        isCallIncoming={false}
+        onAccept={() => {}}
+        onReject={() => {}}
       />
 
       {/* Incoming Call Component */}
@@ -358,5 +383,3 @@ export default function CompleteTherapistFlow() {
     </div>
   );
 }
-
-

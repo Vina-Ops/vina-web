@@ -5,9 +5,18 @@ import { getUserProfile } from "@/services/auth-service";
 import React from "react";
 import { createContext } from "react";
 
-type UserProfile = ReturnType<typeof getUserProfile> extends Promise<infer T>
-  ? T
-  : unknown;
+// Define a proper User interface instead of complex type inference
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  [key: string]: any; // Allow additional properties
+}
 
 const UserContext = createContext<{
   user: UserProfile | null;
@@ -27,7 +36,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   React.useEffect(() => {
     // console.log("UserContext: data received", data);
     if (data) {
-      setUser(data);
+      setUser(data as UserProfile);
     }
   }, [data]);
 
@@ -69,7 +78,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           // console.log("UserContext: executing getUserProfile");
           const data = await execute();
           // console.log("UserContext: data received", data);
-          setUser(data);
+          setUser(data as UserProfile);
         } else {
           // Mark as attempted to prevent future attempts on auth pages or landing page
           hasAttemptedFetch.current = true;

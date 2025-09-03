@@ -21,9 +21,11 @@ import {
 } from "@/components/navigation/FixedNavbar";
 import { usePathname } from "next/navigation";
 import { useNotification } from "@/context/notification-context";
+import { useTopToast } from "@/components/ui/toast";
 
 // DeleteChatsModal Component
 const DeleteChatsModal: React.FC = () => {
+  const { showToast } = useTopToast();
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -33,9 +35,16 @@ const DeleteChatsModal: React.FC = () => {
       const { deleteChatWithAI } = await import("@/services/general-service");
       await deleteChatWithAI();
       setShowModal(false);
-      alert("All your chats with Vina have been deleted.");
+      showToast("All your chats with Vina have been deleted.", {
+        type: "success",
+      });
     } catch (error) {
-      alert("Failed to delete chats. Please try again or contact support.");
+      showToast(
+        "Failed to delete chats. Please try again or contact support.",
+        {
+          type: "error",
+        }
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -104,7 +113,12 @@ interface SettingItem {
 }
 
 export default function SettingsPage() {
-  const { settings: notificationSettings, toggleSound, toggleIncomingCallSound, setVolume } = useNotification();
+  const {
+    settings: notificationSettings,
+    toggleSound,
+    toggleIncomingCallSound,
+    setVolume,
+  } = useNotification();
   const [settings, setSettings] = useState({
     notifications: true,
     emailUpdates: true,
@@ -328,7 +342,9 @@ export default function SettingsPage() {
                 }}
                 className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                 style={{
-                  background: `linear-gradient(to right, #013F25 0%, #013F25 ${(item.value as number) * 100}%, #e5e7eb ${(item.value as number) * 100}%, #e5e7eb 100%)`
+                  background: `linear-gradient(to right, #013F25 0%, #013F25 ${
+                    (item.value as number) * 100
+                  }%, #e5e7eb ${(item.value as number) * 100}%, #e5e7eb 100%)`,
                 }}
               />
               <span className="text-sm text-gray-600 dark:text-gray-400 w-8 text-center">

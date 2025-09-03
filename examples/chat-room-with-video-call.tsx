@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useChatVideoCall } from "@/hooks/useChatVideoCall";
+import { usePeerVideoCall } from "@/hooks/usePeerVideoCall";
 import VideoCall from "@/components/chat/VideoCall";
 import IncomingCall from "@/components/chat/IncomingCall";
-import { CallParticipant } from "@/services/video-call-service";
+import { CallParticipant } from "@/hooks/usePeerVideoCall";
 
 // Example of how to integrate video calls with your chat room system
 export default function ChatRoomWithVideoCall() {
@@ -18,6 +18,7 @@ export default function ChatRoomWithVideoCall() {
   // Use the integrated video call hook
   const {
     callState,
+    localStream,
     remoteStreams,
     incomingCall,
     currentRoomId,
@@ -29,11 +30,12 @@ export default function ChatRoomWithVideoCall() {
     toggleMute,
     toggleVideo,
     toggleScreenShare,
+    startRecording,
+    stopRecording,
     createChatRoom,
     connectToExistingRoom,
-  } = useChatVideoCall({
+  } = usePeerVideoCall({
     currentUserId,
-    therapistId,
     roomId: roomId || undefined,
   });
 
@@ -234,6 +236,31 @@ export default function ChatRoomWithVideoCall() {
           },
         ]}
         currentUserId={currentUserId}
+        localStream={localStream}
+        remoteStreams={remoteStreams}
+        onToggleMute={toggleMute}
+        onToggleVideo={toggleVideo}
+        onToggleScreenShare={toggleScreenShare}
+        onStartRecording={startRecording}
+        onStopRecording={stopRecording}
+        isMuted={callState.isMuted}
+        isVideoEnabled={callState.isVideoEnabled}
+        isScreenSharing={callState.isScreenSharing}
+        isRecording={callState.isRecording}
+        callDuration={callState.callDuration}
+        recordingDuration={callState.recordingDuration}
+        networkStats={{
+          bitrate: 0,
+          packetLoss: 0,
+          latency: 0,
+          resolution: "0x0",
+          frameRate: 0,
+        }}
+        // Ringing overlay props
+        isCallOutgoing={callState.isCallOutgoing}
+        isCallIncoming={callState.isCallIncoming}
+        onAccept={handleAcceptCall}
+        onReject={handleRejectCall}
       />
 
       {/* Incoming Call Component */}

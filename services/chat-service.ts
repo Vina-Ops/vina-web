@@ -189,7 +189,7 @@ export class ChatWebSocketService {
   private handleIncomingMessage(data: any): void {
     // console.log("WebSocket received data:", data);
     try {
-      // Handle Vina response format: { "vina": "response content" }
+      // Handle Vina response format: { "vina": "response content" } - Priority for AI chat
       if (data.vina && typeof data.vina === "string") {
         if (this.onMessageHandler) {
           // console.log("📨 Vina response received:", data.vina);
@@ -225,6 +225,28 @@ export class ChatWebSocketService {
             content: cleanedContent,
             sender: "ai",
             timestamp: timestamp,
+          };
+          this.onMessageHandler(message);
+        }
+        return;
+      }
+
+      // Handle new unified format: { "content": "message", "sender": "uuid", "timestamp": "time" }
+      // This is mainly for therapist-patient chat, lower priority for AI chat
+      if (
+        data.content &&
+        typeof data.content === "string" &&
+        data.sender &&
+        data.timestamp
+      ) {
+        if (this.onMessageHandler) {
+          // console.log("📨 Unified format message received:", data);
+
+          const message: Message = {
+            id: this.generateUniqueId(),
+            content: data.content,
+            sender: "ai", // Treat as AI response in the main chat
+            timestamp: new Date(data.timestamp),
           };
           this.onMessageHandler(message);
         }
@@ -323,8 +345,8 @@ export class ChatWebSocketService {
     }
 
     try {
-      // Format message as { "human": "message content" }
-      const message: HumanMessage = {
+      // Use AI chat format: { "human": "message content" }
+      const message = {
         human: content,
       };
 

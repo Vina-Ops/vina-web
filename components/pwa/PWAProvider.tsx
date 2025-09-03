@@ -10,6 +10,11 @@ interface PWAProviderProps {
 }
 
 export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
+  // Check if PWA should be disabled
+  const isPWADisabled =
+    process.env.NODE_ENV === "development" &&
+    process.env.NEXT_PUBLIC_DISABLE_PWA === "true";
+
   const {
     isOnline,
     requestNotificationPermission,
@@ -18,6 +23,8 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
 
   // Request notification permission on first visit
   useEffect(() => {
+    if (isPWADisabled) return;
+
     const requestNotifications = async () => {
       const hasPermission = await requestNotificationPermission();
       if (hasPermission) {
@@ -33,14 +40,26 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
       requestNotifications();
       localStorage.setItem("notification-permission-requested", "true");
     }
-  }, [requestNotificationPermission, subscribeToPushNotifications]);
+  }, [
+    requestNotificationPermission,
+    subscribeToPushNotifications,
+    isPWADisabled,
+  ]);
 
   // Show offline indicator
   useEffect(() => {
+    if (isPWADisabled) return;
+
     if (!isOnline) {
       console.log("App is offline");
     }
-  }, [isOnline]);
+  }, [isOnline, isPWADisabled]);
+
+  // If PWA is disabled, just render children
+  if (isPWADisabled) {
+    console.log("🚫 PWA disabled for development");
+    return <>{children}</>;
+  }
 
   return (
     <>

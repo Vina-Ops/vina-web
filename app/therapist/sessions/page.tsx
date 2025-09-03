@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useEffect, Suspense } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  Suspense,
+  useCallback,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
@@ -26,8 +32,7 @@ import { ChatMessages } from "@/components/chat/ChatMessages";
 import { Message } from "@/types/chat";
 import VideoCall from "@/components/chat/VideoCall";
 import IncomingCall from "@/components/chat/IncomingCall";
-import { useChatVideoCall } from "@/hooks/useChatVideoCall";
-import { CallParticipant } from "@/services/video-call-service";
+import { usePeerVideoCall, CallParticipant } from "@/hooks/usePeerVideoCall";
 import { useUser } from "@/context/user-context";
 import { fetchToken } from "@/helpers/get-token";
 import { getMyTherapySessions } from "@/services/general-service";
@@ -102,7 +107,21 @@ function TherapistSessionsContent() {
   const [isTyping, setIsTyping] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
   const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
+  const [wsConnecting, setWsConnecting] = useState(false);
+  const [wsError, setWsError] = useState<string | null>(null);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
+
+  // Demo state for testing video call UI
+  const [demoCallActive, setDemoCallActive] = useState(false);
+
+  // WebSocket retry mechanism
+  const [wsRetryCount, setWsRetryCount] = useState(0);
+  const [wsRetryTimeout, setWsRetryTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
+
+  // Message queue for offline messages
+  const [messageQueue, setMessageQueue] = useState<Message[]>([]);
 
   // URL state management utility
   // Usage: updateUrlParams({ chat: sessionId }) to open chat
@@ -126,9 +145,11 @@ function TherapistSessionsContent() {
   const {
     callState,
     remoteStreams,
+    localStream,
     incomingCall,
     currentRoomId,
     isConnecting,
+    networkStats,
     startCall,
     acceptCall,
     rejectCall,
@@ -136,19 +157,25 @@ function TherapistSessionsContent() {
     toggleMute,
     toggleVideo,
     toggleScreenShare,
+    startRecording,
+    stopRecording,
+    getCurrentPeerId,
     createChatRoom,
     connectToExistingRoom,
-  } = useChatVideoCall({
+  } = usePeerVideoCall({
     currentUserId: (user as any)?.id || "",
     roomId: currentChatSession?.id || "",
-    token: tokens || undefined,
   });
 
   // Fetch token on component mount
   useEffect(() => {
     const getToken = async () => {
       try {
+        console.log("Fetching token...");
         const token = await fetchToken();
+        console.log("Token received:", token);
+        console.log("Token type:", typeof token);
+        console.log("Token length:", token?.length);
         setTokens(token);
       } catch (error) {
         console.error("Failed to fetch token:", error);
@@ -157,38 +184,136 @@ function TherapistSessionsContent() {
     getToken();
   }, []);
 
+  // Cleanup retry timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (wsRetryTimeout) {
+        clearTimeout(wsRetryTimeout);
+      }
+    };
+  }, [wsRetryTimeout]);
+
+  // Debug user context
+  useEffect(() => {
+    console.log("🔍 User Context Debug:", {
+      user: user,
+      userId: (user as any)?.id,
+      userRole: (user as any)?.role,
+      hasUser: !!user,
+    });
+  }, [user]);
+
+  // Debug chat session state
+  useEffect(() => {
+    console.log("🔍 Chat Session Debug:", {
+      currentChatSession,
+      showChat,
+      hasSession: !!currentChatSession,
+      sessionId: currentChatSession?.id,
+    });
+  }, [currentChatSession, showChat]);
+
+  // Debug video call state
+  useEffect(() => {
+    console.log("🔍 Video Call Debug:", {
+      callState,
+      demoCallActive,
+      remoteStreams: remoteStreams.size,
+      isInCall: callState.isInCall,
+      isCallActive: callState.isCallActive,
+    });
+  }, [callState, demoCallActive, remoteStreams]);
+
+  // WebSocket retry function
+  const retryWebSocketConnection = useCallback(() => {
+    if (wsRetryTimeout) {
+      clearTimeout(wsRetryTimeout);
+    }
+
+    setWsRetryCount((prev) => prev + 1);
+    setWsError(null);
+
+    // Retry after 2 seconds
+    const timeout = setTimeout(() => {
+      console.log("🔄 Retrying WebSocket connection...");
+      // Force re-run of the WebSocket useEffect
+      setWsRetryCount((prev) => prev);
+    }, 2000);
+
+    setWsRetryTimeout(timeout);
+  }, [wsRetryTimeout]);
+
   // Connect to therapist chat WS for selected room using unified payloads
   useEffect(() => {
-    if (!tokens || !currentChatSession || !user || !showChat) return;
+    if (!tokens || !currentChatSession || !user || !showChat) {
+      console.log("Missing required data for WebSocket:", {
+        hasToken: !!tokens,
+        hasSession: !!currentChatSession,
+        hasUser: !!user,
+        showChat,
+      });
+      return;
+    }
 
     const roomId = currentChatSession.id;
     const baseUrl =
       process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
-    const wsUrl = `${baseUrl}/safe-space/${roomId}?userId=${
-      (user as any)?.id
-    }&roomId=${roomId}&token=${tokens}`;
+    const wsUrl = `${baseUrl}/safe-space/${roomId}?token=${tokens}`;
 
     console.log("Creating therapist chat WebSocket connection to:", wsUrl);
+    console.log("Token value:", tokens);
+    console.log("Room ID:", roomId);
+    console.log("Token type:", typeof tokens);
+    console.log("Token length:", tokens?.length);
+    console.log("Retry count:", wsRetryCount);
+
+    setWsConnecting(true);
+    setWsError(null);
+
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
+      console.log("✅ WebSocket connected successfully");
       setWsConnection(ws);
       setWsConnected(true);
+      setWsConnecting(false);
+      setWsError(null);
+
+      // Send any queued messages
+      if (messageQueue.length > 0) {
+        console.log(`📤 Sending ${messageQueue.length} queued messages...`);
+        messageQueue.forEach((queuedMessage) => {
+          try {
+            ws.send(JSON.stringify({ content: queuedMessage.content }));
+            console.log("✅ Queued message sent:", queuedMessage.content);
+          } catch (error) {
+            console.error("Failed to send queued message:", error);
+          }
+        });
+        // Clear the queue after sending
+        setMessageQueue([]);
+      }
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+
         if (
           data &&
           typeof data === "object" &&
           "content" in data &&
-          ("sender" in data || "timestamp" in data)
+          "sender" in data &&
+          "timestamp" in data
         ) {
+          // Determine if the message is from the current user (therapist) or the patient
+          const isFromCurrentUser = data.sender === (user as any)?.id;
+          const messageSender = isFromCurrentUser ? "user" : "ai";
+
           const incoming: Message = {
             id: data.id || `${Date.now()}`,
             content: data.content,
-            sender: data.sender === (user as any)?.id ? "user" : "ai",
+            sender: messageSender,
             timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
           };
           setMessages((prev) => [...prev, incoming]);
@@ -199,15 +324,61 @@ function TherapistSessionsContent() {
     };
 
     ws.onclose = (event) => {
-      console.log("Therapist chat WebSocket closed:", event.code, event.reason);
+      const closeCode = event.code;
+      const closeReason = event.reason || "No reason provided";
+
+      console.log("Therapist chat WebSocket closed:", closeCode, closeReason);
+
+      // Log specific close codes for debugging
+      switch (closeCode) {
+        case 1000:
+          console.log("✅ WebSocket closed normally");
+          break;
+        case 1001:
+          console.log("🔄 WebSocket going away");
+          break;
+        case 1002:
+          console.log("❌ WebSocket protocol error");
+          break;
+        case 1003:
+          console.log("❌ WebSocket unsupported data type");
+          break;
+        case 1005:
+          console.log("❌ WebSocket no status received");
+          break;
+        case 1006:
+          console.log("❌ WebSocket abnormal closure");
+          break;
+        case 1007:
+          console.log("❌ WebSocket invalid frame payload data");
+          break;
+        case 1008:
+          console.log("❌ WebSocket policy violation");
+          break;
+        case 1009:
+          console.log("❌ WebSocket message too big");
+          break;
+        case 1011:
+          console.log("❌ WebSocket server error");
+          break;
+        case 1015:
+          console.log("❌ WebSocket TLS handshake failed");
+          break;
+        default:
+          console.log(`❌ WebSocket closed with unknown code: ${closeCode}`);
+      }
+
       setWsConnected(false);
       setWsConnection(null);
+      setWsConnecting(false);
     };
 
     ws.onerror = (error) => {
       console.error("Therapist chat WebSocket error:", error);
       setWsConnected(false);
       setWsConnection(null);
+      setWsConnecting(false);
+      setWsError("Connection error occurred");
     };
 
     return () => {
@@ -222,7 +393,7 @@ function TherapistSessionsContent() {
       setWsConnection(null);
       setWsConnected(false);
     };
-  }, [tokens, currentChatSession, user, showChat]);
+  }, [tokens, currentChatSession, user, showChat, wsRetryCount]);
 
   // Play notification sound for new messages in therapist chat
   useEffect(() => {
@@ -230,7 +401,7 @@ function TherapistSessionsContent() {
       // Only play sound for incoming messages (not the first load)
       const newMessages = messages.slice(previousMessageCount);
       const hasIncomingMessages = newMessages.some(
-        (msg) => msg.sender === "ai"
+        (msg) => msg.sender === "ai" // "ai" represents messages from the patient
       );
 
       if (hasIncomingMessages && settings.soundEnabled) {
@@ -238,7 +409,7 @@ function TherapistSessionsContent() {
       }
     }
     setPreviousMessageCount(messages.length);
-  }, [messages, previousMessageCount]);
+  }, [messages, previousMessageCount, settings.soundEnabled, settings.volume]);
 
   // Fetch therapy sessions from API and map to local Session type
   useEffect(() => {
@@ -338,8 +509,79 @@ function TherapistSessionsContent() {
     if (!currentChatSession) return;
 
     try {
-      const roomId = await createChatRoom(currentChatSession.patientId);
-      console.log("Video call room created:", roomId);
+      console.log("Starting video call...");
+      console.log("Current call state before:", callState);
+
+      // Check if we're a therapist or patient
+      const isTherapist = (user as any)?.role === "therapist";
+      console.log("User role:", (user as any)?.role);
+
+      if (isTherapist) {
+        // Therapist initiating call to patient
+        console.log("Therapist initiating call to patient...");
+
+        // Create a participant object for the patient
+        const patientParticipant: CallParticipant = {
+          id: currentChatSession.patientId,
+          name: currentChatSession.patientName,
+          avatar: currentChatSession.patientAvatar,
+          isTherapist: false,
+          isMuted: false,
+          isVideoEnabled: true,
+        };
+
+        console.log("Patient participant:", patientParticipant);
+        console.log(
+          "🎯 Patient ID from session:",
+          currentChatSession.patientId
+        );
+        console.log("🎯 Current user ID (therapist):", (user as any)?.id);
+
+        // Try to start the call (this will fail if patient is not online)
+        const callStarted = await startCall([patientParticipant]);
+        console.log("startCall result:", callStarted);
+
+        if (callStarted) {
+          console.log(
+            "Video call started successfully for patient:",
+            currentChatSession.patientName
+          );
+          console.log("Call state after startCall:", callState);
+        } else {
+          console.log(
+            "Call failed to start - this is expected if patient is not online"
+          );
+          console.log(
+            "For demo purposes, you can manually trigger the call UI"
+          );
+        }
+      } else {
+        // Patient initiating call to therapist
+        console.log("Patient initiating call to therapist...");
+
+        // Create a participant object for the therapist
+        const therapistParticipant: CallParticipant = {
+          id: currentChatSession.patientId, // This should be therapist ID in real implementation
+          name: "Therapist", // This should be therapist name in real implementation
+          avatar: "", // This should be therapist avatar in real implementation
+          isTherapist: true,
+          isMuted: false,
+          isVideoEnabled: true,
+        };
+
+        console.log("Therapist participant:", therapistParticipant);
+
+        // Try to start the call
+        const callStarted = await startCall([therapistParticipant]);
+        console.log("startCall result:", callStarted);
+
+        if (callStarted) {
+          console.log("Video call started successfully for therapist");
+          console.log("Call state after startCall:", callState);
+        } else {
+          console.log("Call failed to start - therapist may not be online");
+        }
+      }
     } catch (error) {
       console.error("Failed to start video call:", error);
     }
@@ -350,19 +592,33 @@ function TherapistSessionsContent() {
     const content = chatMessage.trim();
     if (!content) return;
 
-    // optimistic UI
+    // Create message object
     const outgoing: Message = {
       id: `${Date.now()}`,
       content,
       sender: "user",
       timestamp: new Date(),
     };
+
+    // Add to messages immediately (optimistic UI)
     setMessages((prev) => [...prev, outgoing]);
 
-    // send unified format
+    // Try to send via WebSocket if connected
     if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-      wsConnection.send(JSON.stringify({ content }));
+      try {
+        wsConnection.send(JSON.stringify({ content }));
+        console.log("✅ Message sent via WebSocket");
+      } catch (error) {
+        console.error("Failed to send message via WebSocket:", error);
+        // Add to queue if sending fails
+        setMessageQueue((prev) => [...prev, outgoing]);
+      }
+    } else {
+      // WebSocket not connected, add to queue
+      console.log("📝 WebSocket not connected, adding message to queue");
+      setMessageQueue((prev) => [...prev, outgoing]);
     }
+
     setChatMessage("");
   };
 
@@ -745,10 +1001,39 @@ function TherapistSessionsContent() {
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                       {currentChatSession.patientName}
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Session: {formatDate(currentChatSession.date)} at{" "}
-                      {formatTime(currentChatSession.time)}
-                    </p>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Session: {formatDate(currentChatSession.date)} at{" "}
+                        {formatTime(currentChatSession.time)}
+                      </p>
+                      {/* Connection Status Indicator */}
+                      <div className="flex items-center space-x-1">
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            wsConnected
+                              ? "bg-green-500 animate-pulse"
+                              : wsConnecting
+                              ? "bg-yellow-500 animate-pulse"
+                              : "bg-red-500"
+                          }`}
+                        />
+                        <span
+                          className={`text-xs ${
+                            wsConnected
+                              ? "text-green-600 dark:text-green-400"
+                              : wsConnecting
+                              ? "text-yellow-600 dark:text-yellow-400"
+                              : "text-red-600 dark:text-red-400"
+                          }`}
+                        >
+                          {wsConnected
+                            ? "Connected"
+                            : wsConnecting
+                            ? "Connecting..."
+                            : "Disconnected"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -759,6 +1044,81 @@ function TherapistSessionsContent() {
                   >
                     <Video className="h-5 w-5" />
                   </button>
+                  {/* Demo button to test video call UI */}
+                  <button
+                    onClick={() => {
+                      console.log("Demo: Manually triggering video call UI");
+                      setDemoCallActive(!demoCallActive);
+                      console.log("Demo call active:", !demoCallActive);
+                    }}
+                    className={`p-2 rounded-md ${
+                      demoCallActive
+                        ? "bg-red-600 text-white hover:bg-red-700"
+                        : "bg-blue-600 text-white hover:bg-blue-700"
+                    }`}
+                    title={
+                      demoCallActive ? "Stop Demo Call" : "Start Demo Call"
+                    }
+                  >
+                    {demoCallActive ? (
+                      <X className="h-5 w-5" />
+                    ) : (
+                      <Play className="h-5 w-5" />
+                    )}
+                  </button>
+
+                  {/* Test local stream button */}
+                  <button
+                    onClick={async () => {
+                      try {
+                        console.log("Testing local stream acquisition...");
+                        const stream =
+                          await navigator.mediaDevices.getUserMedia({
+                            video: true,
+                            audio: true,
+                          });
+                        console.log("✅ Local stream acquired:", stream);
+                        console.log(
+                          "Video tracks:",
+                          stream.getVideoTracks().length
+                        );
+                        console.log(
+                          "Audio tracks:",
+                          stream.getAudioTracks().length
+                        );
+                      } catch (error) {
+                        console.error("❌ Failed to get local stream:", error);
+                      }
+                    }}
+                    className="p-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                    title="Test Local Stream"
+                  >
+                    📹
+                  </button>
+
+                  {/* Test peer connection button */}
+                  <button
+                    onClick={() => {
+                      console.log("🎯 Testing peer connection...");
+                      console.log("🎯 Current user ID:", (user as any)?.id);
+                      console.log("🎯 Current PeerJS ID:", getCurrentPeerId());
+                      console.log(
+                        "🎯 Patient ID from session:",
+                        currentChatSession?.patientId
+                      );
+                      console.log("🎯 Call state:", callState);
+                      console.log("🎯 Remote streams:", remoteStreams.size);
+                      console.log(
+                        "🎯 Local stream:",
+                        localStream ? "Available" : "Not available"
+                      );
+                    }}
+                    className="p-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
+                    title="Test Peer Connection"
+                  >
+                    🔗
+                  </button>
+
                   <button
                     onClick={handleCloseChat}
                     className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md"
@@ -768,6 +1128,47 @@ function TherapistSessionsContent() {
                   </button>
                 </div>
               </div>
+
+              {/* Connection Status Banner */}
+              {!wsConnected && (
+                <div
+                  className={`border-l-4 p-3 mx-4 mt-2 ${
+                    wsConnecting
+                      ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400"
+                      : "bg-red-50 dark:bg-red-900/20 border-red-400"
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        wsConnecting ? "bg-yellow-500" : "bg-red-500"
+                      }`}
+                    ></div>
+                    <span
+                      className={`text-sm font-medium ${
+                        wsConnecting
+                          ? "text-yellow-700 dark:text-yellow-300"
+                          : "text-red-700 dark:text-red-300"
+                      }`}
+                    >
+                      {wsConnecting
+                        ? "Connecting to WebSocket..."
+                        : "WebSocket Disconnected"}
+                    </span>
+                    <span
+                      className={`text-xs ${
+                        wsConnecting
+                          ? "text-yellow-600 dark:text-yellow-400"
+                          : "text-red-600 dark:text-red-400"
+                      }`}
+                    >
+                      {wsConnecting
+                        ? "Please wait while establishing connection..."
+                        : "Messages may not be delivered"}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Chat Messages */}
               <div className="flex-1 overflow-y-auto p-4">
@@ -804,6 +1205,54 @@ function TherapistSessionsContent() {
 
               {/* Chat Input */}
               <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+                {/* Connection Warning */}
+                {!wsConnected && (
+                  <div
+                    className={`mb-3 p-2 border rounded-md ${
+                      wsConnecting
+                        ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
+                        : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                    }`}
+                  >
+                    <div
+                      className={`flex items-center justify-between ${
+                        wsConnecting
+                          ? "text-yellow-800 dark:text-yellow-200"
+                          : "text-red-800 dark:text-red-200"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            wsConnecting ? "bg-yellow-500" : "bg-red-500"
+                          }`}
+                        ></div>
+                        <span className="text-xs">
+                          {wsConnecting
+                            ? "Connecting to chat server..."
+                            : "Connection lost. Messages will be queued until reconnected."}
+                        </span>
+                      </div>
+                      {!wsConnecting && (
+                        <div className="flex items-center space-x-2">
+                          {messageQueue.length > 0 && (
+                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                              {messageQueue.length} message
+                              {messageQueue.length !== 1 ? "s" : ""} queued
+                            </span>
+                          )}
+                          <button
+                            onClick={retryWebSocketConnection}
+                            className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <form
                   onSubmit={handleSendChatMessage}
                   className="flex items-end gap-3"
@@ -813,8 +1262,19 @@ function TherapistSessionsContent() {
                       value={chatMessage}
                       onChange={(e) => setChatMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      placeholder="Type your message..."
-                      className="w-full resize-none rounded-lg border py-2 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                      placeholder={
+                        wsConnected
+                          ? "Type your message..."
+                          : wsConnecting
+                          ? "Connecting... Please wait"
+                          : "Connection lost"
+                      }
+                      disabled={!wsConnected}
+                      className={`w-full resize-none rounded-lg border py-2 px-4 ${
+                        wsConnected
+                          ? "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          : "border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500"
+                      } placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500`}
                       rows={1}
                       style={{
                         minHeight: "44px",
@@ -824,9 +1284,23 @@ function TherapistSessionsContent() {
                   </div>
                   <button
                     type="submit"
-                    disabled={!chatMessage.trim()}
-                    className="flex h-11 w-11 items-center justify-center rounded-lg bg-green-600 text-white transition-colors hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    title="Send Message"
+                    disabled={!chatMessage.trim() || !wsConnected}
+                    className={`flex h-11 w-11 items-center justify-center rounded-lg transition-colors ${
+                      wsConnected && chatMessage.trim()
+                        ? "bg-green-600 text-white hover:bg-green-700"
+                        : wsConnecting
+                        ? "bg-yellow-500 text-white cursor-wait"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    title={
+                      !wsConnected
+                        ? wsConnecting
+                          ? "Connecting to chat server..."
+                          : "Waiting for connection..."
+                        : !chatMessage.trim()
+                        ? "Type a message to send"
+                        : "Send Message"
+                    }
                   >
                     <Send className="h-5 w-5" />
                   </button>
@@ -838,20 +1312,93 @@ function TherapistSessionsContent() {
       )}
 
       {/* Video Call Component */}
-      {callState.isInCall && (
+      {(callState.isInCall || demoCallActive) && (
         <VideoCall
-          isOpen={callState.isInCall}
-          onClose={() => endCall()}
-          participants={Array.from(remoteStreams.keys()).map((userId) => ({
-            id: userId,
-            name: currentChatSession?.patientName || "Patient",
-            avatar: currentChatSession?.patientAvatar || "",
-            isTherapist: false,
-            isMuted: false,
-            isVideoEnabled: true,
-          }))}
+          isOpen={callState.isInCall || demoCallActive}
+          onClose={() => {
+            if (demoCallActive) {
+              setDemoCallActive(false);
+            } else {
+              endCall();
+            }
+          }}
+          participants={
+            demoCallActive
+              ? [
+                  {
+                    id: currentChatSession?.patientId || "demo-patient",
+                    name: currentChatSession?.patientName || "Demo Patient",
+                    avatar: currentChatSession?.patientAvatar || "",
+                    isTherapist: false,
+                    isMuted: false,
+                    isVideoEnabled: true,
+                  },
+                ]
+              : Array.from(remoteStreams.keys()).map((userId) => ({
+                  id: userId,
+                  name: currentChatSession?.patientName || "Patient",
+                  avatar: currentChatSession?.patientAvatar || "",
+                  isTherapist: false,
+                  isMuted: false,
+                  isVideoEnabled: true,
+                }))
+          }
           currentUserId={(user as any)?.id || ""}
+          // PeerJS video call props
+          localStream={localStream}
+          remoteStreams={remoteStreams}
+          onToggleMute={toggleMute}
+          onToggleVideo={toggleVideo}
+          onToggleScreenShare={toggleScreenShare}
+          onStartRecording={startRecording}
+          onStopRecording={stopRecording}
+          isMuted={callState.isMuted}
+          isVideoEnabled={callState.isVideoEnabled}
+          isScreenSharing={callState.isScreenSharing}
+          isRecording={callState.isRecording}
+          callDuration={callState.callDuration}
+          recordingDuration={callState.recordingDuration}
+          networkStats={networkStats}
+          // Ringing overlay props
+          isCallOutgoing={callState.isCallOutgoing}
+          isCallIncoming={callState.isCallIncoming}
+          onAccept={acceptCall}
+          onReject={rejectCall}
         />
+      )}
+
+      {/* Debug Video Call State */}
+      {process.env.NODE_ENV === "development" && (
+        <div className="fixed bottom-4 right-4 bg-black bg-opacity-75 text-white p-3 rounded-lg text-xs z-50 max-w-xs">
+          <div className="font-bold mb-2">🎥 Video Call Debug</div>
+          <div>
+            Call State: {callState.isInCall ? "✅ Active" : "❌ Inactive"}
+          </div>
+          <div>Remote Streams: {remoteStreams.size}</div>
+          <div>
+            Call Duration: {Math.floor(callState.callDuration / 60)}:
+            {(callState.callDuration % 60).toString().padStart(2, "0")}
+          </div>
+          <div>
+            Recording: {callState.isRecording ? "🔴 Recording" : "⏸️ Stopped"}
+          </div>
+          {callState.isRecording && (
+            <div>
+              Recording Time: {Math.floor(callState.recordingDuration / 60)}:
+              {(callState.recordingDuration % 60).toString().padStart(2, "0")}
+            </div>
+          )}
+          <div className="mt-2 font-bold">📊 Network Stats</div>
+          <div>Resolution: {networkStats.resolution}</div>
+          <div>Frame Rate: {networkStats.frameRate} FPS</div>
+          <div>Bitrate: {networkStats.bitrate} kbps</div>
+          <div className="mt-2 font-bold">🎤 Controls</div>
+          <div>Muted: {callState.isMuted ? "🔇 Yes" : "🔊 No"}</div>
+          <div>Video: {callState.isVideoEnabled ? "📹 On" : "❌ Off"}</div>
+          <div>
+            Screen Share: {callState.isScreenSharing ? "🖥️ Yes" : "❌ No"}
+          </div>
+        </div>
       )}
 
       {/* Incoming Call Component */}

@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { Phone, PhoneOff, Video } from "lucide-react";
-import { CallParticipant } from "@/services/video-call-service";
+import { CallParticipant } from "@/hooks/usePeerVideoCall";
 import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
 
