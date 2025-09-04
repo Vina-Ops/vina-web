@@ -370,6 +370,52 @@ export default function ChatSessionPage() {
     };
   }, [tokens, chatId, user]);
 
+  // Cleanup WebSocket connection when component unmounts or user leaves page
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      console.log(
+        "🧹 Cleaning up user chat room WebSocket connection before page unload"
+      );
+      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+        wsConnection.close(1000, "User leaving page");
+        setWsConnection(null);
+        setWsConnected(false);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        console.log(
+          "🧹 Cleaning up user chat room WebSocket connection - page hidden"
+        );
+        if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+          wsConnection.close(1000, "Page hidden");
+          setWsConnection(null);
+          setWsConnected(false);
+        }
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Cleanup on component unmount
+    return () => {
+      console.log(
+        "🧹 Cleaning up user chat room WebSocket connection - component unmount"
+      );
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+
+      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+        wsConnection.close(1000, "Component unmounting");
+        setWsConnection(null);
+        setWsConnected(false);
+      }
+    };
+  }, [wsConnection]);
+
   useEffect(() => {
     // Scroll to bottom when new messages arrive
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -786,7 +832,7 @@ export default function ChatSessionPage() {
                         onClick={() => handleAttachment("image")}
                         className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                       >
-                        <Image className="h-4 w-4" />
+                        <Image className="h-4 w-4" alt="Image attachment" />
                         <span>Image</span>
                       </button>
                       <button

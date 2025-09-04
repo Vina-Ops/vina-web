@@ -63,7 +63,7 @@ function HomePageContent() {
 
   // Default home page content here
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-bg-gray-200 dark:via-bg-gray-600 dark:to-bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-bg-gray-200 dark:via-bg-gray-600 dark:to-bg-gray-900 relative">
       {/* Navigation Header */}
       <nav className="relative z-10 px-4 md:px-6 py-4 dark:bg-gray-900">
         {/* Background decoration */}

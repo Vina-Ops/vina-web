@@ -41,6 +41,18 @@ interface UsePeerVideoCallProps {
   onIncomingCall?: (caller: CallParticipant) => void;
 }
 
+// Helper function to generate a dynamic peer ID
+const generateDynamicPeerId = (userId: string): string => {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 8);
+  return `${userId}-${timestamp}-${random}`;
+};
+
+// Helper function to extract base user ID from dynamic peer ID
+const extractBaseUserId = (peerId: string): string => {
+  return peerId.split('-')[0];
+};
+
 export const usePeerVideoCall = ({
   currentUserId,
   therapistId,
@@ -99,6 +111,9 @@ export const usePeerVideoCall = ({
     frameRate: 0,
   });
 
+  // Store the dynamic peer ID
+  const [currentPeerId, setCurrentPeerId] = useState<string | null>(null);
+
   // Refs for PeerJS instances
   const peerRef = useRef<Peer | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -110,21 +125,31 @@ export const usePeerVideoCall = ({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const statsIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef<number>(0);
+  const maxReconnectAttemptsRef = useRef<number>(3);
 
-  // Initialize PeerJS
-  useEffect(() => {
+  // Initialize PeerJS with retry mechanism
+  const initializePeer = useCallback((retryCount = 0) => {
     if (!currentUserId) return;
 
-    // Initialize PeerJS with a unique ID
-    const peer = new Peer(currentUserId, getPeerConfig());
+    const dynamicId = generateDynamicPeerId(currentUserId);
+    console.log(`🎯 Initializing PeerJS with dynamic ID: ${dynamicId} (attempt ${retryCount + 1})`);
 
+    // Cleanup existing peer
+    if (peerRef.current) {
+      peerRef.current.destroy();
+    }
+
+    const peer = new Peer(dynamicId, getPeerConfig());
     peerRef.current = peer;
+    setIsConnecting(true);
 
     // Handle incoming calls
     peer.on("call", (incomingCall) => {
+      const callerBaseId = extractBaseUserId(incomingCall.peer);
       console.log("📞 Incoming call from:", incomingCall.peer);
+      console.log("📞 Caller base ID:", callerBaseId);
       console.log("📞 Current peer ID:", peer.id);
-      console.log("📞 Call object:", incomingCall);
 
       // Get local media stream first
       navigator.mediaDevices
@@ -134,30 +159,39 @@ export const usePeerVideoCall = ({
           localStreamRef.current = stream;
           setLocalStream(stream);
 
-          // Show incoming call notification instead of auto-answering
+          // Show incoming call notification
           setIncomingCall({
             isVisible: true,
             caller: {
               id: incomingCall.peer,
-              name: "Incoming Call", // You can enhance this with actual caller info
+              name: `Call from ${callerBaseId}`, // Use base user ID for display
               avatar: "",
-              isTherapist: false,
+              isTherapist: callerBaseId === therapistId,
               isMuted: false,
               isVideoEnabled: true,
             },
             call: incomingCall,
           });
 
-          console.log(
-            "📞 Incoming call notification set for peer:",
-            incomingCall.peer
-          );
+          console.log("📞 Incoming call notification set for peer:", incomingCall.peer);
 
           // Set call state to incoming
           setCallState((prev) => ({
             ...prev,
             isCallIncoming: true,
           }));
+
+          // Trigger onIncomingCall callback if provided
+          if (onIncomingCall) {
+            onIncomingCall({
+              id: incomingCall.peer,
+              name: `Call from ${callerBaseId}`,
+              avatar: "",
+              isTherapist: callerBaseId === therapistId,
+              isMuted: false,
+              isVideoEnabled: true,
+            });
+          }
         })
         .catch((err) => {
           console.error("Failed to get user media:", err);
@@ -168,8 +202,10 @@ export const usePeerVideoCall = ({
     // Handle peer connection
     peer.on("open", (id) => {
       console.log("🎯 PeerJS connected with ID:", id);
-      console.log("🎯 Current user ID:", currentUserId);
+      console.log("🎯 Base user ID:", currentUserId);
+      setCurrentPeerId(id);
       setIsConnecting(false);
+      reconnectAttemptsRef.current = 0; // Reset retry count on successful connection
     });
 
     // Handle peer errors
@@ -177,26 +213,65 @@ export const usePeerVideoCall = ({
       console.error("PeerJS error:", err);
       setIsConnecting(false);
 
-      // If it's a connection error, try alternative server
-      if (
-        err.type === "peer-unavailable" ||
-        err.message?.includes("Lost connection")
-      ) {
-        console.log("🔄 Connection failed, trying alternative server...");
-        // You can implement server fallback logic here
+      // Handle "ID already in use" error specifically
+      if (err.type === "unavailable-id" || err.message?.includes("ID") && err.message?.includes("taken")) {
+        console.log("🔄 ID already in use, generating new ID...");
+        if (retryCount < maxReconnectAttemptsRef.current) {
+          setTimeout(() => {
+            initializePeer(retryCount + 1);
+          }, 1000 * (retryCount + 1)); // Exponential backoff
+        } else {
+          console.error("❌ Max retry attempts reached for ID generation");
+        }
+        return;
+      }
+
+      // Handle other connection errors
+      if (err.type === "peer-unavailable" || err.message?.includes("Lost connection")) {
+        console.log("🔄 Connection failed, attempting to reconnect...");
+        if (reconnectAttemptsRef.current < maxReconnectAttemptsRef.current) {
+          reconnectAttemptsRef.current++;
+          setTimeout(() => {
+            initializePeer(reconnectAttemptsRef.current);
+          }, 2000 * reconnectAttemptsRef.current);
+        }
       }
     });
 
     // Handle peer disconnection
     peer.on("disconnected", () => {
       console.log("PeerJS disconnected, attempting to reconnect...");
-      peer.reconnect();
+      if (reconnectAttemptsRef.current < maxReconnectAttemptsRef.current) {
+        reconnectAttemptsRef.current++;
+        setTimeout(() => {
+          if (peerRef.current && !peerRef.current.destroyed) {
+            peerRef.current.reconnect();
+          } else {
+            initializePeer(reconnectAttemptsRef.current);
+          }
+        }, 1000);
+      }
     });
 
+    // Handle connection close
+    peer.on("close", () => {
+      console.log("PeerJS connection closed");
+      setCurrentPeerId(null);
+    });
+
+  }, [currentUserId, therapistId, onIncomingCall]);
+
+  // Initialize PeerJS
+  useEffect(() => {
+    initializePeer();
+
     return () => {
-      peer.destroy();
+      if (peerRef.current) {
+        peerRef.current.destroy();
+        setCurrentPeerId(null);
+      }
     };
-  }, [currentUserId]);
+  }, [initializePeer]);
 
   // Initialize local stream when component mounts
   useEffect(() => {
@@ -218,6 +293,28 @@ export const usePeerVideoCall = ({
     if (!localStreamRef.current) {
       initializeLocalStream();
     }
+  }, []);
+
+  // Function to find active peer ID for a user
+  const findActivePeerForUser = useCallback(async (baseUserId: string): Promise<string | null> => {
+    // In a real implementation, you might want to maintain a registry of active peers
+    // For now, we'll use the therapist's base ID with a dynamic suffix
+    // You could implement a signaling server to track active peer IDs
+    
+    // Try common patterns first (most recent connections are more likely)
+    const now = Date.now();
+    for (let i = 0; i < 5; i++) {
+      const estimatedTime = now - (i * 60000); // Try last 5 minutes in 1-minute intervals
+      const estimatedId = `${baseUserId}-${estimatedTime}`;
+      
+      // In practice, you'd check if this peer is actually online
+      // For now, we'll return the first one we construct
+      if (i === 0) return estimatedId;
+    }
+    
+    // If no pattern works, you might need to implement peer discovery
+    console.warn(`⚠️ Could not find active peer for user: ${baseUserId}`);
+    return null;
   }, []);
 
   // Start call timer
@@ -263,29 +360,24 @@ export const usePeerVideoCall = ({
     statsIntervalRef.current = setInterval(async () => {
       if (localStreamRef.current) {
         try {
-          // Get video track stats using RTCRtpSender if available
           const videoTrack = localStreamRef.current.getVideoTracks()[0];
           if (videoTrack) {
-            // For now, we'll use basic stats since getStats() on MediaStreamTrack is not widely supported
-            // In a real implementation, you'd use RTCRtpSender.getStats() or RTCPeerConnection.getStats()
             let bitrate = 0;
             let frameRate = 0;
             let resolution = "0x0";
 
-            // Get basic video track properties
             if (videoTrack.getSettings) {
               const settings = videoTrack.getSettings();
               resolution = `${settings.width || 0}x${settings.height || 0}`;
               frameRate = settings.frameRate || 0;
             }
 
-            // Estimate bitrate based on resolution and frame rate
             if (resolution !== "0x0" && frameRate > 0) {
               const [width, height] = resolution.split("x").map(Number);
               const pixels = width * height;
               const estimatedBitrate = Math.round(
                 (pixels * frameRate * 0.1) / 1000
-              ); // Rough estimate
+              );
               bitrate = estimatedBitrate;
             }
 
@@ -314,14 +406,13 @@ export const usePeerVideoCall = ({
   // Call timeout mechanism
   const startCallTimeout = useCallback(() => {
     if (outgoingCall.startTime) {
-      const timeoutDuration = 60000; // 1 minute in milliseconds
+      const timeoutDuration = 60000;
       const timeElapsed = Date.now() - outgoingCall.startTime;
 
       if (timeElapsed >= timeoutDuration) {
         console.log("⏰ Call timeout reached (1 minute)");
         handleCallTimeout();
       } else {
-        // Schedule next timeout check
         setTimeout(startCallTimeout, 1000);
       }
     }
@@ -347,7 +438,6 @@ export const usePeerVideoCall = ({
       isCallOutgoing: false,
     }));
 
-    // Show timeout notification
     alert("Call timed out after 1 minute");
   }, [outgoingCall.call]);
 
@@ -376,7 +466,6 @@ export const usePeerVideoCall = ({
     stopRecordingTimer();
     stopNetworkStatsMonitoring();
 
-    // Stop local streams
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => track.stop());
       localStreamRef.current = null;
@@ -386,7 +475,6 @@ export const usePeerVideoCall = ({
       screenStreamRef.current = null;
     }
 
-    // Stop recording if active
     if (
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state === "recording"
@@ -398,8 +486,12 @@ export const usePeerVideoCall = ({
   // Start a call
   const startCall = useCallback(
     async (participants: CallParticipant[]) => {
-      if (!peerRef.current || !localStreamRef.current) {
-        // Get local media stream first
+      if (!peerRef.current || !currentPeerId) {
+        console.error("❌ Peer not initialized");
+        return false;
+      }
+
+      if (!localStreamRef.current) {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
             video: true,
@@ -416,7 +508,6 @@ export const usePeerVideoCall = ({
 
       if (!localStreamRef.current) return false;
 
-      // Ensure local stream is set in state
       if (!localStream) {
         console.log("🔄 Setting local stream in state from startCall");
         setLocalStream(localStreamRef.current);
@@ -425,21 +516,29 @@ export const usePeerVideoCall = ({
       try {
         setIsConnecting(true);
 
-        // For now, assume we're calling the first participant (therapist)
-        const targetPeerId = participants[0]?.id;
-        if (!targetPeerId) return false;
+        // For calling by base user ID, we need to find their active peer ID
+        const targetBaseUserId = participants[0]?.id;
+        if (!targetBaseUserId) return false;
+
+        // If the participant ID already looks like a dynamic peer ID, use it directly
+        let targetPeerId = targetBaseUserId;
+        if (!targetBaseUserId.includes('-')) {
+          // It's a base user ID, try to find the active peer
+          const activePeerId = await findActivePeerForUser(targetBaseUserId);
+          if (!activePeerId) {
+            console.error(`❌ Could not find active peer for user: ${targetBaseUserId}`);
+            return false;
+          }
+          targetPeerId = activePeerId;
+        }
 
         console.log("🎯 Calling peer:", targetPeerId);
-        console.log("🎯 Current peer ID:", peerRef.current?.id);
+        console.log("🎯 Current peer ID:", currentPeerId);
         console.log("🎯 Participants:", participants);
         console.log("🎯 Local stream available:", !!localStreamRef.current);
 
-        const call = peerRef.current!.call(
-          targetPeerId,
-          localStreamRef.current
-        );
+        const call = peerRef.current.call(targetPeerId, localStreamRef.current);
 
-        // Set up outgoing call tracking
         setOutgoingCall({
           isActive: true,
           call: call,
@@ -453,15 +552,12 @@ export const usePeerVideoCall = ({
           isCallOutgoing: true,
         }));
 
-        // Start call timeout
         startCallTimeout();
 
-        // Set up call event handlers
         call.on("stream", (remoteStream) => {
           console.log("✅ Remote stream received from:", targetPeerId);
           console.log("📞 Call answered - stopping timeout");
 
-          // Stop the timeout since call was answered
           stopCallTimeout();
 
           setRemoteStreams(
@@ -473,7 +569,6 @@ export const usePeerVideoCall = ({
             isCallOutgoing: false,
           }));
 
-          // Clear outgoing call tracking
           setOutgoingCall({
             isActive: false,
             call: null,
@@ -518,12 +613,14 @@ export const usePeerVideoCall = ({
       }
     },
     [
+      currentPeerId,
       startCallTimer,
       handleCallEnded,
       startNetworkStatsMonitoring,
       localStream,
       startCallTimeout,
       stopCallTimeout,
+      findActivePeerForUser,
     ]
   );
 
@@ -535,16 +632,13 @@ export const usePeerVideoCall = ({
       console.log("📞 Accepting incoming call from:", incomingCall.call.peer);
       console.log("📞 Local stream available:", !!localStreamRef.current);
 
-      // Ensure local stream is set in state
       if (!localStream) {
         console.log("🔄 Setting local stream in state from acceptCall");
         setLocalStream(localStreamRef.current);
       }
 
-      // Answer the call
       incomingCall.call.answer(localStreamRef.current);
 
-      // Set up call event handlers
       incomingCall.call.on("stream", (remoteStream) => {
         console.log(
           "✅ Remote stream received after accepting call from:",
@@ -612,7 +706,6 @@ export const usePeerVideoCall = ({
 
   // End current call
   const endCall = useCallback(() => {
-    // Close all peer connections
     setRemoteStreams((prev) => {
       prev.forEach((stream) => {
         stream.getTracks().forEach((track) => track.stop());
@@ -653,7 +746,6 @@ export const usePeerVideoCall = ({
   // Toggle screen share
   const toggleScreenShare = useCallback(async () => {
     if (callState.isScreenSharing) {
-      // Stop screen sharing
       if (screenStreamRef.current) {
         screenStreamRef.current.getTracks().forEach((track) => track.stop());
         screenStreamRef.current = null;
@@ -661,7 +753,6 @@ export const usePeerVideoCall = ({
       setCallState((prev) => ({ ...prev, isScreenSharing: false }));
       console.log("🖥️ Screen sharing stopped");
     } else {
-      // Start screen sharing
       try {
         const stream = await navigator.mediaDevices.getDisplayMedia({
           video: true,
@@ -671,7 +762,6 @@ export const usePeerVideoCall = ({
         screenStreamRef.current = stream;
         setCallState((prev) => ({ ...prev, isScreenSharing: true }));
 
-        // Replace video track in local stream
         if (localStreamRef.current) {
           const videoTrack = localStreamRef.current.getVideoTracks()[0];
           if (videoTrack) {
@@ -694,12 +784,10 @@ export const usePeerVideoCall = ({
     try {
       const combinedStream = new MediaStream();
 
-      // Add local stream tracks
       localStreamRef.current.getTracks().forEach((track) => {
         combinedStream.addTrack(track);
       });
 
-      // Add remote stream tracks
       remoteStreams.forEach((stream) => {
         stream.getTracks().forEach((track) => {
           combinedStream.addTrack(track);
@@ -762,7 +850,6 @@ export const usePeerVideoCall = ({
 
   // Create chat room (placeholder for compatibility)
   const createChatRoom = useCallback(async (therapistId: string) => {
-    // This is now handled by PeerJS, but we keep it for compatibility
     console.log("Chat room creation handled by PeerJS");
     return `peer-${therapistId}`;
   }, []);
@@ -770,12 +857,16 @@ export const usePeerVideoCall = ({
   // Connect to existing room (placeholder for compatibility)
   const connectToExistingRoom = useCallback((roomId: string) => {
     setCurrentRoomId(roomId);
-    // PeerJS handles connections automatically
   }, []);
 
   // Get current peer ID for debugging
   const getCurrentPeerId = useCallback(() => {
-    return peerRef.current?.id || null;
+    return currentPeerId;
+  }, [currentPeerId]);
+
+  // Get base user ID from peer ID
+  const getBaseUserId = useCallback((peerId: string) => {
+    return extractBaseUserId(peerId);
   }, []);
 
   return {
@@ -786,6 +877,7 @@ export const usePeerVideoCall = ({
     currentRoomId,
     isConnecting,
     networkStats,
+    currentPeerId, // Expose current peer ID
     startCall,
     acceptCall,
     rejectCall,
@@ -797,7 +889,11 @@ export const usePeerVideoCall = ({
     stopRecording,
     getLocalStream,
     getCurrentPeerId,
+    getBaseUserId, // New helper function
     createChatRoom,
     connectToExistingRoom,
+    // Utility functions
+    generateDynamicPeerId: (userId: string) => generateDynamicPeerId(userId),
+    extractBaseUserId: (peerId: string) => extractBaseUserId(peerId),
   };
 };

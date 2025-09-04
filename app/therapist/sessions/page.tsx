@@ -193,6 +193,46 @@ function TherapistSessionsContent() {
     };
   }, [wsRetryTimeout]);
 
+  // Cleanup WebSocket connection when component unmounts or user leaves page
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      console.log("🧹 Cleaning up therapist chat WebSocket connection before page unload");
+      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+        wsConnection.close(1000, "User leaving page");
+        setWsConnection(null);
+        setWsConnected(false);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        console.log("🧹 Cleaning up therapist chat WebSocket connection - page hidden");
+        if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+          wsConnection.close(1000, "Page hidden");
+          setWsConnection(null);
+          setWsConnected(false);
+        }
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup on component unmount
+    return () => {
+      console.log("🧹 Cleaning up therapist chat WebSocket connection - component unmount");
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      
+      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+        wsConnection.close(1000, "Component unmounting");
+        setWsConnection(null);
+        setWsConnected(false);
+      }
+    };
+  }, [wsConnection]);
+
   // Debug user context
   useEffect(() => {
     console.log("🔍 User Context Debug:", {
@@ -316,7 +356,30 @@ function TherapistSessionsContent() {
             sender: messageSender,
             timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
           };
-          setMessages((prev) => [...prev, incoming]);
+
+          // Check for duplicates before adding
+          setMessages((prev) => {
+            // Check if this message already exists (by content and timestamp)
+            const isDuplicate = prev.some(
+              (msg) =>
+                msg.content === incoming.content &&
+                Math.abs(
+                  new Date(msg.timestamp).getTime() -
+                    new Date(incoming.timestamp).getTime()
+                ) < 1000 // Within 1 second
+            );
+
+            if (isDuplicate) {
+              console.log("🔄 Duplicate message detected, skipping:", incoming.content);
+              return prev;
+            }
+
+            // Add new message and sort by timestamp
+            const newMessages = [...prev, incoming];
+            return newMessages.sort(
+              (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+            );
+          });
         }
       } catch (err) {
         console.error("Error parsing WS message:", err);
@@ -493,7 +556,8 @@ function TherapistSessionsContent() {
   const handleOpenChat = (session: Session) => {
     setCurrentChatSession(session);
     setShowChat(true);
-    setMessages([]);
+    setMessages([]); // Clear messages for new session
+    setMessageQueue([]); // Clear message queue
     // Update URL to include chat session ID
     updateUrlParams({ chat: session.id });
   };
@@ -592,16 +656,22 @@ function TherapistSessionsContent() {
     const content = chatMessage.trim();
     if (!content) return;
 
-    // Create message object
+    // Create message object with unique ID
+    const messageId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const outgoing: Message = {
-      id: `${Date.now()}`,
+      id: messageId,
       content,
       sender: "user",
       timestamp: new Date(),
     };
 
-    // Add to messages immediately (optimistic UI)
-    setMessages((prev) => [...prev, outgoing]);
+    // Add to messages immediately (optimistic UI) and sort by timestamp
+    setMessages((prev) => {
+      const newMessages = [...prev, outgoing];
+      return newMessages.sort(
+        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+    });
 
     // Try to send via WebSocket if connected
     if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {

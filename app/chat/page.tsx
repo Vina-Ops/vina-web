@@ -50,8 +50,10 @@ export default function ChatPage() {
     if (messages.length > previousMessageCount && previousMessageCount > 0) {
       // Only play sound for incoming messages (not the first load)
       const newMessages = messages.slice(previousMessageCount);
-      const hasIncomingMessages = newMessages.some(msg => msg.sender === 'ai');
-      
+      const hasIncomingMessages = newMessages.some(
+        (msg) => msg.sender === "ai"
+      );
+
       if (hasIncomingMessages && settings.soundEnabled) {
         notificationSound.play(settings.volume);
       }
@@ -109,6 +111,61 @@ export default function ChatPage() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [showSearch]);
+
+  // Cleanup WebSocket connection when component unmounts or user leaves page
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      console.log(
+        "🧹 Cleaning up AI chat WebSocket connection before page unload"
+      );
+      try {
+        const { cleanupChatWebSocketService } = await import(
+          "@/services/chat-service"
+        );
+        cleanupChatWebSocketService();
+      } catch (error) {
+        console.error("Error cleaning up AI chat WebSocket:", error);
+      }
+    };
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === "hidden") {
+        console.log(
+          "🧹 Cleaning up AI chat WebSocket connection - page hidden"
+        );
+        try {
+          const { cleanupChatWebSocketService } = await import(
+            "@/services/chat-service"
+          );
+          cleanupChatWebSocketService();
+        } catch (error) {
+          console.error("Error cleaning up AI chat WebSocket:", error);
+        }
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Cleanup on component unmount
+    return () => {
+      console.log(
+        "🧹 Cleaning up AI chat WebSocket connection - component unmount"
+      );
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+
+      // Use dynamic import for cleanup
+      import("@/services/chat-service")
+        .then(({ cleanupChatWebSocketService }) => {
+          cleanupChatWebSocketService();
+        })
+        .catch((error) => {
+          console.error("Error cleaning up AI chat WebSocket:", error);
+        });
+    };
+  }, []);
 
   // Show search page if search is active
   if (showSearch) {

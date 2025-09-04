@@ -1,8 +1,8 @@
 // PeerJS Configuration
 export const peerConfig = {
-  // Production: Use a public PeerJS server or your own hosted server
+  // Production: Use a reliable public PeerJS server
   production: {
-    host: "vina-ai.vercel.app", 
+    host: "peerjs-server.herokuapp.com",
     port: 443,
     path: "/",
     secure: true,
@@ -83,6 +83,9 @@ export const getPeerConfig = () => {
     path: config.path,
     hasCustomHost: !!process.env.NEXT_PUBLIC_PEER_HOST,
     useAlternative: process.env.NEXT_PUBLIC_PEER_USE_ALTERNATIVE === "true",
+    fullUrl: `${config.secure ? "wss" : "ws"}://${config.host}:${config.port}${
+      config.path
+    }`,
   });
 
   return config;
