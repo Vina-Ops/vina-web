@@ -832,7 +832,7 @@ export default function ChatSessionPage() {
                         onClick={() => handleAttachment("image")}
                         className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                       >
-                        <Image className="h-4 w-4" alt="Image attachment" />
+                        <Image className="h-4 w-4" />
                         <span>Image</span>
                       </button>
                       <button
