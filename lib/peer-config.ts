@@ -2,7 +2,7 @@
 export const peerConfig = {
   // Production: Use a reliable public PeerJS server
   production: {
-    host: "peerjs-server.herokuapp.com",
+    host: "vina-ai.onrender.com",
     port: 443,
     path: "/",
     secure: true,
@@ -18,7 +18,7 @@ export const peerConfig = {
 
   // Alternative: Use a different public server
   alternative: {
-    host: "peerjs-server.herokuapp.com",
+    host: "vina-ai.onrender.com",
     port: 443,
     path: "/",
     secure: true,
@@ -26,7 +26,7 @@ export const peerConfig = {
 
   // Custom: Override with environment variables
   custom: {
-    host: process.env.NEXT_PUBLIC_PEER_HOST || "peerjs-server.herokuapp.com",
+    host: process.env.NEXT_PUBLIC_PEER_HOST || "vina-ai.onrender.com",
     port: parseInt(process.env.NEXT_PUBLIC_PEER_PORT || "443"),
     path: process.env.NEXT_PUBLIC_PEER_PATH || "/",
     secure: process.env.NEXT_PUBLIC_PEER_PORT !== "9000", // Default to secure for public servers

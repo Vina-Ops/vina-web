@@ -19,6 +19,7 @@ import {
   Image,
   File,
   X,
+  LogOut,
 } from "lucide-react";
 import VideoCall from "@/components/chat/VideoCall";
 import IncomingCall from "@/components/chat/IncomingCall";
@@ -75,6 +76,7 @@ export default function ChatSessionPage() {
   const [pendingMessages, setPendingMessages] = useState<Set<string>>(
     new Set()
   );
+  const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
 
   const chatId = params?.id as string;
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -578,6 +580,29 @@ export default function ChatSessionPage() {
     endCall();
   };
 
+  const handleLeaveChat = () => {
+    setShowLeaveConfirmation(true);
+  };
+
+  const confirmLeaveChat = () => {
+    // Clean up WebSocket connection
+    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+      wsConnection.close(1000, "User leaving chat");
+    }
+
+    // End any active video call
+    if (showVideoCall) {
+      endCall();
+    }
+
+    // Navigate back to the main page or therapy sessions
+    router.push("/");
+  };
+
+  const cancelLeaveChat = () => {
+    setShowLeaveConfirmation(false);
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -692,6 +717,13 @@ export default function ChatSessionPage() {
                     className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   >
                     <Video className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={handleLeaveChat}
+                    className="p-2 text-red-400 hover:text-red-600 dark:hover:text-red-300"
+                    title="Leave Chat"
+                  >
+                    <LogOut className="h-5 w-5" />
                   </button>
                   <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <MoreVertical className="h-5 w-5" />
@@ -979,6 +1011,40 @@ export default function ChatSessionPage() {
         onAccept={handleAcceptCall}
         onReject={handleRejectCall}
       />
+
+      {/* Leave Chat Confirmation Dialog */}
+      {showLeaveConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="flex-shrink-0">
+                <LogOut className="h-6 w-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Leave Chat
+              </h3>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              Are you sure you want to leave this chat? You will be disconnected
+              from the conversation and any ongoing video calls will end.
+            </p>
+            <div className="flex space-x-3 justify-end">
+              <button
+                onClick={cancelLeaveChat}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLeaveChat}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                Leave Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
