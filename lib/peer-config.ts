@@ -1,35 +1,43 @@
 // PeerJS Configuration
 export const peerConfig = {
-  // Production: Use a reliable public PeerJS server
+  // Production: Use official PeerJS servers (no custom server needed)
+  // This is the recommended approach as it's more reliable and doesn't require
+  // setting up your own PeerJS signaling server
   production: {
-    host: "vina-ai.onrender.com",
-    port: 443,
-    path: "/",
-    secure: true,
+    // Use default PeerJS servers - no custom host needed
+    // PeerJS will use its default signaling servers (0.peerjs.com, 1.peerjs.com, etc.)
   },
 
-  // Development: Use localhost for reliability
+  // Development: Use localhost for reliability - HARDCODED
   development: {
     host: "localhost",
     port: 9000,
-    path: "/",
+    path: "/peerjs",
     secure: false,
   },
 
-  // Alternative: Use a different public server
+  // Alternative: Use multiple official PeerJS servers for better reliability
   alternative: {
-    host: "vina-ai.onrender.com",
+    host: "0.peerjs.com",
     port: 443,
     path: "/",
     secure: true,
   },
 
-  // Custom: Override with environment variables
+  // Backup servers in case primary fails
+  backup: {
+    host: "1.peerjs.com",
+    port: 443,
+    path: "/",
+    secure: true,
+  },
+
+  // Custom: HARDCODED - NO ENVIRONMENT VARIABLES
   custom: {
-    host: process.env.NEXT_PUBLIC_PEER_HOST || "vina-ai.onrender.com",
-    port: parseInt(process.env.NEXT_PUBLIC_PEER_PORT || "443"),
-    path: process.env.NEXT_PUBLIC_PEER_PATH || "/",
-    secure: process.env.NEXT_PUBLIC_PEER_PORT !== "9000", // Default to secure for public servers
+    host: "localhost",
+    port: 9000,
+    path: "/peerjs",
+    secure: false,
   },
 
   // ICE servers for WebRTC connection
@@ -44,48 +52,29 @@ export const peerConfig = {
 
 // Get the appropriate config based on environment
 export const getPeerConfig = () => {
-  const config = (() => {
-    if (process.env.NODE_ENV === "production") {
-      return {
-        ...peerConfig.production,
-        config: { iceServers: peerConfig.iceServers },
-      };
-    }
-
-    // Check if custom config is provided via environment variables
-    if (process.env.NEXT_PUBLIC_PEER_HOST) {
-      return {
-        ...peerConfig.custom,
-        config: { iceServers: peerConfig.iceServers },
-      };
-    }
-
-    // Try alternative server if development server fails
-    if (process.env.NEXT_PUBLIC_PEER_USE_ALTERNATIVE === "true") {
-      return {
-        ...peerConfig.alternative,
-        config: { iceServers: peerConfig.iceServers },
-      };
-    }
-
-    return {
-      ...peerConfig.development,
-      config: { iceServers: peerConfig.iceServers },
-    };
-  })();
+  // HARDCODED CONFIGURATION - NO ENVIRONMENT CHECKS
+  const config = {
+    host: "localhost",
+    port: 9000,
+    path: "/peerjs", // PeerJS server runs on /peerjs
+    secure: false,
+    config: { iceServers: peerConfig.iceServers },
+  };
 
   // Debug logging
   console.log("🔧 PeerJS Config:", {
     environment: process.env.NODE_ENV,
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    path: config.path,
+    host: (config as any).host || "default PeerJS servers",
+    port: (config as any).port || "default",
+    secure: (config as any).secure || "default",
+    path: (config as any).path || "default",
     hasCustomHost: !!process.env.NEXT_PUBLIC_PEER_HOST,
     useAlternative: process.env.NEXT_PUBLIC_PEER_USE_ALTERNATIVE === "true",
-    fullUrl: `${config.secure ? "wss" : "ws"}://${config.host}:${config.port}${
-      config.path
-    }`,
+    fullUrl: (config as any).host
+      ? `${(config as any).secure ? "wss" : "ws"}://${(config as any).host}:${
+          (config as any).port
+        }${(config as any).path}`
+      : "default PeerJS servers",
   });
 
   return config;

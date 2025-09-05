@@ -5,8 +5,13 @@ const withNextIntl = createNextIntlPlugin("./i18n.ts");
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // PWA Configuration
+  // PWA Configuration - conditionally enabled
   async headers() {
+    // Skip PWA headers if PWA is disabled
+    if (process.env.NEXT_PUBLIC_DISABLE_PWA === "true") {
+      return [];
+    }
+
     return [
       {
         source: "/sw.js",

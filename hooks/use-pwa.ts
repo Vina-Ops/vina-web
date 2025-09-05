@@ -40,6 +40,12 @@ export const usePWA = () => {
 
   // Register service worker
   const registerServiceWorker = useCallback(async () => {
+    // Skip PWA registration if disabled
+    if (process.env.NEXT_PUBLIC_DISABLE_PWA === "true") {
+      console.log("PWA disabled in development");
+      return;
+    }
+
     if ("serviceWorker" in navigator) {
       try {
         const registration = await navigator.serviceWorker.register("/sw.js");
@@ -74,6 +80,12 @@ export const usePWA = () => {
 
   // Install PWA
   const installPWA = useCallback(async () => {
+    // Skip PWA installation if disabled
+    if (process.env.NEXT_PUBLIC_DISABLE_PWA === "true") {
+      console.log("PWA installation disabled in development");
+      return;
+    }
+
     if (deferredPrompt) {
       setState((prev) => ({ ...prev, isInstalling: true }));
 

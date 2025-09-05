@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   FixedNavbar,
@@ -33,6 +33,8 @@ import {
 import { User } from "iconsax-react";
 import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
+import { wsManager } from "@/utils/websocket-manager";
+import { generateUniqueMessageId } from "@/utils/message-id-generator";
 
 interface Message {
   id: string;
@@ -94,11 +96,14 @@ export default function ChatSessionPage() {
     acceptCall,
     rejectCall,
     endCall,
+    destroyPeer,
+    initializeForIncomingCalls,
     toggleMute,
     toggleVideo,
     toggleScreenShare,
     startRecording,
     stopRecording,
+    getCurrentPeerId,
     createChatRoom,
     connectToExistingRoom,
   } = usePeerVideoCall({
@@ -118,14 +123,28 @@ export default function ChatSessionPage() {
   useEffect(() => {
     const getToken = async () => {
       try {
+        console.log("🔑 Fetching token...");
         const token = await fetchToken();
+        console.log("🔑 Token fetched:", token ? "✅ Present" : "❌ Missing");
         setTokens(token);
       } catch (error) {
-        console.error("Failed to fetch token:", error);
+        console.error("❌ Failed to fetch token:", error);
+        setError("Failed to authenticate. Please refresh the page.");
       }
     };
     getToken();
   }, []);
+
+  // Initialize PeerJS for incoming calls when chat room loads
+  // This allows the user to receive video calls from the therapist
+  useEffect(() => {
+    if (user && chatId) {
+      console.log(
+        "🎯 Chat room loaded - initializing PeerJS for incoming calls"
+      );
+      initializeForIncomingCalls();
+    }
+  }, [user, chatId, initializeForIncomingCalls]);
 
   // Fetch therapist information
   useEffect(() => {
@@ -204,38 +223,80 @@ export default function ChatSessionPage() {
 
   // WebSocket connection state
   const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
+  const [maxReconnectAttempts] = useState(5);
+  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const maxReconnectAttemptsRef = useRef(5);
 
-  // WebSocket message handling
-  useEffect(() => {
-    if (!tokens || !chatId || !user) return;
+  // WebSocket connection function with enhanced reconnection logic
+  const connectWebSocket = useCallback(() => {
+    console.log("🔌 Attempting WebSocket connection (User Side)...");
+    console.log("🔌 Tokens:", tokens ? "✅ Present" : "❌ Missing");
+    console.log("🔌 ChatId:", chatId ? "✅ Present" : "❌ Missing");
+    console.log("🔌 User:", user ? "✅ Present" : "❌ Missing");
+
+    if (!tokens || !chatId || !user) {
+      console.log("❌ Cannot connect WebSocket - missing required data");
+      return null;
+    }
 
     // Set up WebSocket connection for chat messages
     const baseUrl =
       process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
     const wsUrl = `${baseUrl}/safe-space/${chatId}?token=${tokens}`;
 
-    console.log("Creating chat room WebSocket connection to:", wsUrl);
+    console.log("Creating user WebSocket connection to:", wsUrl);
+
+    // Create direct WebSocket connection (like therapist side) for better stability
     const ws = new WebSocket(wsUrl);
 
+    // Set up event handlers
     ws.onopen = () => {
-      console.log("Connected to chat WebSocket");
+      console.log("✅ User WebSocket connected successfully");
       setWsConnection(ws);
       setWsConnected(true);
-      // Send join room message
-      // ws.send(
-      //   JSON.stringify({
-      //     type: "join-room",
-      //     data: { roomId: chatId },
-      //   })
-      // );
+      setReconnectAttempts(0); // Reset reconnect attempts on successful connection
+      reconnectAttemptsRef.current = 0; // Reset ref as well
+      setError(null); // Clear any previous errors
+
+      // Start heartbeat to keep connection alive
+      startHeartbeat(ws);
+
+      // Broadcast current peer ID if available
+      if (getCurrentPeerId) {
+        const currentPeerId = getCurrentPeerId();
+        if (currentPeerId) {
+          try {
+            ws.send(
+              JSON.stringify({
+                type: "peer-id-broadcast",
+                data: {
+                  peerId: currentPeerId,
+                  userId: (user as any)?.id,
+                  timestamp: Date.now(),
+                },
+              })
+            );
+            console.log(
+              "📡 Broadcasted peer ID on WebSocket connect:",
+              currentPeerId
+            );
+          } catch (error) {
+            console.error("Failed to broadcast peer ID:", error);
+          }
+        }
+      }
     };
 
     ws.onmessage = (event) => {
+      // Message handler
       try {
         const data = JSON.parse(event.data);
         console.log("WebSocket received message:", data);
 
-        // New unified format: { sender: "uuid", timestamp: time, content: "abc" }
+        // Handle unified message format: { sender: "uuid", timestamp: time, content: "abc" }
         if (
           typeof data === "object" &&
           data !== null &&
@@ -251,24 +312,21 @@ export default function ChatSessionPage() {
           const isDuplicate = messages.some(
             (msg) =>
               msg.content === data.content &&
+              msg.sender === messageSender &&
               Math.abs(
                 new Date(msg.timestamp).getTime() -
                   new Date(data.timestamp).getTime()
-              ) < 1000 // Within 1 second
+              ) < 1000
           );
 
           if (!isDuplicate) {
             const incoming: Message = {
-              id: data.id || Date.now().toString(),
+              id: data.id || generateUniqueMessageId(),
               content: data.content,
               sender: messageSender,
-              timestamp:
-                data.timestamp ||
-                new Date().toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
+              timestamp: data.timestamp || new Date().toISOString(),
               type: "text",
+              status: "delivered",
               isRead: isFromCurrentUser,
             };
             setMessages((prev) => [...prev, incoming]);
@@ -298,7 +356,7 @@ export default function ChatSessionPage() {
             });
           }
 
-          // Play notification sound for incoming messages (from therapist)
+          // Play notification sound for incoming messages
           if (!isFromCurrentUser && settings.soundEnabled) {
             notificationSound.play(settings.volume);
           }
@@ -312,7 +370,7 @@ export default function ChatSessionPage() {
             setMessages((prev) => [
               ...prev,
               {
-                id: data.id || Date.now().toString(),
+                id: data.id || generateUniqueMessageId(),
                 content: data.content,
                 sender:
                   data.sender === (user as any)?.id ? "user" : "therapist",
@@ -338,6 +396,28 @@ export default function ChatSessionPage() {
           case "user-joined":
             console.log("User joined chat:", data);
             break;
+          case "peer-id-broadcast":
+            console.log("📡 Received peer ID broadcast:", data.data);
+            // Store the peer ID for future use
+            if (
+              data.data &&
+              data.data.peerId &&
+              data.data.userId !== (user as any)?.id
+            ) {
+              const sessionId = data.data.peerId.split("-").slice(1).join("-");
+              sessionStorage.setItem(
+                `peer-session-${data.data.userId}`,
+                sessionId
+              );
+              console.log(
+                `📡 Stored peer ID for user ${data.data.userId}: ${data.data.peerId}`
+              );
+            }
+            break;
+          case "ping":
+            // Handle ping responses (optional)
+            console.log("💓 Received ping response");
+            break;
           default:
             console.log("Unknown message format:", data);
         }
@@ -347,76 +427,143 @@ export default function ChatSessionPage() {
     };
 
     ws.onclose = (event) => {
-      console.log("Chat room WebSocket closed:", event.code, event.reason);
-      setWsConnection(null);
+      console.log(
+        "🔌 User WebSocket connection closed:",
+        event.code,
+        event.reason
+      );
       setWsConnected(false);
+      setWsConnection(null);
+      stopHeartbeat();
+
+      // Always attempt reconnection unless it's a normal closure (user leaving page)
+      if (event.code !== 1000) {
+        reconnectAttemptsRef.current += 1;
+        setReconnectAttempts(reconnectAttemptsRef.current);
+
+        console.log(
+          `🔄 Attempting to reconnect user WebSocket (attempt ${reconnectAttemptsRef.current})`
+        );
+
+        // Exponential backoff
+        const delay = Math.min(
+          1000 * Math.pow(2, reconnectAttemptsRef.current - 1),
+          10000
+        );
+        setTimeout(() => {
+          // Always try to reconnect
+          console.log("🔄 Reconnecting user WebSocket...");
+          connectWebSocket();
+        }, delay);
+      } else {
+        console.log("✅ WebSocket closed normally (user leaving page)");
+      }
     };
 
     ws.onerror = (error) => {
-      console.error("Chat room WebSocket error:", error);
-      setError("Connection error");
-      setWsConnection(null);
+      console.error("❌ User WebSocket connection error:", error);
       setWsConnected(false);
+      setError("Connection error occurred");
     };
 
-    return () => {
-      // Only close if the WebSocket is actually connected or connecting
-      if (
-        ws &&
-        (ws.readyState === WebSocket.OPEN ||
-          ws.readyState === WebSocket.CONNECTING)
-      ) {
-        ws.close();
+    return ws;
+  }, [tokens, chatId, user]);
+
+  // Heartbeat function to keep WebSocket alive
+  const startHeartbeat = useCallback((ws: WebSocket) => {
+    stopHeartbeat(); // Clear any existing heartbeat
+
+    let missedPings = 0;
+    const maxMissedPings = 3;
+
+    heartbeatIntervalRef.current = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        try {
+          // Send a simple ping message that the server can handle
+          ws.send(JSON.stringify({ type: "ping", timestamp: Date.now() }));
+          console.log("💓 Sent heartbeat ping");
+          missedPings = 0; // Reset missed pings on successful send
+        } catch (error) {
+          console.error("Failed to send heartbeat:", error);
+          missedPings++;
+
+          if (missedPings >= maxMissedPings) {
+            console.error(
+              "💔 Too many missed heartbeats, marking connection as lost"
+            );
+            setWsConnected(false);
+            stopHeartbeat();
+          }
+        }
+      } else {
+        console.log("💓 WebSocket not open, stopping heartbeat");
+        stopHeartbeat();
       }
-      setWsConnection(null);
+    }, 15000); // Send ping every 15 seconds
+  }, []);
+
+  const stopHeartbeat = useCallback(() => {
+    if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
+    }
+  }, []);
+
+  // WebSocket message handling
+  useEffect(() => {
+    console.log("🔄 WebSocket effect triggered");
+    console.log("🔄 Tokens:", tokens ? "✅ Present" : "❌ Missing");
+    console.log("🔄 ChatId:", chatId ? "✅ Present" : "❌ Missing");
+    console.log("🔄 User:", user ? "✅ Present" : "❌ Missing");
+
+    if (!tokens || !chatId || !user) {
+      console.log(
+        "❌ WebSocket effect - missing required data, skipping connection"
+      );
+      return;
+    }
+
+    console.log("✅ WebSocket effect - all data present, connecting...");
+    // Connect to WebSocket
+    const ws = connectWebSocket();
+    if (!ws) {
+      console.log("❌ WebSocket connection failed");
+      return;
+    }
+
+    return () => {
+      // Don't close WebSocket on useEffect cleanup - keep connection alive
+      console.log("🧹 WebSocket useEffect cleanup - keeping connection alive");
+      // Only stop heartbeat, but don't close the WebSocket
+      stopHeartbeat();
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, [tokens, chatId, user]);
 
-  // Cleanup WebSocket connection when component unmounts or user leaves page
+  // Only cleanup WebSocket connection when user actually leaves the page/refreshes
   useEffect(() => {
     const handleBeforeUnload = () => {
-      console.log(
-        "🧹 Cleaning up user chat room WebSocket connection before page unload"
-      );
+      console.log("🧹 User leaving page - closing user WebSocket connection");
+      stopHeartbeat();
       if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
         wsConnection.close(1000, "User leaving page");
-        setWsConnection(null);
-        setWsConnected(false);
       }
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        console.log(
-          "🧹 Cleaning up user chat room WebSocket connection - page hidden"
-        );
-        if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-          wsConnection.close(1000, "Page hidden");
-          setWsConnection(null);
-          setWsConnected(false);
-        }
-      }
-    };
-
-    // Add event listeners
+    // Only listen for actual page unload/refresh
     window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Cleanup on component unmount
+    // Cleanup on component unmount - but don't close WebSocket
     return () => {
       console.log(
-        "🧹 Cleaning up user chat room WebSocket connection - component unmount"
+        "🧹 Component unmounting - keeping user WebSocket connection alive"
       );
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-
-      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-        wsConnection.close(1000, "Component unmounting");
-        setWsConnection(null);
-        setWsConnected(false);
-      }
+      // Don't close WebSocket on component unmount - keep it alive
     };
-  }, [wsConnection]);
+  }, [chatId, user, stopHeartbeat]);
 
   useEffect(() => {
     // Scroll to bottom when new messages arrive
@@ -465,7 +612,7 @@ export default function ChatSessionPage() {
       wsConnection &&
       wsConnection.readyState === WebSocket.OPEN
     ) {
-      const messageId = Date.now().toString();
+      const messageId = generateUniqueMessageId();
       const message: Message = {
         id: messageId,
         content: newMessage,
@@ -585,15 +732,14 @@ export default function ChatSessionPage() {
   };
 
   const confirmLeaveChat = () => {
-    // Clean up WebSocket connection
+    // Clean up WebSocket connection directly
+    stopHeartbeat();
     if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
       wsConnection.close(1000, "User leaving chat");
     }
 
-    // End any active video call
-    if (showVideoCall) {
-      endCall();
-    }
+    // Destroy PeerJS connection completely (this will also end any active calls)
+    destroyPeer();
 
     // Navigate back to the main page or therapy sessions
     router.push("/");
@@ -697,12 +843,17 @@ export default function ChatSessionPage() {
                       <div className="flex items-center space-x-2">
                         <div
                           className={`w-2 h-2 rounded-full ${
-                            wsConnected ? "bg-green" : "bg-red-400"
+                            wsConnected ? "bg-green-500" : "bg-red-400"
                           }`}
                         ></div>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                           {wsConnected ? "Connected" : "Disconnected"}
                         </span>
+                        {!wsConnected && (
+                          <span className="text-xs text-red-500">
+                            ({reconnectAttempts}/{maxReconnectAttempts})
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -757,6 +908,32 @@ export default function ChatSessionPage() {
                 )}
               </div>
             </div>
+
+            {/* Connection Status Banner */}
+            {!wsConnected && (
+              <div className="bg-red-100 dark:bg-red-900 border-b border-red-200 dark:border-red-700 p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-red-700 dark:text-red-300">
+                      Connection lost. Attempting to reconnect... (
+                      {reconnectAttempts}/{maxReconnectAttempts})
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      console.log("🔄 Manual reconnection triggered");
+                      if (tokens && chatId && user) {
+                        connectWebSocket();
+                      }
+                    }}
+                    className="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -848,6 +1025,11 @@ export default function ChatSessionPage() {
 
             {/* Message Input */}
             <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+              {!wsConnected && (
+                <div className="mb-2 p-2 bg-yellow-100 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded text-sm text-yellow-700 dark:text-yellow-300">
+                  ⚠️ Messages will be queued until connection is restored
+                </div>
+              )}
               <div className="flex items-end space-x-2">
                 {/* Attachment Menu */}
                 <div className="relative">

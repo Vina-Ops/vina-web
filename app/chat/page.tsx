@@ -11,6 +11,7 @@ import { SearchPage } from "@/components/chat/SearchPage";
 import { useChatWebSocket } from "@/hooks/use-chat-websocket";
 import { useWebSocket } from "@/context/websocket-context";
 import { getChatWebSocketService } from "@/services/chat-service";
+import { wsManager } from "@/utils/websocket-manager";
 import { Message } from "@/types/chat";
 import { ConnectionLoading } from "@/components/ui/ConnectionLoading";
 import { DateHeader } from "@/components/chat/DateHeader";
@@ -112,8 +113,10 @@ export default function ChatPage() {
     };
   }, [showSearch]);
 
-  // Cleanup WebSocket connection when component unmounts or user leaves page
+  // Cleanup WebSocket connection when component unmounts or page unloads
   useEffect(() => {
+    const connectionId = `ai-chat-${Date.now()}`;
+
     const handleBeforeUnload = async () => {
       console.log(
         "🧹 Cleaning up AI chat WebSocket connection before page unload"
@@ -123,47 +126,37 @@ export default function ChatPage() {
           "@/services/chat-service"
         );
         cleanupChatWebSocketService();
+        wsManager.closeConnection(connectionId, 1000, "User leaving page");
       } catch (error) {
         console.error("Error cleaning up AI chat WebSocket:", error);
       }
     };
 
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === "hidden") {
-        console.log(
-          "🧹 Cleaning up AI chat WebSocket connection - page hidden"
+    const handlePageHide = async () => {
+      console.log("🧹 Cleaning up AI chat WebSocket connection - page hidden");
+      try {
+        const { cleanupChatWebSocketService } = await import(
+          "@/services/chat-service"
         );
-        try {
-          const { cleanupChatWebSocketService } = await import(
-            "@/services/chat-service"
-          );
-          cleanupChatWebSocketService();
-        } catch (error) {
-          console.error("Error cleaning up AI chat WebSocket:", error);
-        }
+        cleanupChatWebSocketService();
+        wsManager.closeConnection(connectionId, 1000, "Page hidden");
+      } catch (error) {
+        console.error("Error cleaning up AI chat WebSocket:", error);
       }
     };
 
     // Add event listeners
     window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
 
     // Cleanup on component unmount
     return () => {
       console.log(
         "🧹 Cleaning up AI chat WebSocket connection - component unmount"
       );
+      wsManager.closeConnection(connectionId, 1000, "Component unmount");
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-
-      // Use dynamic import for cleanup
-      import("@/services/chat-service")
-        .then(({ cleanupChatWebSocketService }) => {
-          cleanupChatWebSocketService();
-        })
-        .catch((error) => {
-          console.error("Error cleaning up AI chat WebSocket:", error);
-        });
+      window.removeEventListener("pagehide", handlePageHide);
     };
   }, []);
 

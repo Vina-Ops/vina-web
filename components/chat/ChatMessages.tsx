@@ -174,10 +174,10 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             </div>
 
             {/* Messages for this date */}
-            {dateMessages.map((message) => (
+            {dateMessages.map((message, index) => (
               <div
-                key={message.id}
-                data-message-timestamp={message.timestamp.getTime()}
+                key={index}
+                // data-message-timestamp={message.timestamp.getTime()}
                 className="scroll-mt-20" // Offset for sticky header
               >
                 <ChatMessage message={message} />

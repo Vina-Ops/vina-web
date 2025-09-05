@@ -82,7 +82,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             {/* Link Previews */}
             {linkMetadata.map((link, index) => (
               <LinkPreview
-                key={index}
+                key={`${link.url}-${index}`}
                 url={link.url}
                 title={link.title}
                 description={link.description}

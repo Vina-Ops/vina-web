@@ -167,7 +167,7 @@ export default function ChatRoomWithVideoCall() {
           ) : (
             messages.map((message, index) => (
               <div
-                key={index}
+                key={message.id || `msg-${index}`}
                 className={`flex ${
                   message.from === currentUserId
                     ? "justify-end"

@@ -5,6 +5,7 @@ import { usePeerVideoCall, CallParticipant } from "@/hooks/usePeerVideoCall";
 import { useUser } from "@/context/user-context";
 import VideoCall from "@/components/chat/VideoCall";
 import IncomingCall from "@/components/chat/IncomingCall";
+import PeerConnectionDebug from "@/components/debug/PeerConnectionDebug";
 
 export default function PeerJSDemoPage() {
   const { user } = useUser();
@@ -109,6 +110,8 @@ export default function PeerJSDemoPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Demo Controls */}
             <div className="space-y-6">
+              {/* Debug Component */}
+              <PeerConnectionDebug roomId="demo-room" />
               <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">
                   How to Test

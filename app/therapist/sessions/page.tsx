@@ -38,6 +38,7 @@ import { fetchToken } from "@/helpers/get-token";
 import { getMyTherapySessions } from "@/services/general-service";
 import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
+import { generateUniqueMessageId } from "@/utils/message-id-generator";
 
 interface Session {
   id: string;
@@ -119,6 +120,10 @@ function TherapistSessionsContent() {
   const [wsRetryTimeout, setWsRetryTimeout] = useState<NodeJS.Timeout | null>(
     null
   );
+  const wsRetryCountRef = useRef(0);
+  const maxWsRetryAttemptsRef = useRef(5);
+  const wsConnectionRef = useRef<WebSocket | null>(null);
+  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Message queue for offline messages
   const [messageQueue, setMessageQueue] = useState<Message[]>([]);
@@ -162,10 +167,34 @@ function TherapistSessionsContent() {
     getCurrentPeerId,
     createChatRoom,
     connectToExistingRoom,
+    initializeForIncomingCalls,
   } = usePeerVideoCall({
     currentUserId: (user as any)?.id || "",
     roomId: currentChatSession?.id || "",
   });
+
+  // Initialize PeerJS for incoming calls when chat session is active
+  useEffect(() => {
+    if (user && currentChatSession && showChat) {
+      console.log(
+        "🎯 Chat session active - initializing PeerJS for incoming calls (therapist)"
+      );
+      initializeForIncomingCalls();
+    }
+  }, [user, currentChatSession, showChat, initializeForIncomingCalls]);
+
+  // Debug video call integration
+  useEffect(() => {
+    console.log("🎯 Video Call Integration Debug:", {
+      userId: (user as any)?.id,
+      userRole: (user as any)?.role,
+      roomId: currentChatSession?.id,
+      hasUser: !!user,
+      hasSession: !!currentChatSession,
+      callState: callState,
+      isConnecting: isConnecting,
+    });
+  }, [user, currentChatSession, callState, isConnecting]);
 
   // Fetch token on component mount
   useEffect(() => {
@@ -193,51 +222,35 @@ function TherapistSessionsContent() {
     };
   }, [wsRetryTimeout]);
 
-  // Cleanup WebSocket connection when component unmounts or user leaves page
+  // Only cleanup WebSocket connection when user actually leaves the page/refreshes
   useEffect(() => {
     const handleBeforeUnload = () => {
       console.log(
-        "🧹 Cleaning up therapist chat WebSocket connection before page unload"
+        "🧹 User leaving page - closing therapist WebSocket connection"
       );
-      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-        wsConnection.close(1000, "User leaving page");
+      if (
+        wsConnectionRef.current &&
+        wsConnectionRef.current.readyState === WebSocket.OPEN
+      ) {
+        wsConnectionRef.current.close(1000, "User leaving page");
         setWsConnection(null);
         setWsConnected(false);
       }
+      stopHeartbeat();
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        console.log(
-          "🧹 Cleaning up therapist chat WebSocket connection - page hidden"
-        );
-        if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-          wsConnection.close(1000, "Page hidden");
-          setWsConnection(null);
-          setWsConnected(false);
-        }
-      }
-    };
-
-    // Add event listeners
+    // Only listen for actual page unload/refresh
     window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Cleanup on component unmount
+    // Cleanup on component unmount - but don't close WebSocket
     return () => {
       console.log(
-        "🧹 Cleaning up therapist chat WebSocket connection - component unmount"
+        "🧹 Component unmounting - keeping WebSocket connection alive"
       );
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-
-      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-        wsConnection.close(1000, "Component unmounting");
-        setWsConnection(null);
-        setWsConnected(false);
-      }
+      // Don't close WebSocket on component unmount - keep it alive
     };
-  }, [wsConnection]);
+  }, []);
 
   // Debug user context
   useEffect(() => {
@@ -270,6 +283,46 @@ function TherapistSessionsContent() {
     });
   }, [callState, demoCallActive, remoteStreams]);
 
+  // Heartbeat function to keep WebSocket alive
+  const startHeartbeat = useCallback((ws: WebSocket) => {
+    stopHeartbeat(); // Clear any existing heartbeat
+
+    let missedPings = 0;
+    const maxMissedPings = 3;
+
+    heartbeatIntervalRef.current = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        try {
+          // Send a simple ping message that the server can handle
+          ws.send(JSON.stringify({ type: "ping", timestamp: Date.now() }));
+          console.log("💓 Sent heartbeat ping (therapist)");
+          missedPings = 0; // Reset missed pings on successful send
+        } catch (error) {
+          console.error("Failed to send heartbeat (therapist):", error);
+          missedPings++;
+
+          if (missedPings >= maxMissedPings) {
+            console.error(
+              "💔 Too many missed heartbeats, marking connection as lost (therapist)"
+            );
+            setWsConnected(false);
+            stopHeartbeat();
+          }
+        }
+      } else {
+        console.log("💓 WebSocket not open, stopping heartbeat (therapist)");
+        stopHeartbeat();
+      }
+    }, 15000); // Send ping every 15 seconds
+  }, []);
+
+  const stopHeartbeat = useCallback(() => {
+    if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
+    }
+  }, []);
+
   // WebSocket retry function
   const retryWebSocketConnection = useCallback(() => {
     if (wsRetryTimeout) {
@@ -291,13 +344,25 @@ function TherapistSessionsContent() {
 
   // Connect to therapist chat WS for selected room using unified payloads
   useEffect(() => {
-    if (!tokens || !currentChatSession || !user || !showChat) {
+    if (!tokens || !currentChatSession || !user) {
       console.log("Missing required data for WebSocket:", {
         hasToken: !!tokens,
         hasSession: !!currentChatSession,
         hasUser: !!user,
         showChat,
       });
+      return;
+    }
+
+    // Only connect if chat is open, but don't disconnect if it's closed
+    if (!showChat) {
+      console.log("Chat not open, skipping WebSocket connection");
+      return;
+    }
+
+    // Don't create a new connection if one already exists for this session
+    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+      console.log("WebSocket already connected, skipping new connection");
       return;
     }
 
@@ -321,9 +386,40 @@ function TherapistSessionsContent() {
     ws.onopen = () => {
       console.log("✅ WebSocket connected successfully");
       setWsConnection(ws);
+      wsConnectionRef.current = ws; // Update ref
       setWsConnected(true);
       setWsConnecting(false);
       setWsError(null);
+      setWsRetryCount(0); // Reset retry count on successful connection
+      wsRetryCountRef.current = 0; // Reset ref as well
+
+      // Start heartbeat to keep connection alive
+      startHeartbeat(ws);
+
+      // Broadcast current peer ID if available
+      if (getCurrentPeerId) {
+        const currentPeerId = getCurrentPeerId();
+        if (currentPeerId) {
+          try {
+            ws.send(
+              JSON.stringify({
+                type: "peer-id-broadcast",
+                data: {
+                  peerId: currentPeerId,
+                  userId: (user as any)?.id,
+                  timestamp: Date.now(),
+                },
+              })
+            );
+            console.log(
+              "📡 Broadcasted therapist peer ID on WebSocket connect:",
+              currentPeerId
+            );
+          } catch (error) {
+            console.error("Failed to broadcast therapist peer ID:", error);
+          }
+        }
+      }
 
       // Send any queued messages
       if (messageQueue.length > 0) {
@@ -345,6 +441,23 @@ function TherapistSessionsContent() {
       try {
         const data = JSON.parse(event.data);
 
+        // Handle peer ID broadcast from users
+        if (data.type === "peer-id-broadcast" && data.data) {
+          console.log("📡 Received peer ID broadcast from user:", data.data);
+          // Store the peer ID for future video calls
+          if (data.data.peerId && data.data.userId) {
+            const sessionId = data.data.peerId.split("-").slice(1).join("-");
+            sessionStorage.setItem(
+              `peer-session-${data.data.userId}`,
+              sessionId
+            );
+            console.log(
+              `📡 Stored peer ID for user ${data.data.userId}: ${data.data.peerId}`
+            );
+          }
+          return;
+        }
+
         if (
           data &&
           typeof data === "object" &&
@@ -357,7 +470,7 @@ function TherapistSessionsContent() {
           const messageSender = isFromCurrentUser ? "user" : "ai";
 
           const incoming: Message = {
-            id: data.id || `${Date.now()}`,
+            id: data.id || generateUniqueMessageId(),
             content: data.content,
             sender: messageSender,
             timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
@@ -444,30 +557,52 @@ function TherapistSessionsContent() {
 
       setWsConnected(false);
       setWsConnection(null);
+      wsConnectionRef.current = null; // Clear ref
       setWsConnecting(false);
+      stopHeartbeat(); // Stop heartbeat on connection close
+
+      // Always attempt reconnection unless it's a normal closure (user leaving page)
+      if (closeCode !== 1000 && currentChatSession) {
+        wsRetryCountRef.current += 1;
+        setWsRetryCount(wsRetryCountRef.current);
+
+        console.log(
+          `🔄 Attempting to reconnect therapist WebSocket (attempt ${wsRetryCountRef.current})...`
+        );
+
+        // Exponential backoff
+        const delay = Math.min(
+          1000 * Math.pow(2, wsRetryCountRef.current - 1),
+          10000
+        );
+        setTimeout(() => {
+          // Always try to reconnect
+          console.log("🔄 Reconnecting therapist WebSocket...");
+          // Trigger reconnection by updating the effect dependencies
+          setWsRetryCount((prev) => prev + 1);
+        }, delay);
+      } else if (closeCode === 1000) {
+        console.log("✅ WebSocket closed normally (user leaving page)");
+      }
     };
 
     ws.onerror = (error) => {
       console.error("Therapist chat WebSocket error:", error);
       setWsConnected(false);
       setWsConnection(null);
+      wsConnectionRef.current = null; // Clear ref
       setWsConnecting(false);
       setWsError("Connection error occurred");
+      stopHeartbeat(); // Stop heartbeat on error
     };
 
     return () => {
-      // Only close if the WebSocket is actually connected or connecting
-      if (
-        ws &&
-        (ws.readyState === WebSocket.OPEN ||
-          ws.readyState === WebSocket.CONNECTING)
-      ) {
-        ws.close();
-      }
-      setWsConnection(null);
-      setWsConnected(false);
+      // Don't close WebSocket on useEffect cleanup - keep connection alive
+      console.log("🧹 WebSocket useEffect cleanup - keeping connection alive");
+      // Only stop heartbeat, but don't close the WebSocket
+      stopHeartbeat();
     };
-  }, [tokens, currentChatSession, user, showChat, wsRetryCount]);
+  }, [tokens, currentChatSession, user, showChat]);
 
   // Play notification sound for new messages in therapist chat
   useEffect(() => {
@@ -581,15 +716,33 @@ function TherapistSessionsContent() {
   };
 
   const handleStartVideoCall = async () => {
-    if (!currentChatSession) return;
+    if (!currentChatSession) {
+      console.log("❌ No current chat session for video call");
+      return;
+    }
 
     try {
-      console.log("Starting video call...");
-      console.log("Current call state before:", callState);
+      console.log("🎯 Starting video call...");
+      console.log("🎯 Current call state before:", callState);
+      console.log("🎯 User data:", {
+        id: (user as any)?.id,
+        role: (user as any)?.role,
+        hasUser: !!user,
+      });
+      console.log("🎯 Chat session:", {
+        id: currentChatSession.id,
+        patientId: currentChatSession.patientId,
+        patientName: currentChatSession.patientName,
+      });
 
       // Check if we're a therapist or patient
       const isTherapist = (user as any)?.role === "therapist";
-      console.log("User role:", (user as any)?.role);
+      console.log(
+        "🎯 User role:",
+        (user as any)?.role,
+        "isTherapist:",
+        isTherapist
+      );
 
       if (isTherapist) {
         // Therapist initiating call to patient
@@ -668,9 +821,7 @@ function TherapistSessionsContent() {
     if (!content) return;
 
     // Create message object with unique ID
-    const messageId = `${Date.now()}-${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    const messageId = generateUniqueMessageId();
     const outgoing: Message = {
       id: messageId,
       content,
@@ -1452,38 +1603,7 @@ function TherapistSessionsContent() {
       )}
 
       {/* Debug Video Call State */}
-      {process.env.NODE_ENV === "development" && (
-        <div className="fixed bottom-4 right-4 bg-black bg-opacity-75 text-white p-3 rounded-lg text-xs z-50 max-w-xs">
-          <div className="font-bold mb-2">🎥 Video Call Debug</div>
-          <div>
-            Call State: {callState.isInCall ? "✅ Active" : "❌ Inactive"}
-          </div>
-          <div>Remote Streams: {remoteStreams.size}</div>
-          <div>
-            Call Duration: {Math.floor(callState.callDuration / 60)}:
-            {(callState.callDuration % 60).toString().padStart(2, "0")}
-          </div>
-          <div>
-            Recording: {callState.isRecording ? "🔴 Recording" : "⏸️ Stopped"}
-          </div>
-          {callState.isRecording && (
-            <div>
-              Recording Time: {Math.floor(callState.recordingDuration / 60)}:
-              {(callState.recordingDuration % 60).toString().padStart(2, "0")}
-            </div>
-          )}
-          <div className="mt-2 font-bold">📊 Network Stats</div>
-          <div>Resolution: {networkStats.resolution}</div>
-          <div>Frame Rate: {networkStats.frameRate} FPS</div>
-          <div>Bitrate: {networkStats.bitrate} kbps</div>
-          <div className="mt-2 font-bold">🎤 Controls</div>
-          <div>Muted: {callState.isMuted ? "🔇 Yes" : "🔊 No"}</div>
-          <div>Video: {callState.isVideoEnabled ? "📹 On" : "❌ Off"}</div>
-          <div>
-            Screen Share: {callState.isScreenSharing ? "🖥️ Yes" : "❌ No"}
-          </div>
-        </div>
-      )}
+      {/* / */}
 
       {/* Incoming Call Component */}
       {incomingCall.isVisible && incomingCall.caller && (

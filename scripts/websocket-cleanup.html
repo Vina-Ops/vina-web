@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Connection Cleanup Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button.danger {
+            background: #dc3545;
+        }
+        .button.danger:hover {
+            background: #c82333;
+        }
+        .button.success {
+            background: #28a745;
+        }
+        .button.success:hover {
+            background: #218838;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .status {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 WebSocket Connection Cleanup Tool</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> This tool will close all WebSocket connections in your application. 
+            Use with caution as it may disrupt ongoing functionality.
+        </div>
+        
+        <div class="status" id="status">
+            <strong>Status:</strong> Ready to clean up WebSocket connections
+        </div>
+        
+        <div style="text-align: center;">
+            <button class="button" onclick="checkConnections()">📊 Check Connections</button>
+            <button class="button danger" onclick="closeAllConnections()">🧹 Close All Connections</button>
+            <button class="button success" onclick="preventNewConnections()">🚫 Block New Connections</button>
+            <button class="button" onclick="restoreFunctionality()">🔄 Restore Functionality</button>
+        </div>
+        
+        <div class="log" id="log">
+            <div>WebSocket Cleanup Tool Ready</div>
+            <div>Click a button above to get started...</div>
+        </div>
+    </div>
+
+    <script>
+        let closedCount = 0;
+        let isBlocking = false;
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = `<strong>Status:</strong> ${message}`;
+        }
+        
+        function checkConnections() {
+            log("🔍 Checking for WebSocket connections...");
+            
+            let foundConnections = 0;
+            const globalVars = [
+                'wsConnection', 'ws', 'socket', 'connection', 'websocket',
+                'chatSocket', 'therapistSocket', 'userSocket', 'sessionSocket'
+            ];
+            
+            globalVars.forEach(varName => {
+                if (window[varName]) {
+                    const state = window[varName].readyState;
+                    const url = window[varName].url || 'No URL';
+                    const stateText = {
+                        0: 'CONNECTING',
+                        1: 'OPEN',
+                        2: 'CLOSING',
+                        3: 'CLOSED'
+                    }[state] || 'UNKNOWN';
+                    
+                    log(`📡 Found ${varName}: ${stateText} - ${url}`);
+                    foundConnections++;
+                }
+            });
+            
+            if (foundConnections === 0) {
+                log("✅ No WebSocket connections found in common global variables");
+            } else {
+                log(`📊 Found ${foundConnections} WebSocket connections`);
+            }
+            
+            updateStatus(`Found ${foundConnections} connections`);
+        }
+        
+        function closeAllConnections() {
+            log("🧹 Starting WebSocket connection cleanup...");
+            updateStatus("Closing connections...");
+            
+            closedCount = 0;
+            const globalVars = [
+                'wsConnection', 'ws', 'socket', 'connection', 'websocket',
+                'chatSocket', 'therapistSocket', 'userSocket', 'sessionSocket'
+            ];
+            
+            globalVars.forEach(varName => {
+                if (window[varName]) {
+                    try {
+                        if (window[varName].readyState === WebSocket.OPEN || window[varName].readyState === WebSocket.CONNECTING) {
+                            log(`🔌 Closing ${varName}: ${window[varName].url || 'No URL'}`);
+                            window[varName].close(1000, "Cleanup tool");
+                            closedCount++;
+                        }
+                    } catch (e) {
+                        log(`❌ Error closing ${varName}: ${e.message}`);
+                    }
+                }
+            });
+            
+            // Also try to close any connections in the current page's context
+            try {
+                // Check if we're in a React app and try to access component state
+                const reactRoots = document.querySelectorAll('[data-reactroot], #__next, #root');
+                if (reactRoots.length > 0) {
+                    log("🔍 Found React application, attempting additional cleanup...");
+                }
+            } catch (e) {
+                log(`ℹ️ Could not access React internals: ${e.message}`);
+            }
+            
+            log(`✅ Cleanup completed - Closed ${closedCount} WebSocket connections`);
+            updateStatus(`Closed ${closedCount} connections`);
+        }
+        
+        function preventNewConnections() {
+            if (isBlocking) {
+                log("🚫 New connections are already being blocked");
+                return;
+            }
+            
+            log("🚫 Blocking new WebSocket connections...");
+            updateStatus("Blocking new connections...");
+            
+            if (!window._originalWebSocket) {
+                window._originalWebSocket = WebSocket;
+            }
+            
+            window.WebSocket = function() {
+                log("🚫 New WebSocket connection blocked!");
+                throw new Error("WebSocket connections are currently disabled by cleanup tool");
+            };
+            
+            isBlocking = true;
+            log("✅ New WebSocket connections are now blocked");
+            updateStatus("New connections blocked");
+        }
+        
+        function restoreFunctionality() {
+            if (!isBlocking && !window._originalWebSocket) {
+                log("ℹ️ WebSocket functionality is already restored");
+                return;
+            }
+            
+            log("🔄 Restoring WebSocket functionality...");
+            updateStatus("Restoring functionality...");
+            
+            if (window._originalWebSocket) {
+                window.WebSocket = window._originalWebSocket;
+                delete window._originalWebSocket;
+                isBlocking = false;
+                log("✅ WebSocket functionality restored");
+                updateStatus("Functionality restored");
+            } else {
+                log("❌ No original WebSocket found to restore");
+                updateStatus("Nothing to restore");
+            }
+        }
+        
+        // Auto-check on page load
+        window.addEventListener('load', () => {
+            log("🚀 WebSocket Cleanup Tool loaded");
+            setTimeout(checkConnections, 1000);
+        });
+        
+        // Auto-cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (closedCount > 0) {
+                log("🧹 Auto-cleanup on page unload...");
+            }
+        });
+    </script>
+</body>
+</html>
+
+
