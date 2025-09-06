@@ -15,16 +15,35 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sort messages by timestamp to ensure proper chronological order
-  const sortedMessages = [...messages].sort(
-    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-  );
+  const sortedMessages = [...messages].sort((a, b) => {
+    const timestampA =
+      typeof a.timestamp === "string" ? new Date(a.timestamp) : a.timestamp;
+    const timestampB =
+      typeof b.timestamp === "string" ? new Date(b.timestamp) : b.timestamp;
+    const result = timestampA.getTime() - timestampB.getTime();
+
+    // Debug logging
+    if (process.env.NODE_ENV === "development") {
+      console.log("Message sort:", {
+        messageA: { content: a.content, timestamp: timestampA.toISOString() },
+        messageB: { content: b.content, timestamp: timestampB.toISOString() },
+        result,
+      });
+    }
+
+    return result;
+  });
 
   // Group messages by date for better organization
   const groupMessagesByDate = (messages: any[]) => {
     const groups: { [key: string]: any[] } = {};
 
     messages.forEach((message) => {
-      const dateKey = message.timestamp.toDateString();
+      const timestamp =
+        typeof message.timestamp === "string"
+          ? new Date(message.timestamp)
+          : message.timestamp;
+      const dateKey = timestamp.toDateString();
       if (!groups[dateKey]) {
         groups[dateKey] = [];
       }
@@ -35,6 +54,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   };
 
   const messageGroups = groupMessagesByDate(sortedMessages);
+
+  // Sort date groups chronologically
+  const sortedDateKeys = Object.keys(messageGroups).sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime()
+  );
 
   // Function to format date display
   const formatDateDisplay = useCallback((dateString: string) => {
@@ -162,7 +186,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         className="flex-1 overflow-y-auto px-4 space-y-4 chat-scrollbar bg-transparent pt-6 pb-6"
         style={{ scrollBehavior: "smooth" }}
       >
-        {Object.entries(messageGroups).map(([dateKey, dateMessages]) => (
+        {sortedDateKeys.map((dateKey) => (
           <div key={dateKey} className="space-y-4" data-date-key={dateKey}>
             {/* Date separator */}
             <div className="flex justify-center">
@@ -174,9 +198,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             </div>
 
             {/* Messages for this date */}
-            {dateMessages.map((message, index) => (
+            {messageGroups[dateKey].map((message, index) => (
               <div
-                key={index}
+                key={message.id || `${dateKey}-${index}`}
                 // data-message-timestamp={message.timestamp.getTime()}
                 className="scroll-mt-20" // Offset for sticky header
               >

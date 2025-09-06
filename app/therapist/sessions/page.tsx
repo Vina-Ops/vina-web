@@ -27,6 +27,8 @@ import {
   Video,
   X,
   Loader2,
+  Minimize2,
+  Maximize2,
 } from "lucide-react";
 import { ChatMessages } from "@/components/chat/ChatMessages";
 import { Message } from "@/types/chat";
@@ -38,6 +40,7 @@ import { fetchToken } from "@/helpers/get-token";
 import { getMyTherapySessions } from "@/services/general-service";
 import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
+import { wsConnectionTracker } from "@/utils/websocket-connection-tracker";
 import { generateUniqueMessageId } from "@/utils/message-id-generator";
 
 interface Session {
@@ -98,6 +101,7 @@ function TherapistSessionsContent() {
 
   // Chat functionality
   const [showChat, setShowChat] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(true);
   const [currentChatSession, setCurrentChatSession] = useState<Session | null>(
     null
   );
@@ -152,9 +156,9 @@ function TherapistSessionsContent() {
     remoteStreams,
     localStream,
     incomingCall,
-    currentRoomId,
     isConnecting,
     networkStats,
+    currentPeerId,
     startCall,
     acceptCall,
     rejectCall,
@@ -164,24 +168,30 @@ function TherapistSessionsContent() {
     toggleScreenShare,
     startRecording,
     stopRecording,
-    getCurrentPeerId,
-    createChatRoom,
-    connectToExistingRoom,
-    initializeForIncomingCalls,
   } = usePeerVideoCall({
     currentUserId: (user as any)?.id || "",
     roomId: currentChatSession?.id || "",
+    userRole: "therapist",
+    sessionData: currentChatSession
+      ? {
+          therapistName: (user as any)?.name || "Therapist",
+          patientName: currentChatSession.patientName,
+          therapistAvatar:
+            (user as any)?.avatar ||
+            "https://ui-avatars.com/api/?name=Therapist&background=EAF7F0&color=013F25",
+          patientAvatar: currentChatSession.patientAvatar,
+        }
+      : undefined,
   });
 
   // Initialize PeerJS for incoming calls when chat session is active
   useEffect(() => {
     if (user && currentChatSession && showChat) {
       console.log(
-        "🎯 Chat session active - initializing PeerJS for incoming calls (therapist)"
+        "🎯 Chat session active - PeerJS will auto-initialize for incoming calls (therapist)"
       );
-      initializeForIncomingCalls();
     }
-  }, [user, currentChatSession, showChat, initializeForIncomingCalls]);
+  }, [user, currentChatSession, showChat]);
 
   // Debug video call integration
   useEffect(() => {
@@ -222,7 +232,7 @@ function TherapistSessionsContent() {
     };
   }, [wsRetryTimeout]);
 
-  // Only cleanup WebSocket connection when user actually leaves the page/refreshes
+  // Cleanup WebSocket connection when leaving the page or component unmounts
   useEffect(() => {
     const handleBeforeUnload = () => {
       console.log(
@@ -239,16 +249,27 @@ function TherapistSessionsContent() {
       stopHeartbeat();
     };
 
-    // Only listen for actual page unload/refresh
+    // Listen for page unload/refresh
     window.addEventListener("beforeunload", handleBeforeUnload);
 
-    // Cleanup on component unmount - but don't close WebSocket
+    // Cleanup on component unmount - close WebSocket to prevent connection maxing out
     return () => {
       console.log(
-        "🧹 Component unmounting - keeping WebSocket connection alive"
+        "🧹 Component unmounting - closing therapist WebSocket connection"
       );
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      // Don't close WebSocket on component unmount - keep it alive
+
+      // Close WebSocket connection on component unmount
+      if (
+        wsConnectionRef.current &&
+        wsConnectionRef.current.readyState === WebSocket.OPEN
+      ) {
+        console.log("🔌 Closing therapist WebSocket on component unmount");
+        wsConnectionRef.current.close(1000, "Component unmounting");
+        setWsConnection(null);
+        setWsConnected(false);
+      }
+      stopHeartbeat();
     };
   }, []);
 
@@ -282,6 +303,40 @@ function TherapistSessionsContent() {
       isCallActive: callState.isCallActive,
     });
   }, [callState, demoCallActive, remoteStreams]);
+
+  // Keyboard shortcuts for chat
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!showChat) return;
+
+      // F11 or Ctrl+M to toggle full screen
+      if (event.key === "F11" || (event.ctrlKey && event.key === "m")) {
+        event.preventDefault();
+        setIsFullScreen(!isFullScreen);
+      }
+
+      // Escape to close chat
+      if (event.key === "Escape") {
+        event.preventDefault();
+        handleCloseChat();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showChat, isFullScreen]);
+
+  // Debug chat modal state
+  useEffect(() => {
+    if (showChat && currentChatSession) {
+      console.log("Chat modal state:", {
+        showChat,
+        isFullScreen,
+        hasSession: !!currentChatSession,
+        sessionId: currentChatSession.id,
+      });
+    }
+  }, [showChat, isFullScreen, currentChatSession]);
 
   // Heartbeat function to keep WebSocket alive
   const startHeartbeat = useCallback((ws: WebSocket) => {
@@ -393,31 +448,37 @@ function TherapistSessionsContent() {
       setWsRetryCount(0); // Reset retry count on successful connection
       wsRetryCountRef.current = 0; // Reset ref as well
 
+      // Track this connection
+      const connectionId = `therapist-chat-${roomId}-${Date.now()}`;
+      wsConnectionTracker.trackConnection(
+        connectionId,
+        "therapist-chat",
+        ws,
+        window.location.pathname
+      );
+
       // Start heartbeat to keep connection alive
       startHeartbeat(ws);
 
       // Broadcast current peer ID if available
-      if (getCurrentPeerId) {
-        const currentPeerId = getCurrentPeerId();
-        if (currentPeerId) {
-          try {
-            ws.send(
-              JSON.stringify({
-                type: "peer-id-broadcast",
-                data: {
-                  peerId: currentPeerId,
-                  userId: (user as any)?.id,
-                  timestamp: Date.now(),
-                },
-              })
-            );
-            console.log(
-              "📡 Broadcasted therapist peer ID on WebSocket connect:",
-              currentPeerId
-            );
-          } catch (error) {
-            console.error("Failed to broadcast therapist peer ID:", error);
-          }
+      if (currentPeerId) {
+        try {
+          ws.send(
+            JSON.stringify({
+              type: "peer-id-broadcast",
+              data: {
+                peerId: currentPeerId,
+                userId: (user as any)?.id,
+                timestamp: Date.now(),
+              },
+            })
+          );
+          console.log(
+            "📡 Broadcasted therapist peer ID on WebSocket connect:",
+            currentPeerId
+          );
+        } catch (error) {
+          console.error("Failed to broadcast therapist peer ID:", error);
         }
       }
 
@@ -597,9 +658,12 @@ function TherapistSessionsContent() {
     };
 
     return () => {
-      // Don't close WebSocket on useEffect cleanup - keep connection alive
-      console.log("🧹 WebSocket useEffect cleanup - keeping connection alive");
-      // Only stop heartbeat, but don't close the WebSocket
+      // Close WebSocket on useEffect cleanup to prevent connection accumulation
+      console.log("🧹 WebSocket useEffect cleanup - closing connection");
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        console.log("🔌 Closing WebSocket on useEffect cleanup");
+        ws.close(1000, "Effect cleanup");
+      }
       stopHeartbeat();
     };
   }, [tokens, currentChatSession, user, showChat]);
@@ -690,6 +754,7 @@ function TherapistSessionsContent() {
       if (session) {
         setCurrentChatSession(session);
         setShowChat(true);
+        setIsFullScreen(true); // Always open in full screen mode
         setMessages([]);
       }
     } else if (!chatSessionId) {
@@ -702,6 +767,7 @@ function TherapistSessionsContent() {
   const handleOpenChat = (session: Session) => {
     setCurrentChatSession(session);
     setShowChat(true);
+    setIsFullScreen(true); // Always open in full screen mode
     setMessages([]); // Clear messages for new session
     setMessageQueue([]); // Clear message queue
     // Update URL to include chat session ID
@@ -910,7 +976,7 @@ function TherapistSessionsContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="relative space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -926,7 +992,6 @@ function TherapistSessionsContent() {
           Schedule Session
         </button>
       </div>
-
       {/* Quick Stats */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-4">
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
@@ -1017,7 +1082,6 @@ function TherapistSessionsContent() {
           </div>
         </div>
       </div>
-
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
@@ -1073,7 +1137,6 @@ function TherapistSessionsContent() {
           </div>
         </div>
       </div>
-
       {/* Sessions List */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
@@ -1088,6 +1151,7 @@ function TherapistSessionsContent() {
               {error}
             </div>
           )}
+
           <div className="space-y-4">
             {filteredSessions.map((session) => (
               <div
@@ -1217,15 +1281,41 @@ function TherapistSessionsContent() {
           )}
         </div>
       </div>
+      {/* Chat Interface - Full Screen */}
 
-      {/* Chat Interface */}
+      {/* Chat Interface - Full Screen */}
       {showChat && currentChatSession && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          <div className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-          <div className="absolute inset-0 flex">
-            <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 shadow-xl">
+        <>
+          {/* Backdrop for windowed mode only */}
+          {!isFullScreen && (
+            <div
+              className="fixed inset-0 z-[9998] bg-gray-500 bg-opacity-50"
+              onClick={handleCloseChat} // Allow clicking backdrop to close
+            />
+          )}
+
+          <div
+            className={`fixed z-[9999] overflow-hidden bg-white dark:bg-gray-800 ${
+              isFullScreen
+                ? "inset-0" // Remove h-screen class to avoid conflict
+                : "top-4 right-4 bottom-4 left-4 rounded-lg shadow-2xl"
+            }`}
+            style={
+              isFullScreen
+                ? {
+                    width: "100vw",
+                    height: "100vh",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                  }
+                : undefined
+            }
+          >
+            <div className="h-full w-full flex flex-col">
               {/* Chat Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center space-x-3">
                   <img
                     className="h-10 w-10 rounded-full object-cover"
@@ -1233,9 +1323,23 @@ function TherapistSessionsContent() {
                     alt={currentChatSession.patientName}
                   />
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                      {currentChatSession.patientName}
-                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        {currentChatSession.patientName}
+                      </h3>
+                      {isFullScreen ? (
+                        <span className="px-2 py-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full">
+                          Full Screen
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
+                          Windowed
+                        </span>
+                      )}
+                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                        Press F11 or Ctrl+M to toggle full screen
+                      </span>
+                    </div>
                     <div className="flex items-center space-x-2">
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         Session: {formatDate(currentChatSession.date)} at{" "}
@@ -1336,7 +1440,7 @@ function TherapistSessionsContent() {
                     onClick={() => {
                       console.log("🎯 Testing peer connection...");
                       console.log("🎯 Current user ID:", (user as any)?.id);
-                      console.log("🎯 Current PeerJS ID:", getCurrentPeerId());
+                      console.log("🎯 Current PeerJS ID:", currentPeerId);
                       console.log(
                         "🎯 Patient ID from session:",
                         currentChatSession?.patientId
@@ -1355,6 +1459,17 @@ function TherapistSessionsContent() {
                   </button>
 
                   <button
+                    onClick={() => setIsFullScreen(!isFullScreen)}
+                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md"
+                    title={isFullScreen ? "Minimize Chat" : "Maximize Chat"}
+                  >
+                    {isFullScreen ? (
+                      <Minimize2 className="h-5 w-5" />
+                    ) : (
+                      <Maximize2 className="h-5 w-5" />
+                    )}
+                  </button>
+                  <button
                     onClick={handleCloseChat}
                     className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md"
                     title="Close Chat"
@@ -1367,7 +1482,7 @@ function TherapistSessionsContent() {
               {/* Connection Status Banner */}
               {!wsConnected && (
                 <div
-                  className={`border-l-4 p-3 mx-4 mt-2 ${
+                  className={`flex-shrink-0 border-l-4 p-3 mx-4 mt-2 ${
                     wsConnecting
                       ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400"
                       : "bg-red-50 dark:bg-red-900/20 border-red-400"
@@ -1405,8 +1520,8 @@ function TherapistSessionsContent() {
                 </div>
               )}
 
-              {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-4">
+              {/* Chat Messages - This should take up remaining space */}
+              <div className="flex-1 min-h-0 overflow-y-auto p-4">
                 <div className="space-y-4">
                   {/* Welcome message */}
                   <div className="flex justify-center">
@@ -1438,8 +1553,8 @@ function TherapistSessionsContent() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Chat Input */}
-              <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+              {/* Chat Input - Fixed at bottom */}
+              <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-4">
                 {/* Connection Warning */}
                 {!wsConnected && (
                   <div
@@ -1543,9 +1658,8 @@ function TherapistSessionsContent() {
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
-
       {/* Video Call Component */}
       {(callState.isInCall || demoCallActive) && (
         <VideoCall
@@ -1601,12 +1715,10 @@ function TherapistSessionsContent() {
           onReject={rejectCall}
         />
       )}
-
       {/* Debug Video Call State */}
       {/* / */}
-
       {/* Incoming Call Component */}
-      {incomingCall.isVisible && incomingCall.caller && (
+      {incomingCall?.isVisible && incomingCall?.caller && (
         <IncomingCall
           isVisible={incomingCall.isVisible}
           caller={incomingCall.caller}
@@ -1614,7 +1726,6 @@ function TherapistSessionsContent() {
           onReject={() => rejectCall()}
         />
       )}
-
       {/* Session Details Modal */}
       {selectedSession && (
         <div className="fixed inset-0 z-50 overflow-y-auto">

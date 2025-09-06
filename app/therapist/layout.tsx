@@ -193,7 +193,7 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
                       className={cn(
                         "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
                         isActive
-                          ? "bg-green/20 font-bold text-green dark:bg-white/30 dark:text-white"
+                          ? "bg-green/20 font-bold text-green dark:bg-gray-800 dark:text-white"
                           : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
                       )}
                     >

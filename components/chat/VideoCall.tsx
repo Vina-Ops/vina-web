@@ -156,9 +156,9 @@ const VideoCall: React.FC<VideoCallProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black">
+    <div className="fixed inset-0 z-[999999] bg-black">
       {/* Header with call duration and network stats */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-black bg-opacity-75 text-white p-4">
+      <div className="absolute top-0 left-0 right-0 z-[99999]	 bg-black bg-opacity-75 text-white p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
@@ -181,16 +181,16 @@ const VideoCall: React.FC<VideoCallProps> = ({
           {/* Network Stats */}
           <div className="flex items-center space-x-4 text-xs">
             <div className="flex items-center space-x-2">
-              <span>📊</span>
-              <span>{networkStats.resolution}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span>🎬</span>
-              <span>{networkStats.frameRate} FPS</span>
-            </div>
-            <div className="flex items-center space-x-2">
               <span>🌐</span>
-              <span>{networkStats.bitrate} kbps</span>
+              <span>{networkStats.bandwidth} kbps</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span>📊</span>
+              <span>{networkStats.latency}ms</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span>📉</span>
+              <span>{networkStats.packetLoss}%</span>
             </div>
             {/* Debug: Local Stream Status */}
             <div className="flex items-center space-x-2">

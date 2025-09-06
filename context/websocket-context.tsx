@@ -38,47 +38,94 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const serviceRef = useRef<any>(null);
 
   useEffect(() => {
-    try {
-      // Get the WebSocket service
-      const service = getChatWebSocketService();
-      serviceRef.current = service;
+    const handlePathChange = () => {
+      const currentPath =
+        typeof window !== "undefined" ? window.location.pathname : "";
+      const isAIChatPage = currentPath === "/chat";
 
-      // Set up connection status handler
-      service.onConnectionChange((connected: boolean) => {
+      if (!isAIChatPage) {
+        console.log("🚫 Not on AI chat page, skipping WebSocket connection");
+        setIsConnected(false);
+        setError(null);
+        return;
+      }
+
+      try {
+        // Get the WebSocket service
+        const service = getChatWebSocketService();
+        serviceRef.current = service;
+
+        // Set up connection status handler
+        service.onConnectionChange((connected: boolean) => {
+          // console.log(
+          //   "WebSocket Provider: Connection status changed to:",
+          //   connected
+          // );
+          setIsConnected(connected);
+
+          if (connected) {
+            setError(null);
+          }
+        });
+
+        // Set up error handler
+        service.onError((errorMessage: string) => {
+          console.error("WebSocket Provider: Error received:", errorMessage);
+          setError(errorMessage);
+        });
+
+        // Check initial connection status
+        const initialStatus = service.isConnected();
         // console.log(
-        //   "WebSocket Provider: Connection status changed to:",
-        //   connected
+        //   "WebSocket Provider: Initial connection status:",
+        //   initialStatus
         // );
-        setIsConnected(connected);
+        setIsConnected(initialStatus);
+      } catch (error) {
+        console.error("WebSocket Provider: Failed to initialize:", error);
+        setError("Failed to initialize WebSocket connection");
+      }
+    };
 
-        if (connected) {
-          setError(null);
-        }
-      });
+    // Check initial path
+    handlePathChange();
 
-      // Set up error handler
-      service.onError((errorMessage: string) => {
-        console.error("WebSocket Provider: Error received:", errorMessage);
-        setError(errorMessage);
-      });
+    // Listen for path changes (for client-side navigation)
+    const handlePopState = () => {
+      handlePathChange();
+    };
 
-      // Check initial connection status
-      const initialStatus = service.isConnected();
-      // console.log(
-      //   "WebSocket Provider: Initial connection status:",
-      //   initialStatus
-      // );
-      setIsConnected(initialStatus);
-    } catch (error) {
-      console.error("WebSocket Provider: Failed to initialize:", error);
-      setError("Failed to initialize WebSocket connection");
+    // Listen for route changes using Next.js router events
+    const handleRouteChange = () => {
+      handlePathChange();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    // Listen for Next.js route changes
+    if (typeof window !== "undefined") {
+      // Use a custom event to detect route changes
+      window.addEventListener("routechange", handleRouteChange);
     }
 
     // Cleanup on unmount
     return () => {
+      window.removeEventListener("popstate", handlePopState);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("routechange", handleRouteChange);
+      }
+
+      // Clean up WebSocket service when provider unmounts
       if (serviceRef.current) {
-        // Note: We don't disconnect here to maintain the singleton pattern
-        // The service will handle reconnection automatically
+        console.log("🧹 WebSocket Provider: Cleaning up service on unmount");
+        try {
+          const {
+            cleanupChatWebSocketService,
+          } = require("@/services/chat-service");
+          cleanupChatWebSocketService();
+        } catch (error) {
+          console.error("Error cleaning up WebSocket service:", error);
+        }
       }
     };
   }, []);

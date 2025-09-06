@@ -35,6 +35,7 @@ import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
 import { wsManager } from "@/utils/websocket-manager";
 import { generateUniqueMessageId } from "@/utils/message-id-generator";
+import { wsConnectionTracker } from "@/utils/websocket-connection-tracker";
 
 interface Message {
   id: string;
@@ -89,26 +90,33 @@ export default function ChatSessionPage() {
     localStream,
     remoteStreams,
     incomingCall,
-    currentRoomId,
     isConnecting,
+    currentPeerId,
     networkStats,
     startCall,
     acceptCall,
     rejectCall,
     endCall,
-    destroyPeer,
-    initializeForIncomingCalls,
     toggleMute,
     toggleVideo,
     toggleScreenShare,
     startRecording,
     stopRecording,
-    getCurrentPeerId,
-    createChatRoom,
-    connectToExistingRoom,
+    getLocalStream,
   } = usePeerVideoCall({
     currentUserId: (user as any)?.id || "", // Type assertion for user ID
     roomId: chatId, // Use the chat room ID from URL
+    userRole: "patient",
+    sessionData: therapist
+      ? {
+          therapistName: therapist.name,
+          patientName: (user as any)?.name || "Patient",
+          therapistAvatar: therapist.avatar,
+          patientAvatar:
+            (user as any)?.avatar ||
+            "https://ui-avatars.com/api/?name=Patient&background=E3F2FD&color=1976D2",
+        }
+      : undefined,
   });
 
   // Update navigation items to reflect current path
@@ -140,11 +148,10 @@ export default function ChatSessionPage() {
   useEffect(() => {
     if (user && chatId) {
       console.log(
-        "🎯 Chat room loaded - initializing PeerJS for incoming calls"
+        "🎯 Chat room loaded - PeerJS will auto-initialize for incoming calls"
       );
-      initializeForIncomingCalls();
     }
-  }, [user, chatId, initializeForIncomingCalls]);
+  }, [user, chatId]);
 
   // Fetch therapist information
   useEffect(() => {
@@ -242,6 +249,12 @@ export default function ChatSessionPage() {
       return null;
     }
 
+    // Don't create a new connection if one already exists and is open
+    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+      console.log("🔄 WebSocket already connected, skipping new connection");
+      return wsConnection;
+    }
+
     // Set up WebSocket connection for chat messages
     const baseUrl =
       process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
@@ -261,33 +274,20 @@ export default function ChatSessionPage() {
       reconnectAttemptsRef.current = 0; // Reset ref as well
       setError(null); // Clear any previous errors
 
+      // Track this connection
+      const connectionId = `user-chat-${chatId}-${Date.now()}`;
+      wsConnectionTracker.trackConnection(
+        connectionId,
+        "user-chat",
+        ws,
+        window.location.pathname
+      );
+
       // Start heartbeat to keep connection alive
       startHeartbeat(ws);
 
       // Broadcast current peer ID if available
-      if (getCurrentPeerId) {
-        const currentPeerId = getCurrentPeerId();
-        if (currentPeerId) {
-          try {
-            ws.send(
-              JSON.stringify({
-                type: "peer-id-broadcast",
-                data: {
-                  peerId: currentPeerId,
-                  userId: (user as any)?.id,
-                  timestamp: Date.now(),
-                },
-              })
-            );
-            console.log(
-              "📡 Broadcasted peer ID on WebSocket connect:",
-              currentPeerId
-            );
-          } catch (error) {
-            console.error("Failed to broadcast peer ID:", error);
-          }
-        }
-      }
+      // Note: currentPeerId will be available from the hook once initialized
     };
 
     ws.onmessage = (event) => {
@@ -295,6 +295,8 @@ export default function ChatSessionPage() {
       try {
         const data = JSON.parse(event.data);
         console.log("WebSocket received message:", data);
+        console.log("Current user ID:", (user as any)?.id);
+        console.log("Message sender:", data.sender);
 
         // Handle unified message format: { sender: "uuid", timestamp: time, content: "abc" }
         if (
@@ -309,28 +311,42 @@ export default function ChatSessionPage() {
           const messageSender = isFromCurrentUser ? "user" : "therapist";
 
           // Check if this message is already in our state (to prevent duplicates)
-          const isDuplicate = messages.some(
-            (msg) =>
-              msg.content === data.content &&
-              msg.sender === messageSender &&
-              Math.abs(
-                new Date(msg.timestamp).getTime() -
-                  new Date(data.timestamp).getTime()
-              ) < 1000
-          );
+          setMessages((prevMessages) => {
+            const isDuplicate = prevMessages.some(
+              (msg) =>
+                msg.content === data.content &&
+                msg.sender === messageSender &&
+                Math.abs(
+                  new Date(msg.timestamp).getTime() -
+                    new Date(data.timestamp).getTime()
+                ) < 1000
+            );
 
-          if (!isDuplicate) {
-            const incoming: Message = {
-              id: data.id || generateUniqueMessageId(),
+            console.log("Duplicate check:", {
               content: data.content,
               sender: messageSender,
-              timestamp: data.timestamp || new Date().toISOString(),
-              type: "text",
-              status: "delivered",
-              isRead: isFromCurrentUser,
-            };
-            setMessages((prev) => [...prev, incoming]);
-          }
+              isFromCurrentUser,
+              isDuplicate,
+              existingMessages: prevMessages.length,
+            });
+
+            if (!isDuplicate) {
+              const incoming: Message = {
+                id: data.id || generateUniqueMessageId(),
+                content: data.content,
+                sender: messageSender,
+                timestamp: data.timestamp || new Date().toISOString(),
+                type: "text",
+                status: "delivered",
+                isRead: isFromCurrentUser,
+              };
+              console.log("Adding new message:", incoming);
+              return [...prevMessages, incoming];
+            } else {
+              console.log("Skipping duplicate message");
+            }
+            return prevMessages;
+          });
 
           // If this is a confirmation of our own message, mark it as delivered
           if (isFromCurrentUser) {
@@ -344,14 +360,14 @@ export default function ChatSessionPage() {
             // Remove from pending messages
             setPendingMessages((prev) => {
               const newSet = new Set(prev);
-              messages.forEach((msg) => {
-                if (
-                  msg.content === data.content &&
-                  msg.status === "delivered"
-                ) {
-                  newSet.delete(msg.id);
-                }
-              });
+              // Find the message that was just confirmed and remove it from pending
+              const confirmedMessage = messages.find(
+                (msg) =>
+                  msg.content === data.content && msg.status === "sending"
+              );
+              if (confirmedMessage) {
+                newSet.delete(confirmedMessage.id);
+              }
               return newSet;
             });
           }
@@ -467,7 +483,7 @@ export default function ChatSessionPage() {
     };
 
     return ws;
-  }, [tokens, chatId, user]);
+  }, [tokens, chatId, user, wsConnection]);
 
   // Heartbeat function to keep WebSocket alive
   const startHeartbeat = useCallback((ws: WebSocket) => {
@@ -532,9 +548,12 @@ export default function ChatSessionPage() {
     }
 
     return () => {
-      // Don't close WebSocket on useEffect cleanup - keep connection alive
-      console.log("🧹 WebSocket useEffect cleanup - keeping connection alive");
-      // Only stop heartbeat, but don't close the WebSocket
+      // Close WebSocket on useEffect cleanup to prevent connection accumulation
+      console.log("🧹 WebSocket useEffect cleanup - closing connection");
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        console.log("🔌 Closing WebSocket on useEffect cleanup");
+        ws.close(1000, "Effect cleanup");
+      }
       stopHeartbeat();
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -542,7 +561,7 @@ export default function ChatSessionPage() {
     };
   }, [tokens, chatId, user]);
 
-  // Only cleanup WebSocket connection when user actually leaves the page/refreshes
+  // Cleanup WebSocket connection when leaving the page or component unmounts
   useEffect(() => {
     const handleBeforeUnload = () => {
       console.log("🧹 User leaving page - closing user WebSocket connection");
@@ -552,22 +571,44 @@ export default function ChatSessionPage() {
       }
     };
 
-    // Only listen for actual page unload/refresh
+    // Listen for page unload/refresh
     window.addEventListener("beforeunload", handleBeforeUnload);
 
-    // Cleanup on component unmount - but don't close WebSocket
+    // Cleanup on component unmount - close WebSocket to prevent connection maxing out
     return () => {
       console.log(
-        "🧹 Component unmounting - keeping user WebSocket connection alive"
+        "🧹 Component unmounting - closing user WebSocket connection"
       );
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      // Don't close WebSocket on component unmount - keep it alive
+
+      // Close WebSocket connection on component unmount
+      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+        console.log("🔌 Closing user WebSocket on component unmount");
+        wsConnection.close(1000, "Component unmounting");
+      }
+      stopHeartbeat();
     };
-  }, [chatId, user, stopHeartbeat]);
+  }, [chatId, user, stopHeartbeat, wsConnection]);
 
   useEffect(() => {
     // Scroll to bottom when new messages arrive
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Debug: Log messages state
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("User chat messages state:", {
+        totalMessages: messages.length,
+        messages: messages.map((m) => ({
+          id: m.id,
+          content: m.content,
+          sender: m.sender,
+          timestamp: m.timestamp,
+          status: m.status,
+        })),
+      });
+    }
   }, [messages]);
 
   const handleRetryMessage = (message: Message) => {
@@ -617,10 +658,7 @@ export default function ChatSessionPage() {
         id: messageId,
         content: newMessage,
         sender: "user",
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+        timestamp: new Date().toISOString(),
         type: "text",
         isRead: false,
         status: "sending",
@@ -708,10 +746,8 @@ export default function ChatSessionPage() {
 
   const handleAcceptCall = async () => {
     try {
-      const success = await acceptCall();
-      if (success) {
-        setShowVideoCall(true);
-      }
+      await acceptCall();
+      setShowVideoCall(true);
     } catch (error) {
       console.error("Error accepting call:", error);
       alert("Failed to accept call. Please try again.");
@@ -738,11 +774,11 @@ export default function ChatSessionPage() {
       wsConnection.close(1000, "User leaving chat");
     }
 
-    // Destroy PeerJS connection completely (this will also end any active calls)
-    destroyPeer();
+    // End any active calls (PeerJS will auto-cleanup on unmount)
+    endCall();
 
     // Navigate back to the main page or therapy sessions
-    router.push("/");
+    router.push("/chat-room");
   };
 
   const cancelLeaveChat = () => {
@@ -942,64 +978,90 @@ export default function ChatSessionPage() {
                   <p>No messages yet. Start the conversation!</p>
                 </div>
               ) : (
-                messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.sender === "user"
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
+                // Sort messages by timestamp to ensure proper chronological order
+                [...messages]
+                  .sort((a, b) => {
+                    const timestampA = new Date(a.timestamp).getTime();
+                    const timestampB = new Date(b.timestamp).getTime();
+                    const result = timestampA - timestampB;
+
+                    // Debug logging
+                    if (process.env.NODE_ENV === "development") {
+                      console.log("User chat message sort:", {
+                        messageA: {
+                          content: a.content,
+                          timestamp: a.timestamp,
+                          sender: a.sender,
+                        },
+                        messageB: {
+                          content: b.content,
+                          timestamp: b.timestamp,
+                          sender: b.sender,
+                        },
+                        result,
+                      });
+                    }
+
+                    return result;
+                  })
+                  .map((message) => (
                     <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                      key={message.id}
+                      className={`flex ${
                         message.sender === "user"
-                          ? "bg-green text-white"
-                          : message.sender === "therapist"
-                          ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700"
-                          : "bg-green-600 text-white"
+                          ? "justify-end"
+                          : "justify-start"
                       }`}
                     >
-                      <p className="text-sm">{message.content}</p>
-                      <p
-                        className={`text-xs mt-1 ${
+                      <div
+                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                           message.sender === "user"
-                            ? "text-green-100"
-                            : "text-gray-500 dark:text-gray-400"
+                            ? "bg-green text-white"
+                            : message.sender === "therapist"
+                            ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700"
+                            : "bg-green-600 text-white"
                         }`}
                       >
-                        {new Date(message.timestamp).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                        {message.sender === "user" && message.status && (
-                          <span className="ml-2 text-xs">
-                            {message.status === "sending" && "⏳"}
-                            {message.status === "sent" && "✓"}
-                            {message.status === "delivered" && "✓✓"}
-                            {message.status === "failed" && (
-                              <span className="flex items-center">
-                                ❌
-                                <button
-                                  onClick={() => handleRetryMessage(message)}
-                                  className="ml-1 text-blue-500 hover:text-blue-700"
-                                  title="Retry message"
-                                >
-                                  🔄
-                                </button>
-                              </span>
-                            )}
-                          </span>
-                        )}
-                        {message.sender === "user" && (
-                          <span className="ml-2">
-                            {message.isRead ? "✓✓" : "✓"}
-                          </span>
-                        )}
-                      </p>
+                        <p className="text-sm">{message.content}</p>
+                        <p
+                          className={`text-xs mt-1 ${
+                            message.sender === "user"
+                              ? "text-green-100"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}
+                        >
+                          {new Date(message.timestamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          {message.sender === "user" && message.status && (
+                            <span className="ml-2 text-xs">
+                              {message.status === "sending" && "⏳"}
+                              {message.status === "sent" && "✓"}
+                              {message.status === "delivered" && "✓✓"}
+                              {message.status === "failed" && (
+                                <span className="flex items-center">
+                                  ❌
+                                  <button
+                                    onClick={() => handleRetryMessage(message)}
+                                    className="ml-1 text-blue-500 hover:text-blue-700"
+                                    title="Retry message"
+                                  >
+                                    🔄
+                                  </button>
+                                </span>
+                              )}
+                            </span>
+                          )}
+                          {message.sender === "user" && (
+                            <span className="ml-2">
+                              {message.isRead ? "✓✓" : "✓"}
+                            </span>
+                          )}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))
               )}
 
               {isTyping && (
@@ -1187,12 +1249,14 @@ export default function ChatSessionPage() {
       )}
 
       {/* Incoming Call Component */}
-      <IncomingCall
-        isVisible={incomingCall.isVisible}
-        caller={incomingCall.caller!}
-        onAccept={handleAcceptCall}
-        onReject={handleRejectCall}
-      />
+      {incomingCall && (
+        <IncomingCall
+          isVisible={incomingCall.isVisible}
+          caller={incomingCall.caller!}
+          onAccept={handleAcceptCall}
+          onReject={handleRejectCall}
+        />
+      )}
 
       {/* Leave Chat Confirmation Dialog */}
       {showLeaveConfirmation && (

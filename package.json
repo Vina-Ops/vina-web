@@ -3,15 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npx peerjs --port 9000 --path /peerjs\" \"next dev\"",
-    "dev:no-pwa": "concurrently \"npx peerjs --port 9000 --path /peerjs\" \"NEXT_PUBLIC_DISABLE_PWA=true next dev --turbopack\"",
+    "dev": "concurrently \"npx peerjs --port 9000\" \"next dev\"",
+    "dev:no-pwa": "concurrently \"npx peerjs --port 9000\" \"NEXT_PUBLIC_DISABLE_PWA=true next dev --turbopack\"",
     "build": "next build",
-    "start": "concurrently \"npx peerjs --port 9000 --path /peerjs\" \"next start\"",
-    "start:peerjs": "node server/peerjs-server.js",
+    "start": "concurrently \"node scripts/start-peerjs-server.js\" \"next start\"",
+    "start:peerjs": "node scripts/start-peerjs-server.js",
+    "start:next": "next start",
+    "start:production": "NODE_ENV=production concurrently \"node scripts/start-peerjs-server.js\" \"next start\"",
     "lint": "next lint",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "peerjs": "npx peerjs --port 9000 --path /peerjs"
+    "peerjs": "npx peerjs --port 9000",
+    "peerjs:prod": "NODE_ENV=production node scripts/start-peerjs-server.js"
   },
   "dependencies": {
     "axios": "^1.10.0",
