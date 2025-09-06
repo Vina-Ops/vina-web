@@ -36,6 +36,8 @@ import { useNotification } from "@/context/notification-context";
 import { wsManager } from "@/utils/websocket-manager";
 import { generateUniqueMessageId } from "@/utils/message-id-generator";
 import { wsConnectionTracker } from "@/utils/websocket-connection-tracker";
+import { wsMonitoringTracker } from "@/utils/websocket-monitoring-tracker";
+import ConnectionStatus from "@/components/websocket/ConnectionStatus";
 
 interface Message {
   id: string;
@@ -276,11 +278,16 @@ export default function ChatSessionPage() {
 
       // Track this connection
       const connectionId = `user-chat-${chatId}-${Date.now()}`;
-      wsConnectionTracker.trackConnection(
+      wsMonitoringTracker.trackConnection(
         connectionId,
         "user-chat",
         ws,
-        window.location.pathname
+        wsUrl,
+        {
+          userId: user?.id,
+          roomId: chatId,
+          userType: "patient",
+        }
       );
 
       // Start heartbeat to keep connection alive
@@ -925,23 +932,26 @@ export default function ChatSessionPage() {
                 <span className="text-gray-600 dark:text-gray-400">
                   Connection Status:
                 </span>
-                <span
-                  className={`flex items-center ${
-                    wsConnected ? "text-green-600" : "text-red-600"
-                  }`}
-                >
+                <div className="flex items-center space-x-4">
                   <span
-                    className={`w-2 h-2 rounded-full mr-2 ${
-                      wsConnected ? "bg-green-600" : "bg-red-600"
+                    className={`flex items-center ${
+                      wsConnected ? "text-green-600" : "text-red-600"
                     }`}
-                  ></span>
-                  {wsConnected ? "Connected" : "Disconnected"}
-                </span>
-                {pendingMessages.size > 0 && (
-                  <span className="text-orange-600 text-xs">
-                    {pendingMessages.size} pending
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full mr-2 ${
+                        wsConnected ? "bg-green-600" : "bg-red-600"
+                      }`}
+                    ></span>
+                    {wsConnected ? "Connected" : "Disconnected"}
                   </span>
-                )}
+                  <ConnectionStatus />
+                  {pendingMessages.size > 0 && (
+                    <span className="text-orange-600 text-xs">
+                      {pendingMessages.size} pending
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 

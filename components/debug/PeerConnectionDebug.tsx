@@ -20,8 +20,6 @@ export const PeerConnectionDebug: React.FC<PeerConnectionDebugProps> = ({
     currentPeerId,
     isConnecting,
     startCall,
-    initializeForIncomingCalls,
-    getCurrentPeerId,
   } = usePeerVideoCall({
     currentUserId: (user as any)?.id || "debug-user",
     roomId: roomId,
@@ -32,7 +30,7 @@ export const PeerConnectionDebug: React.FC<PeerConnectionDebugProps> = ({
     const updateDebugInfo = () => {
       const info = {
         currentUserId: (user as any)?.id || "debug-user",
-        currentPeerId: currentPeerId || getCurrentPeerId?.() || "Not connected",
+        currentPeerId: currentPeerId || "Not connected",
         roomId: roomId,
         isConnecting: isConnecting,
         callState: callState,
@@ -64,11 +62,11 @@ export const PeerConnectionDebug: React.FC<PeerConnectionDebugProps> = ({
     updateDebugInfo();
     const interval = setInterval(updateDebugInfo, 2000);
     return () => clearInterval(interval);
-  }, [user, currentPeerId, isConnecting, callState, roomId, getCurrentPeerId]);
+  }, [user, currentPeerId, isConnecting, callState, roomId]);
 
   const handleInitializePeer = async () => {
     console.log("🔧 Manually initializing PeerJS...");
-    await initializeForIncomingCalls();
+    // PeerJS initialization is handled automatically by the hook
   };
 
   const handleStartCall = async () => {

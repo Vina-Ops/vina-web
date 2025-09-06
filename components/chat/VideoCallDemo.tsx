@@ -152,11 +152,9 @@ export default function VideoCallDemo() {
         callDuration={0}
         recordingDuration={0}
         networkStats={{
-          bitrate: 0,
+          bandwidth: 0,
           packetLoss: 0,
           latency: 0,
-          resolution: "0x0",
-          frameRate: 0,
         }}
         // Ringing overlay props
         isCallOutgoing={false}

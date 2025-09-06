@@ -41,6 +41,8 @@ import { getMyTherapySessions } from "@/services/general-service";
 import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
 import { wsConnectionTracker } from "@/utils/websocket-connection-tracker";
+import { wsMonitoringTracker } from "@/utils/websocket-monitoring-tracker";
+import ConnectionStatus from "@/components/websocket/ConnectionStatus";
 import { generateUniqueMessageId } from "@/utils/message-id-generator";
 
 interface Session {
@@ -765,13 +767,8 @@ function TherapistSessionsContent() {
   }, [searchParams, sessions]);
 
   const handleOpenChat = (session: Session) => {
-    setCurrentChatSession(session);
-    setShowChat(true);
-    setIsFullScreen(true); // Always open in full screen mode
-    setMessages([]); // Clear messages for new session
-    setMessageQueue([]); // Clear message queue
-    // Update URL to include chat session ID
-    updateUrlParams({ chat: session.id });
+    // Navigate to dedicated chat page instead of opening modal
+    router.push(`/therapist/sessions/${session.id}`);
   };
 
   const handleCloseChat = () => {
@@ -987,10 +984,13 @@ function TherapistSessionsContent() {
             Manage your therapy sessions and patient appointments
           </p>
         </div>
-        <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-          <Calendar className="h-4 w-4 mr-2" />
-          Schedule Session
-        </button>
+        <div className="flex items-center space-x-4">
+          <ConnectionStatus />
+          <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            <Calendar className="h-4 w-4 mr-2" />
+            Schedule Session
+          </button>
+        </div>
       </div>
       {/* Quick Stats */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-4">
