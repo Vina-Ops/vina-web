@@ -6,7 +6,7 @@ export const getPeerConfig = () => {
   // Get configuration from environment variables with fallbacks
   const peerHost =
     process.env.NEXT_PUBLIC_PEERJS_HOST ||
-    (isDevelopment ? "localhost" : "vina-web.vercel.app");
+    (isDevelopment ? "localhost" : "0.peerjs.com");
 
   const peerPort = parseInt(
     process.env.NEXT_PUBLIC_PEERJS_PORT || (isDevelopment ? "9000" : "443")
@@ -20,7 +20,7 @@ export const getPeerConfig = () => {
     host: peerHost,
     port: peerPort,
     secure: isSecure,
-    // path: "/peerjs",
+   
     config: {
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
