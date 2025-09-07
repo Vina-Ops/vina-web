@@ -2,10 +2,17 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { ChatInputProps } from "@/types/chat";
-import { Send } from "lucide-react";
+import { Send, Languages } from "lucide-react";
 import { AudioRecorder } from "./AudioRecorder";
 
-export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
+interface ChatInputWithTranslationProps extends ChatInputProps {
+  onOpenTranslation?: () => void;
+}
+
+export const ChatInput: React.FC<ChatInputWithTranslationProps> = ({
+  onSendMessage,
+  onOpenTranslation,
+}) => {
   const [message, setMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -76,6 +83,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
             }}
           />
         </div>
+        {/* Translation Button */}
+        {onOpenTranslation && (
+          <button
+            type="button"
+            onClick={onOpenTranslation}
+            className="flex h-11 w-11 items-center justify-center rounded-lg bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200"
+            title="Translate chat"
+          >
+            <Languages className="h-5 w-5" />
+          </button>
+        )}
+
         <button
           type="submit"
           disabled={!message.trim()}

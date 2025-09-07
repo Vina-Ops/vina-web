@@ -20,9 +20,12 @@ import {
   File,
   X,
   LogOut,
+  Languages,
 } from "lucide-react";
 import VideoCall from "@/components/chat/VideoCall";
 import IncomingCall from "@/components/chat/IncomingCall";
+import { TranslationPanel } from "@/components/chat/TranslationPanel";
+import { LanguageSelector } from "@/components/chat/LanguageSelector";
 import { usePeerVideoCall, CallParticipant } from "@/hooks/usePeerVideoCall";
 import { useUser } from "@/context/user-context";
 import { fetchToken } from "@/helpers/get-token";
@@ -82,6 +85,7 @@ export default function ChatSessionPage() {
     new Set()
   );
   const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
+  const [showTranslationPanel, setShowTranslationPanel] = useState(false);
 
   const chatId = params?.id as string;
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -241,258 +245,263 @@ export default function ChatSessionPage() {
   const maxReconnectAttemptsRef = useRef(5);
 
   // WebSocket connection function with enhanced reconnection logic
-  const connectWebSocket = useCallback((connectionId: string) => {
-    console.log("🔌 Attempting WebSocket connection (User Side)...");
-    console.log("🔌 Tokens:", tokens ? "✅ Present" : "❌ Missing");
-    console.log("🔌 ChatId:", chatId ? "✅ Present" : "❌ Missing");
-    console.log("🔌 User:", user ? "✅ Present" : "❌ Missing");
+  const connectWebSocket = useCallback(
+    (connectionId: string) => {
+      console.log("🔌 Attempting WebSocket connection (User Side)...");
+      console.log("🔌 Tokens:", tokens ? "✅ Present" : "❌ Missing");
+      console.log("🔌 ChatId:", chatId ? "✅ Present" : "❌ Missing");
+      console.log("🔌 User:", user ? "✅ Present" : "❌ Missing");
 
-    if (!tokens || !chatId || !user) {
-      console.log("❌ Cannot connect WebSocket - missing required data");
-      return null;
-    }
+      if (!tokens || !chatId || !user) {
+        console.log("❌ Cannot connect WebSocket - missing required data");
+        return null;
+      }
 
-    // Don't create a new connection if one already exists and is open
-    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-      console.log("🔄 WebSocket already connected, skipping new connection");
-      return wsConnection;
-    }
+      // Don't create a new connection if one already exists and is open
+      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+        console.log("🔄 WebSocket already connected, skipping new connection");
+        return wsConnection;
+      }
 
-    // Set up WebSocket connection for chat messages
-    const baseUrl =
-      process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
-    const wsUrl = `${baseUrl}/safe-space/${chatId}?token=${tokens}`;
+      // Set up WebSocket connection for chat messages
+      const baseUrl =
+        process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
+      const wsUrl = `${baseUrl}/safe-space/${chatId}?token=${tokens}`;
 
-    console.log("Creating user WebSocket connection to:", wsUrl);
+      console.log("Creating user WebSocket connection to:", wsUrl);
 
-    // Create direct WebSocket connection (like therapist side) for better stability
-    const ws = new WebSocket(wsUrl);
+      // Create direct WebSocket connection (like therapist side) for better stability
+      const ws = new WebSocket(wsUrl);
 
+      // Set up event handlers
+      ws.onopen = () => {
+        console.log("✅ User WebSocket connected successfully");
+        setWsConnection(ws);
+        setWsConnected(true);
+        setReconnectAttempts(0); // Reset reconnect attempts on successful connection
+        reconnectAttemptsRef.current = 0; // Reset ref as well
+        setError(null); // Clear any previous errors
 
-    // Set up event handlers
-    ws.onopen = () => {
-      console.log("✅ User WebSocket connected successfully");
-      setWsConnection(ws);
-      setWsConnected(true);
-      setReconnectAttempts(0); // Reset reconnect attempts on successful connection
-      reconnectAttemptsRef.current = 0; // Reset ref as well
-      setError(null); // Clear any previous errors
+        // Track this connection
+        wsMonitoringTracker.trackConnection(
+          connectionId,
+          "user-chat",
+          ws,
+          wsUrl,
+          {
+            userId: user?.id,
+            roomId: chatId,
+            userType: "patient",
+          }
+        );
 
-      // Track this connection
-      wsMonitoringTracker.trackConnection(
-        connectionId,
-        "user-chat",
-        ws,
-        wsUrl,
-        {
-          userId: user?.id,
-          roomId: chatId,
-          userType: "patient",
-        }
-      );
+        // Start heartbeat to keep connection alive
+        startHeartbeat(ws);
 
-      // Start heartbeat to keep connection alive
-      startHeartbeat(ws);
+        // Broadcast current peer ID if available
+        // Note: currentPeerId will be available from the hook once initialized
+      };
 
-      // Broadcast current peer ID if available
-      // Note: currentPeerId will be available from the hook once initialized
-    };
+      ws.onmessage = (event) => {
+        // Message handler
+        try {
+          const data = JSON.parse(event.data);
+          console.log("WebSocket received message:", data);
+          console.log("Current user ID:", (user as any)?.id);
+          console.log("Message sender:", data.sender);
 
-    ws.onmessage = (event) => {
-      // Message handler
-      try {
-        const data = JSON.parse(event.data);
-        console.log("WebSocket received message:", data);
-        console.log("Current user ID:", (user as any)?.id);
-        console.log("Message sender:", data.sender);
+          // Handle unified message format: { sender: "uuid", timestamp: time, content: "abc" }
+          if (
+            typeof data === "object" &&
+            data !== null &&
+            "content" in data &&
+            "sender" in data &&
+            "timestamp" in data
+          ) {
+            // Determine if the message is from the current user or the therapist
+            const isFromCurrentUser = data.sender === (user as any)?.id;
+            const messageSender = isFromCurrentUser ? "user" : "therapist";
 
-        // Handle unified message format: { sender: "uuid", timestamp: time, content: "abc" }
-        if (
-          typeof data === "object" &&
-          data !== null &&
-          "content" in data &&
-          "sender" in data &&
-          "timestamp" in data
-        ) {
-          // Determine if the message is from the current user or the therapist
-          const isFromCurrentUser = data.sender === (user as any)?.id;
-          const messageSender = isFromCurrentUser ? "user" : "therapist";
+            // Check if this message is already in our state (to prevent duplicates)
+            setMessages((prevMessages) => {
+              const isDuplicate = prevMessages.some(
+                (msg) =>
+                  msg.content === data.content &&
+                  msg.sender === messageSender &&
+                  Math.abs(
+                    new Date(msg.timestamp).getTime() -
+                      new Date(data.timestamp).getTime()
+                  ) < 1000
+              );
 
-          // Check if this message is already in our state (to prevent duplicates)
-          setMessages((prevMessages) => {
-            const isDuplicate = prevMessages.some(
-              (msg) =>
-                msg.content === data.content &&
-                msg.sender === messageSender &&
-                Math.abs(
-                  new Date(msg.timestamp).getTime() -
-                    new Date(data.timestamp).getTime()
-                ) < 1000
-            );
-
-            console.log("Duplicate check:", {
-              content: data.content,
-              sender: messageSender,
-              isFromCurrentUser,
-              isDuplicate,
-              existingMessages: prevMessages.length,
-            });
-
-            if (!isDuplicate) {
-              const incoming: Message = {
-                id: data.id || generateUniqueMessageId(),
+              console.log("Duplicate check:", {
                 content: data.content,
                 sender: messageSender,
-                timestamp: data.timestamp || new Date().toISOString(),
-                type: "text",
-                status: "delivered",
-                isRead: isFromCurrentUser,
-              };
-              console.log("Adding new message:", incoming);
-              return [...prevMessages, incoming];
-            } else {
-              console.log("Skipping duplicate message");
-            }
-            return prevMessages;
-          });
+                isFromCurrentUser,
+                isDuplicate,
+                existingMessages: prevMessages.length,
+              });
 
-          // If this is a confirmation of our own message, mark it as delivered
-          if (isFromCurrentUser) {
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.content === data.content && msg.status === "sending"
-                  ? { ...msg, status: "delivered" as const }
-                  : msg
-              )
-            );
-            // Remove from pending messages
-            setPendingMessages((prev) => {
-              const newSet = new Set(prev);
-              // Find the message that was just confirmed and remove it from pending
-              const confirmedMessage = messages.find(
-                (msg) =>
-                  msg.content === data.content && msg.status === "sending"
-              );
-              if (confirmedMessage) {
-                newSet.delete(confirmedMessage.id);
+              if (!isDuplicate) {
+                const incoming: Message = {
+                  id: data.id || generateUniqueMessageId(),
+                  content: data.content,
+                  sender: messageSender,
+                  timestamp: data.timestamp || new Date().toISOString(),
+                  type: "text",
+                  status: "delivered",
+                  isRead: isFromCurrentUser,
+                };
+                console.log("Adding new message:", incoming);
+                return [...prevMessages, incoming];
+              } else {
+                console.log("Skipping duplicate message");
               }
-              return newSet;
+              return prevMessages;
             });
-          }
 
-          // Play notification sound for incoming messages
-          if (!isFromCurrentUser && settings.soundEnabled) {
-            notificationSound.play(settings.volume);
-          }
-
-          return;
-        }
-
-        // Legacy typed messages fallback
-        switch (data.type) {
-          case "new-message":
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: data.id || generateUniqueMessageId(),
-                content: data.content,
-                sender:
-                  data.sender === (user as any)?.id ? "user" : "therapist",
-                timestamp:
-                  data.timestamp ||
-                  new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }),
-                type: "text",
-                isRead: data.sender === (user as any)?.id,
-              },
-            ]);
+            // If this is a confirmation of our own message, mark it as delivered
+            if (isFromCurrentUser) {
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.content === data.content && msg.status === "sending"
+                    ? { ...msg, status: "delivered" as const }
+                    : msg
+                )
+              );
+              // Remove from pending messages
+              setPendingMessages((prev) => {
+                const newSet = new Set(prev);
+                // Find the message that was just confirmed and remove it from pending
+                const confirmedMessage = messages.find(
+                  (msg) =>
+                    msg.content === data.content && msg.status === "sending"
+                );
+                if (confirmedMessage) {
+                  newSet.delete(confirmedMessage.id);
+                }
+                return newSet;
+              });
+            }
 
             // Play notification sound for incoming messages
-            if (data.sender !== (user as any)?.id && settings.soundEnabled) {
+            if (!isFromCurrentUser && settings.soundEnabled) {
               notificationSound.play(settings.volume);
             }
-            break;
-          case "user-typing":
-            setIsTyping(data.isTyping);
-            break;
-          case "user-joined":
-            console.log("User joined chat:", data);
-            break;
-          case "peer-id-broadcast":
-            console.log("📡 Received peer ID broadcast:", data.data);
-            // Store the peer ID for future use
-            if (
-              data.data &&
-              data.data.peerId &&
-              data.data.userId !== (user as any)?.id
-            ) {
-              const sessionId = data.data.peerId.split("-").slice(1).join("-");
-              sessionStorage.setItem(
-                `peer-session-${data.data.userId}`,
-                sessionId
-              );
-              console.log(
-                `📡 Stored peer ID for user ${data.data.userId}: ${data.data.peerId}`
-              );
-            }
-            break;
-          case "ping":
-            // Handle ping responses (optional)
-            console.log("💓 Received ping response");
-            break;
-          default:
-            console.log("Unknown message format:", data);
+
+            return;
+          }
+
+          // Legacy typed messages fallback
+          switch (data.type) {
+            case "new-message":
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: data.id || generateUniqueMessageId(),
+                  content: data.content,
+                  sender:
+                    data.sender === (user as any)?.id ? "user" : "therapist",
+                  timestamp:
+                    data.timestamp ||
+                    new Date().toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }),
+                  type: "text",
+                  isRead: data.sender === (user as any)?.id,
+                },
+              ]);
+
+              // Play notification sound for incoming messages
+              if (data.sender !== (user as any)?.id && settings.soundEnabled) {
+                notificationSound.play(settings.volume);
+              }
+              break;
+            case "user-typing":
+              setIsTyping(data.isTyping);
+              break;
+            case "user-joined":
+              console.log("User joined chat:", data);
+              break;
+            case "peer-id-broadcast":
+              console.log("📡 Received peer ID broadcast:", data.data);
+              // Store the peer ID for future use
+              if (
+                data.data &&
+                data.data.peerId &&
+                data.data.userId !== (user as any)?.id
+              ) {
+                const sessionId = data.data.peerId
+                  .split("-")
+                  .slice(1)
+                  .join("-");
+                sessionStorage.setItem(
+                  `peer-session-${data.data.userId}`,
+                  sessionId
+                );
+                console.log(
+                  `📡 Stored peer ID for user ${data.data.userId}: ${data.data.peerId}`
+                );
+              }
+              break;
+            case "ping":
+              // Handle ping responses (optional)
+              console.log("💓 Received ping response");
+              break;
+            default:
+              console.log("Unknown message format:", data);
+          }
+        } catch (error) {
+          console.error("Error parsing WebSocket message:", error);
         }
-      } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
-      }
-    };
+      };
 
-    ws.onclose = (event) => {
-      console.log(
-        "🔌 User WebSocket connection closed:",
-        event.code,
-        event.reason
-      );
-      setWsConnected(false);
-      setWsConnection(null);
-      stopHeartbeat();
-
-      // Always attempt reconnection unless it's a normal closure (user leaving page)
-      if (event.code !== 1000) {
-        reconnectAttemptsRef.current += 1;
-        setReconnectAttempts(reconnectAttemptsRef.current);
-
+      ws.onclose = (event) => {
         console.log(
-          `🔄 Attempting to reconnect user WebSocket (attempt ${reconnectAttemptsRef.current})`
+          "🔌 User WebSocket connection closed:",
+          event.code,
+          event.reason
         );
+        setWsConnected(false);
+        setWsConnection(null);
+        stopHeartbeat();
 
-        // Exponential backoff
-        const delay = Math.min(
-          1000 * Math.pow(2, reconnectAttemptsRef.current - 1),
-          10000
-        );
-        setTimeout(() => {
-          // Always try to reconnect
-          console.log("🔄 Reconnecting user WebSocket...");
-          const newConnectionId = `user-chat-${chatId}-${Date.now()}`;
-          connectWebSocket(newConnectionId);
-        }, delay);
-      } else {
-        console.log("✅ WebSocket closed normally (user leaving page)");
-      }
-    };
+        // Always attempt reconnection unless it's a normal closure (user leaving page)
+        if (event.code !== 1000) {
+          reconnectAttemptsRef.current += 1;
+          setReconnectAttempts(reconnectAttemptsRef.current);
 
-    ws.onerror = (error) => {
-      console.error("❌ User WebSocket connection error:", error);
-      setWsConnected(false);
-      setError("Connection error occurred");
-    };
+          console.log(
+            `🔄 Attempting to reconnect user WebSocket (attempt ${reconnectAttemptsRef.current})`
+          );
 
-    return ws;
-  }, [tokens, chatId, user, wsConnection]);
+          // Exponential backoff
+          const delay = Math.min(
+            1000 * Math.pow(2, reconnectAttemptsRef.current - 1),
+            10000
+          );
+          setTimeout(() => {
+            // Always try to reconnect
+            console.log("🔄 Reconnecting user WebSocket...");
+            const newConnectionId = `user-chat-${chatId}-${Date.now()}`;
+            connectWebSocket(newConnectionId);
+          }, delay);
+        } else {
+          console.log("✅ WebSocket closed normally (user leaving page)");
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error("❌ User WebSocket connection error:", error);
+        setWsConnected(false);
+        setError("Connection error occurred");
+      };
+
+      return ws;
+    },
+    [tokens, chatId, user, wsConnection]
+  );
 
   // Heartbeat function to keep WebSocket alive
   const startHeartbeat = useCallback((ws: WebSocket) => {
@@ -933,6 +942,11 @@ export default function ChatSessionPage() {
               </div>
             </div>
 
+            {/* Language Selector */}
+            <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+              <LanguageSelector compact={true} />
+            </div>
+
             {/* Connection Status */}
             <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between text-sm">
@@ -1169,6 +1183,15 @@ export default function ChatSessionPage() {
                   <Mic className="h-5 w-5" />
                 </button>
 
+                {/* Translation Button */}
+                <button
+                  onClick={() => setShowTranslationPanel(true)}
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  title="Translate chat"
+                >
+                  <Languages className="h-5 w-5" />
+                </button>
+
                 {/* Send Button */}
                 <button
                   onClick={handleSendMessage}
@@ -1310,6 +1333,16 @@ export default function ChatSessionPage() {
           </div>
         </div>
       )}
+
+      {/* Translation Panel */}
+      <TranslationPanel
+        messages={messages}
+        onMessagesUpdate={(updatedMessages) => {
+          setMessages(updatedMessages);
+        }}
+        isOpen={showTranslationPanel}
+        onClose={() => setShowTranslationPanel(false)}
+      />
     </div>
   );
 }

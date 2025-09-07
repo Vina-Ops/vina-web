@@ -17,7 +17,9 @@
     "peerjs:prod": "NODE_ENV=production node scripts/start-peerjs-server.js"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.24",
     "@types/redis": "^4.0.10",
+    "ai": "^5.0.34",
     "axios": "^1.10.0",
     "clsx": "^2.1.1",
     "concurrently": "^9.2.1",

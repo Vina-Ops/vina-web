@@ -15,6 +15,8 @@ import { wsManager } from "@/utils/websocket-manager";
 import { Message } from "@/types/chat";
 import { ConnectionLoading } from "@/components/ui/ConnectionLoading";
 import { DateHeader } from "@/components/chat/DateHeader";
+import { TranslationPanel } from "@/components/chat/TranslationPanel";
+import { LanguageSelector } from "@/components/chat/LanguageSelector";
 import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
 
@@ -25,6 +27,7 @@ export default function ChatPage() {
   const { settings } = useNotification();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [showTranslationPanel, setShowTranslationPanel] = useState(false);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
   // console.log("ChatPage: isConnected from WebSocket context:", isConnected);
@@ -239,14 +242,34 @@ export default function ChatPage() {
 
           {/* <DateHeader messages={messages} /> */}
 
+          {/* Language Selector */}
+          <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <LanguageSelector compact={true} />
+          </div>
+
           <ChatMessages
             messages={messages}
             isTyping={isTyping}
             messagesEndRef={messagesEndRef}
           />
-          <ChatInput onSendMessage={handleSendMessage} />
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            onOpenTranslation={() => setShowTranslationPanel(true)}
+          />
         </div>
       </div>
+
+      {/* Translation Panel */}
+      <TranslationPanel
+        messages={messages}
+        onMessagesUpdate={(updatedMessages) => {
+          // Update messages in the chat context
+          // This would need to be implemented based on your chat state management
+          console.log("Messages updated:", updatedMessages);
+        }}
+        isOpen={showTranslationPanel}
+        onClose={() => setShowTranslationPanel(false)}
+      />
     </>
   );
 }

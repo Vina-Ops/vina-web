@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { ChatMessageProps } from "@/types/chat";
 import { LinkPreview } from "./LinkPreview";
 import { AudioMessage } from "./AudioMessage";
+import { TranslationButton } from "./TranslationButton";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   extractUrls,
   getTextWithoutUrls,
@@ -21,8 +23,56 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       siteName: string | null;
     }>
   >([]);
+  const [translatedContent, setTranslatedContent] = useState<string | null>(
+    null
+  );
+  const [isAutoTranslating, setIsAutoTranslating] = useState(false);
+
+  const {
+    autoTranslate,
+    selectedLanguage,
+    autoTranslateText,
+    getLanguageName,
+    getLanguageFlag,
+  } = useTranslation();
 
   // console.log("Rendering message:", message); // Debug log
+
+  // Auto-translate message content when language changes
+  useEffect(() => {
+    if (
+      autoTranslate &&
+      message.type !== "audio" &&
+      typeof message.content === "string" &&
+      message.content.trim() &&
+      selectedLanguage !== "en"
+    ) {
+      setIsAutoTranslating(true);
+      autoTranslateText(message.content)
+        .then((result) => {
+          if (result.success && result.translatedText !== message.content) {
+            setTranslatedContent(result.translatedText);
+          } else {
+            setTranslatedContent(null);
+          }
+        })
+        .catch((error) => {
+          console.error("Auto-translation failed:", error);
+          setTranslatedContent(null);
+        })
+        .finally(() => {
+          setIsAutoTranslating(false);
+        });
+    } else {
+      setTranslatedContent(null);
+    }
+  }, [
+    autoTranslate,
+    selectedLanguage,
+    message.content,
+    message.type,
+    autoTranslateText,
+  ]);
 
   // Extract URLs and get metadata (only for text messages)
   useEffect(() => {
@@ -73,11 +123,46 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           />
         ) : (
           <>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">
-              {typeof message.content === "string"
-                ? getTextWithoutUrls(message.content)
-                : message.content}
-            </p>
+            <div className="space-y-2">
+              {/* Translated content */}
+              {translatedContent && (
+                <div className="relative">
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {getTextWithoutUrls(translatedContent)}
+                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="text-xs text-blue-600 flex items-center gap-1">
+                      <span>{getLanguageFlag(selectedLanguage)}</span>
+                      <span>
+                        Translated to {getLanguageName(selectedLanguage)}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Original content */}
+              <div className={`${translatedContent ? "opacity-60" : ""}`}>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {typeof message.content === "string"
+                    ? getTextWithoutUrls(message.content)
+                    : message.content}
+                </p>
+                {translatedContent && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    Original message
+                  </div>
+                )}
+              </div>
+
+              {/* Auto-translating indicator */}
+              {isAutoTranslating && (
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <div className="w-3 h-3 border border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                  <span>Translating...</span>
+                </div>
+              )}
+            </div>
 
             {/* Link Previews */}
             {linkMetadata.map((link, index) => (
@@ -92,14 +177,25 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           </>
         )}
         <div
-          className={`text-xs mt-1 ${
+          className={`flex items-center justify-between mt-1 ${
             isUser ? "text-gray-300" : "text-gray-500"
           }`}
         >
-          {message.timestamp.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          <div className="text-xs">
+            {message.timestamp.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </div>
+
+          {/* Translation Button - only for text messages */}
+          {message.type !== "audio" && typeof message.content === "string" && (
+            <TranslationButton
+              text={message.content}
+              messageId={message.id}
+              className={isUser ? "text-gray-300" : "text-gray-500"}
+            />
+          )}
         </div>
       </div>
     </div>
