@@ -149,6 +149,19 @@ export async function POST(request: NextRequest) {
       "TYPE",
       "GET",
       "SET",
+      "INFO",
+      "PING",
+      "DBSIZE",
+      "KEYS",
+      "EXISTS",
+      "HGET",
+      "HSET",
+      "HGETALL",
+      "LLEN",
+      "LRANGE",
+      "SCARD",
+      "SMEMBERS",
+      "CLIENT",
     ];
 
     if (!allowedCommands.includes(command?.toUpperCase())) {
@@ -178,6 +191,65 @@ export async function POST(request: NextRequest) {
           result = await client.flushDb();
         } else if (command === "FLUSHALL") {
           result = await client.flushAll();
+        } else if (command === "INFO") {
+          const infoSection = key || "all";
+          result = await client.info(infoSection);
+        } else if (command === "PING") {
+          result = await client.ping();
+        } else if (command === "DBSIZE") {
+          result = await client.dbSize();
+        } else if (command === "KEYS") {
+          const pattern = key || "*";
+          result = await client.keys(pattern);
+        } else if (command === "EXISTS" && key) {
+          result = await client.exists(key);
+        } else if (command === "HGET" && key && value) {
+          result = await client.hGet(key, value);
+        } else if (command === "HSET" && key && value) {
+          // For HSET, value should be a JSON object
+          const fieldValue = JSON.parse(value);
+          result = await client.hSet(key, fieldValue);
+        } else if (command === "HGETALL" && key) {
+          result = await client.hGetAll(key);
+        } else if (command === "LLEN" && key) {
+          result = await client.lLen(key);
+        } else if (command === "LRANGE" && key && value) {
+          const [start, end] = value.split(" ").map(Number);
+          result = await client.lRange(key, start, end);
+        } else if (command === "SCARD" && key) {
+          result = await client.sCard(key);
+        } else if (command === "SMEMBERS" && key) {
+          result = await client.sMembers(key);
+        } else if (command === "CLIENT") {
+          // Handle CLIENT commands like CLIENT KILL TYPE pubsub
+          if (key === "KILL" && value) {
+            const killType = value.toUpperCase();
+            if (killType === "TYPE PUBSUB") {
+              result = await client.sendCommand([
+                "CLIENT",
+                "KILL",
+                "TYPE",
+                "pubsub",
+              ]);
+            } else if (killType === "TYPE NORMAL") {
+              result = await client.sendCommand([
+                "CLIENT",
+                "KILL",
+                "TYPE",
+                "normal",
+              ]);
+            } else if (killType === "LIST") {
+              result = await client.sendCommand(["CLIENT", "LIST"]);
+            } else {
+              throw new Error(
+                "Invalid CLIENT KILL type. Use 'TYPE PUBSUB' or 'TYPE NORMAL'"
+              );
+            }
+          } else if (key === "LIST") {
+            result = await client.sendCommand(["CLIENT", "LIST"]);
+          } else {
+            throw new Error("Invalid CLIENT command. Use 'KILL' or 'LIST'");
+          }
         } else {
           throw new Error("Invalid command parameters");
         }

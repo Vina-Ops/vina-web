@@ -58,6 +58,7 @@ const RedisMonitor: React.FC<RedisMonitorProps> = ({ className = "" }) => {
   const [selectedKey, setSelectedKey] = useState<string>("");
   const [keyInfo, setKeyInfo] = useState<any>(null);
   const [command, setCommand] = useState("");
+  const [commandValue, setCommandValue] = useState("");
   const [commandResult, setCommandResult] = useState<any>(null);
 
   // Fetch Redis data
@@ -390,26 +391,76 @@ const RedisMonitor: React.FC<RedisMonitorProps> = ({ className = "" }) => {
             Command Execution
           </h3>
           <div className="space-y-3">
-            <div className="flex space-x-2">
-              <select
-                value={command}
-                onChange={(e) => setCommand(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select command...</option>
-                <option value="GET">GET</option>
-                <option value="SET">SET</option>
-                <option value="DEL">DEL</option>
-                <option value="FLUSHDB">FLUSHDB</option>
-                <option value="FLUSHALL">FLUSHALL</option>
-              </select>
-              <button
-                onClick={() => executeCommand("execute", command, selectedKey)}
-                disabled={!command}
-                className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Execute
-              </button>
+            <div className="space-y-2">
+              <div className="flex space-x-2">
+                <select
+                  value={command}
+                  onChange={(e) => setCommand(e.target.value)}
+                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select command...</option>
+                  <option value="GET">GET</option>
+                  <option value="SET">SET</option>
+                  <option value="DEL">DEL</option>
+                  <option value="INFO">INFO</option>
+                  <option value="PING">PING</option>
+                  <option value="DBSIZE">DBSIZE</option>
+                  <option value="KEYS">KEYS</option>
+                  <option value="EXISTS">EXISTS</option>
+                  <option value="HGET">HGET</option>
+                  <option value="HSET">HSET</option>
+                  <option value="HGETALL">HGETALL</option>
+                  <option value="LLEN">LLEN</option>
+                  <option value="LRANGE">LRANGE</option>
+                  <option value="SCARD">SCARD</option>
+                  <option value="SMEMBERS">SMEMBERS</option>
+                  <option value="CLIENT">CLIENT</option>
+                  <option value="FLUSHDB">FLUSHDB</option>
+                  <option value="FLUSHALL">FLUSHALL</option>
+                </select>
+                <button
+                  onClick={() =>
+                    executeCommand(
+                      "execute",
+                      command,
+                      selectedKey,
+                      commandValue
+                    )
+                  }
+                  disabled={!command}
+                  className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Execute
+                </button>
+              </div>
+              {(command === "SET" ||
+                command === "INFO" ||
+                command === "HGET" ||
+                command === "HSET" ||
+                command === "LRANGE" ||
+                command === "CLIENT") && (
+                <input
+                  type="text"
+                  value={commandValue}
+                  onChange={(e) => setCommandValue(e.target.value)}
+                  placeholder={
+                    command === "SET"
+                      ? "Enter value..."
+                      : command === "INFO"
+                      ? "Enter section (clients, memory, etc.)..."
+                      : command === "HGET"
+                      ? "Enter field name..."
+                      : command === "HSET"
+                      ? "Enter JSON object..."
+                      : command === "LRANGE"
+                      ? "Enter start end (e.g., 0 10)..."
+                      : command === "CLIENT"
+                      ? "Enter: KILL TYPE PUBSUB, KILL TYPE NORMAL, or LIST"
+                      : "Enter value..."
+                  }
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
             </div>
 
             {commandResult !== null && (
