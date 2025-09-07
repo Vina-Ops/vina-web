@@ -76,37 +76,52 @@ self.addEventListener("activate", (event) => {
 
 // Fetch event - handle requests
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
+  try {
+    const { request } = event;
+    const url = new URL(request.url);
 
-  // Skip non-GET requests
-  if (request.method !== "GET") {
-    return;
+    // Skip non-GET requests
+    if (request.method !== "GET") {
+      return;
+    }
+
+    // Skip unsupported schemes early
+    if (!isCacheableRequest(request)) {
+      return;
+    }
+
+    // Handle API requests
+    if (url.pathname.startsWith("/api/")) {
+      event.respondWith(handleApiRequest(request));
+      return;
+    }
+
+    // Handle static file requests
+    if (
+      url.pathname.startsWith("/_next/") ||
+      url.pathname.includes(".") ||
+      url.pathname.startsWith("/icons/") ||
+      url.pathname.startsWith("/screenshots/")
+    ) {
+      event.respondWith(handleStaticRequest(request));
+      return;
+    }
+
+    // Handle page requests
+    event.respondWith(handlePageRequest(request));
+  } catch (error) {
+    console.error("Service Worker: Error in fetch handler", error);
+    // Don't respond to the event if there's an error
   }
-
-  // Handle API requests
-  if (url.pathname.startsWith("/api/")) {
-    event.respondWith(handleApiRequest(request));
-    return;
-  }
-
-  // Handle static file requests
-  if (
-    url.pathname.startsWith("/_next/") ||
-    url.pathname.includes(".") ||
-    url.pathname.startsWith("/icons/") ||
-    url.pathname.startsWith("/screenshots/")
-  ) {
-    event.respondWith(handleStaticRequest(request));
-    return;
-  }
-
-  // Handle page requests
-  event.respondWith(handlePageRequest(request));
 });
 
 // Handle API requests with network-first strategy
 async function handleApiRequest(request) {
+  // Skip caching for unsupported schemes
+  if (!isCacheableRequest(request)) {
+    return fetch(request);
+  }
+
   try {
     // Try network first
     const networkResponse = await fetch(request);
@@ -146,6 +161,11 @@ async function handleApiRequest(request) {
 
 // Handle static file requests with cache-first strategy
 async function handleStaticRequest(request) {
+  // Skip caching for unsupported schemes (chrome-extension, moz-extension, etc.)
+  if (!isCacheableRequest(request)) {
+    return fetch(request);
+  }
+
   const cachedResponse = await caches.match(request);
 
   if (cachedResponse) {
@@ -167,8 +187,43 @@ async function handleStaticRequest(request) {
   }
 }
 
+// Check if request can be cached
+function isCacheableRequest(request) {
+  try {
+    const url = new URL(request.url);
+    const unsupportedSchemes = [
+      'chrome-extension',
+      'moz-extension',
+      'safari-extension',
+      'ms-browser-extension',
+      'chrome',
+      'chrome-devtools',
+      'moz-extension',
+      'about',
+      'data',
+      'blob',
+      'file',
+      'ftp',
+      'gopher',
+      'ws',
+      'wss'
+    ];
+    
+    const protocol = url.protocol.slice(0, -1); // Remove trailing ':'
+    return !unsupportedSchemes.includes(protocol);
+  } catch (error) {
+    console.error("Service Worker: Error checking cacheable request", error);
+    return false; // Don't cache if we can't parse the URL
+  }
+}
+
 // Handle page requests with network-first strategy
 async function handlePageRequest(request) {
+  // Skip caching for unsupported schemes
+  if (!isCacheableRequest(request)) {
+    return fetch(request);
+  }
+
   try {
     // Try network first
     const networkResponse = await fetch(request);

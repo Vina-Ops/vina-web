@@ -20,28 +20,69 @@ export const getPeerConfig = () => {
     host: peerHost,
     port: peerPort,
     secure: isSecure,
-   
+
     config: {
       iceServers: [
+        // Google STUN servers
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
         { urls: "stun:stun2.l.google.com:19302" },
-        // Add TURN servers for better connectivity in production
-        ...(isDevelopment
-          ? []
-          : [
-              {
-                urls: "turn:openrelay.metered.ca:80",
-                username: "openrelayproject",
-                credential: "openrelayproject",
-              },
-              {
-                urls: "turn:openrelay.metered.ca:443",
-                username: "openrelayproject",
-                credential: "openrelayproject",
-              },
-            ]),
+        { urls: "stun:stun3.l.google.com:19302" },
+        { urls: "stun:stun4.l.google.com:19302" },
+        
+        // Additional STUN servers for better connectivity
+        { urls: "stun:stun.ekiga.net" },
+        { urls: "stun:stun.ideasip.com" },
+        { urls: "stun:stun.schlund.de" },
+        { urls: "stun:stun.stunprotocol.org:3478" },
+        { urls: "stun:stun.voiparound.com" },
+        { urls: "stun:stun.voipbuster.com" },
+        { urls: "stun:stun.voipstunt.com" },
+        { urls: "stun:stun.counterpath.com" },
+        { urls: "stun:stun.1und1.de" },
+        { urls: "stun:stun.gmx.net" },
+        { urls: "stun:stun.qq.com" },
+        { urls: "stun:stun.miwifi.com" },
+        
+        // TURN servers for NAT traversal (always include for better connectivity)
+        {
+          urls: "turn:openrelay.metered.ca:80",
+          username: "openrelayproject",
+          credential: "openrelayproject",
+        },
+        {
+          urls: "turn:openrelay.metered.ca:443",
+          username: "openrelayproject",
+          credential: "openrelayproject",
+        },
+        {
+          urls: "turn:openrelay.metered.ca:443?transport=tcp",
+          username: "openrelayproject",
+          credential: "openrelayproject",
+        },
+        
+        // Additional free TURN servers
+        {
+          urls: "turn:relay.metered.ca:80",
+          username: "openrelayproject",
+          credential: "openrelayproject",
+        },
+        {
+          urls: "turn:relay.metered.ca:443",
+          username: "openrelayproject",
+          credential: "openrelayproject",
+        },
+        {
+          urls: "turn:relay.metered.ca:443?transport=tcp",
+          username: "openrelayproject",
+          credential: "openrelayproject",
+        },
       ],
+      // Enhanced ICE configuration
+      iceCandidatePoolSize: 10,
+      iceTransportPolicy: "all", // Try both relay and host candidates
+      bundlePolicy: "max-bundle",
+      rtcpMuxPolicy: "require",
     },
   };
 

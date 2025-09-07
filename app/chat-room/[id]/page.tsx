@@ -105,6 +105,7 @@ export default function ChatSessionPage() {
     startRecording,
     stopRecording,
     getLocalStream,
+    connectionDiagnostics,
   } = usePeerVideoCall({
     currentUserId: (user as any)?.id || "", // Type assertion for user ID
     roomId: chatId, // Use the chat room ID from URL
@@ -1250,6 +1251,7 @@ export default function ChatSessionPage() {
           callDuration={callState.callDuration}
           recordingDuration={callState.recordingDuration}
           networkStats={networkStats}
+          connectionDiagnostics={connectionDiagnostics}
           // Ringing overlay props
           isCallOutgoing={callState.isCallOutgoing}
           isCallIncoming={callState.isCallIncoming}

@@ -38,6 +38,19 @@ export interface NetworkStats {
   bandwidth: number;
 }
 
+export interface ConnectionDiagnostics {
+  iceConnectionState: string;
+  iceGatheringState: string;
+  connectionState: string;
+  signalingState: string;
+  iceCandidates: number;
+  turnServersUsed: string[];
+  stunServersUsed: string[];
+  connectionType: string;
+  localCandidateType: string;
+  remoteCandidateType: string;
+}
+
 interface UsePeerVideoCallProps {
   currentUserId: string;
   roomId: string;
@@ -74,6 +87,22 @@ export const usePeerVideoCall = ({
   const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(
     new Map()
   );
+  const [connectionDiagnostics, setConnectionDiagnostics] = useState<ConnectionDiagnostics>({
+    iceConnectionState: "new",
+    iceGatheringState: "new",
+    connectionState: "new",
+    signalingState: "stable",
+    iceCandidates: 0,
+    turnServersUsed: [],
+    stunServersUsed: [],
+    connectionType: "unknown",
+    localCandidateType: "unknown",
+    remoteCandidateType: "unknown",
+  });
+
+  // Track active calls to prevent duplicates and ensure proper cleanup
+  const activeCallsRef = useRef<Map<string, MediaConnection>>(new Map());
+  const callTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [incomingCall, setIncomingCall] = useState<IncomingCall>({
     isVisible: false,
     caller: null,
@@ -222,6 +251,20 @@ export const usePeerVideoCall = ({
         callOpen: call.open,
       });
 
+      // Check if we already have an active call from this peer
+      if (activeCallsRef.current.has(call.peer)) {
+        console.log(`⚠️ Already have an active call from ${call.peer}, rejecting duplicate`);
+        call.close();
+        return;
+      }
+
+      // Check if we already have an incoming call
+      if (incomingCall.isVisible && incomingCall.call) {
+        console.log(`⚠️ Already have an incoming call, rejecting new call from ${call.peer}`);
+        call.close();
+        return;
+      }
+
       // Extract caller information from peer ID
       // Peer ID format: userId-roomId
       const peerIdParts = call.peer.split("-");
@@ -311,6 +354,12 @@ export const usePeerVideoCall = ({
 
       if (stream) {
         incomingCall.call.answer(stream);
+        
+        // Track this incoming call
+        activeCallsRef.current.set(incomingCall.call.peer, incomingCall.call);
+        
+        // Start monitoring ICE connection
+        monitorIceConnection(incomingCall.call);
 
         incomingCall.call.on("stream", (remoteStream) => {
           console.log(
@@ -342,17 +391,25 @@ export const usePeerVideoCall = ({
           console.log(
             `📞 Incoming call ended by remote peer: ${incomingCall.call!.peer}`
           );
+          
+          // Remove from active calls tracking
+          activeCallsRef.current.delete(incomingCall.call!.peer);
+          
           setRemoteStreams((prev) => {
             const newMap = new Map(prev);
             newMap.delete(incomingCall.call!.peer);
             return newMap;
           });
 
+          // Check if we have any remaining active calls
+          const remainingCalls = activeCallsRef.current.size;
+          console.log(`📞 Remaining active calls after incoming call end: ${remainingCalls}`);
+
           // Update call state when call is closed
           setCallState((prev) => ({
             ...prev,
-            isInCall: false,
-            isCallActive: false,
+            isInCall: remainingCalls > 0,
+            isCallActive: remainingCalls > 0,
             isCallIncoming: false,
           }));
 
@@ -363,17 +420,27 @@ export const usePeerVideoCall = ({
             call: null,
           });
 
-          stopCallTimer();
-          stopNetworkStatsMonitoring();
+          // Only stop timers if no more calls
+          if (remainingCalls === 0) {
+            stopCallTimer();
+            stopNetworkStatsMonitoring();
+          }
         });
 
         // Handle call error event for incoming calls
         incomingCall.call.on("error", (error) => {
           console.error(`❌ Incoming call error:`, error);
+          
+          // Remove from active calls tracking
+          activeCallsRef.current.delete(incomingCall.call!.peer);
+          
+          // Check remaining calls
+          const remainingCalls = activeCallsRef.current.size;
+          
           setCallState((prev) => ({
             ...prev,
-            isInCall: false,
-            isCallActive: false,
+            isInCall: remainingCalls > 0,
+            isCallActive: remainingCalls > 0,
             isCallIncoming: false,
           }));
 
@@ -383,6 +450,12 @@ export const usePeerVideoCall = ({
             caller: null,
             call: null,
           });
+
+          // Only stop timers if no more calls
+          if (remainingCalls === 0) {
+            stopCallTimer();
+            stopNetworkStatsMonitoring();
+          }
         });
 
         setCallState((prev) => {
@@ -484,8 +557,20 @@ export const usePeerVideoCall = ({
           });
 
           try {
+            // Check if we already have an active call to this peer
+            if (activeCallsRef.current.has(targetPeerId)) {
+              console.log(`⚠️ Already have an active call to ${targetPeerId}, skipping duplicate`);
+              continue;
+            }
+
             const call = peer.call(targetPeerId, stream);
             calls.push(call);
+            
+            // Track this call
+            activeCallsRef.current.set(targetPeerId, call);
+            
+            // Start monitoring ICE connection
+            monitorIceConnection(call);
 
             console.log(`📞 Call object created:`, {
               peer: call.peer,
@@ -519,19 +604,33 @@ export const usePeerVideoCall = ({
 
             call.on("close", () => {
               console.log(`📞 Call with ${participant.id} ended`);
+              
+              // Remove from active calls tracking
+              activeCallsRef.current.delete(targetPeerId);
+              
               setRemoteStreams((prev) => {
                 const newMap = new Map(prev);
                 newMap.delete(participant.id);
                 return newMap;
               });
 
+              // Check if we have any remaining active calls
+              const remainingCalls = activeCallsRef.current.size;
+              console.log(`📞 Remaining active calls: ${remainingCalls}`);
+
               // Update call state when call is closed
               setCallState((prev) => ({
                 ...prev,
-                isInCall: false,
-                isCallActive: false,
+                isInCall: remainingCalls > 0,
+                isCallActive: remainingCalls > 0,
                 isCallOutgoing: false,
               }));
+
+              // If no more calls, stop timers
+              if (remainingCalls === 0) {
+                stopCallTimer();
+                stopNetworkStatsMonitoring();
+              }
             });
 
             call.on("error", (error) => {
@@ -542,6 +641,18 @@ export const usePeerVideoCall = ({
                 targetPeerId,
                 currentPeerId: peer.id,
               });
+              
+              // Remove from active calls tracking on error
+              activeCallsRef.current.delete(targetPeerId);
+              
+              // Update call state on error
+              const remainingCalls = activeCallsRef.current.size;
+              setCallState((prev) => ({
+                ...prev,
+                isInCall: remainingCalls > 0,
+                isCallActive: remainingCalls > 0,
+                isCallOutgoing: false,
+              }));
             });
           } catch (error) {
             console.error(`❌ Failed to call ${participant.id}:`, error);
@@ -587,9 +698,26 @@ export const usePeerVideoCall = ({
 
   // End call
   const endCall = useCallback(() => {
-    console.log("📞 Ending call");
+    console.log("📞 Ending call - comprehensive cleanup");
 
-    // Close all active call connections
+    // Clear any pending call timeouts
+    if (callTimeoutRef.current) {
+      clearTimeout(callTimeoutRef.current);
+      callTimeoutRef.current = null;
+    }
+
+    // Close all tracked active calls
+    activeCallsRef.current.forEach((call, peerId) => {
+      console.log(`📞 Closing tracked call to: ${peerId}`);
+      try {
+        call.close();
+      } catch (error) {
+        console.warn(`Error closing call to ${peerId}:`, error);
+      }
+    });
+    activeCallsRef.current.clear();
+
+    // Close all active call connections from peer
     if (peerRef.current && !peerRef.current.destroyed) {
       // Close all connections in the peer's connections object
       Object.values(peerRef.current.connections).forEach((connections) => {
@@ -600,7 +728,11 @@ export const usePeerVideoCall = ({
                 "📞 Closing active call connection:",
                 connection.peer
               );
-              connection.close();
+              try {
+                connection.close();
+              } catch (error) {
+                console.warn("Error closing connection:", error);
+              }
             }
           });
         }
@@ -610,7 +742,11 @@ export const usePeerVideoCall = ({
     // Close incoming call if it exists
     if (incomingCall.call) {
       console.log("📞 Closing incoming call");
-      incomingCall.call.close();
+      try {
+        incomingCall.call.close();
+      } catch (error) {
+        console.warn("Error closing incoming call:", error);
+      }
     }
 
     // Close all remote streams
@@ -854,6 +990,82 @@ export const usePeerVideoCall = ({
     };
   }, [handleIncomingCall]);
 
+  // Function to monitor ICE connection states
+  const monitorIceConnection = useCallback((call: MediaConnection) => {
+    const pc = call.peerConnection;
+    if (!pc) return;
+
+    const updateDiagnostics = () => {
+      setConnectionDiagnostics(prev => ({
+        ...prev,
+        iceConnectionState: pc.iceConnectionState,
+        iceGatheringState: pc.iceGatheringState,
+        connectionState: pc.connectionState,
+        signalingState: pc.signalingState,
+      }));
+    };
+
+    // Monitor ICE connection state changes
+    pc.addEventListener('iceconnectionstatechange', () => {
+      console.log(`🧊 ICE Connection State: ${pc.iceConnectionState}`);
+      updateDiagnostics();
+      
+      if (pc.iceConnectionState === 'connected') {
+        console.log('✅ ICE connection established successfully');
+      } else if (pc.iceConnectionState === 'failed') {
+        console.error('❌ ICE connection failed - this usually means NAT traversal failed');
+        console.log('💡 Try using TURN servers or check firewall settings');
+      } else if (pc.iceConnectionState === 'disconnected') {
+        console.warn('⚠️ ICE connection disconnected');
+      }
+    });
+
+    // Monitor ICE gathering state
+    pc.addEventListener('icegatheringstatechange', () => {
+      console.log(`🔍 ICE Gathering State: ${pc.iceGatheringState}`);
+      updateDiagnostics();
+    });
+
+    // Monitor connection state
+    pc.addEventListener('connectionstatechange', () => {
+      console.log(`🔗 Connection State: ${pc.connectionState}`);
+      updateDiagnostics();
+    });
+
+    // Monitor ICE candidates
+    pc.addEventListener('icecandidate', (event) => {
+      if (event.candidate) {
+        console.log('🧊 ICE Candidate:', {
+          type: event.candidate.type,
+          protocol: event.candidate.protocol,
+          address: event.candidate.address,
+          port: event.candidate.port,
+          candidate: event.candidate.candidate,
+        });
+        
+        setConnectionDiagnostics(prev => ({
+          ...prev,
+          iceCandidates: prev.iceCandidates + 1,
+          localCandidateType: event.candidate?.type || prev.localCandidateType,
+        }));
+      }
+    });
+
+    // Monitor ICE candidate errors
+    pc.addEventListener('icecandidateerror', (event) => {
+      console.error('❌ ICE Candidate Error:', {
+        errorCode: event.errorCode,
+        errorText: event.errorText,
+        url: event.url,
+        address: event.address,
+        port: event.port,
+      });
+    });
+
+    // Initial state
+    updateDiagnostics();
+  }, []);
+
   return {
     // State
     callState,
@@ -863,6 +1075,7 @@ export const usePeerVideoCall = ({
     isConnecting,
     currentPeerId,
     networkStats,
+    connectionDiagnostics,
 
     // Actions
     startCall,

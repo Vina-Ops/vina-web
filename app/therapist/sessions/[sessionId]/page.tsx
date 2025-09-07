@@ -101,6 +101,7 @@ export default function TherapistChatPage() {
     toggleScreenShare,
     startRecording,
     stopRecording,
+    connectionDiagnostics,
   } = usePeerVideoCall({
     currentUserId: (user as any)?.id || "",
     roomId: sessionId || "",
@@ -735,7 +736,7 @@ export default function TherapistChatPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white sticky top-0 dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -813,7 +814,7 @@ export default function TherapistChatPage() {
       {/* Connection Status Banner */}
       {!wsConnected && (
         <div
-          className={`border-l-4 p-3 mx-4 mt-2 ${
+          className={`border-l-4 p-3 mt-2 ${
             wsConnecting
               ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400"
               : "bg-red-50 dark:bg-red-900/20 border-red-400"
@@ -861,7 +862,7 @@ export default function TherapistChatPage() {
 
       {/* Main Chat Area */}
       <div className="py-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-[calc(100vh-200px)] flex flex-col">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-[calc(100vh-400px)] flex flex-col">
           {/* Chat Messages */}
           <div className="flex-1 min-h-0 overflow-y-auto p-4">
             <div className="space-y-4">
@@ -1030,6 +1031,7 @@ export default function TherapistChatPage() {
           callDuration={callState.callDuration}
           recordingDuration={callState.recordingDuration}
           networkStats={networkStats}
+          connectionDiagnostics={connectionDiagnostics}
           // Ringing overlay props
           isCallOutgoing={callState.isCallOutgoing}
           isCallIncoming={callState.isCallIncoming}

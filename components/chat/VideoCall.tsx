@@ -12,7 +12,8 @@ import {
   Circle,
   Phone,
 } from "lucide-react";
-import { CallParticipant, NetworkStats } from "@/hooks/usePeerVideoCall";
+import { CallParticipant, NetworkStats, ConnectionDiagnostics } from "@/hooks/usePeerVideoCall";
+import ConnectionDiagnosticsComponent from "./ConnectionDiagnostics";
 
 interface VideoCallProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ interface VideoCallProps {
   onStopRecording: () => void;
   isMuted: boolean;
   isVideoEnabled: boolean;
+  connectionDiagnostics?: ConnectionDiagnostics;
   isScreenSharing: boolean;
   isRecording: boolean;
   callDuration: number;
@@ -54,6 +56,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
   onStopRecording,
   isMuted,
   isVideoEnabled,
+  connectionDiagnostics,
   isScreenSharing,
   isRecording,
   callDuration,
@@ -178,7 +181,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
             )}
           </div>
 
-          {/* Network Stats */}
+          {/* Network Stats and Connection Diagnostics */}
           <div className="flex items-center space-x-4 text-xs">
             <div className="flex items-center space-x-2">
               <span>🌐</span>
@@ -496,6 +499,16 @@ const VideoCall: React.FC<VideoCallProps> = ({
         {1 + remoteStreams.size} participant
         {1 + remoteStreams.size !== 1 ? "s" : ""}
       </div>
+
+      {/* Connection Diagnostics */}
+      {connectionDiagnostics && (
+        <div className="absolute top-20 left-4 max-w-sm">
+          <ConnectionDiagnosticsComponent 
+            diagnostics={connectionDiagnostics}
+            className="bg-white/90 backdrop-blur-sm"
+          />
+        </div>
+      )}
     </div>
   );
 };

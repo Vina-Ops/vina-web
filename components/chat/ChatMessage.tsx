@@ -93,7 +93,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         )}
         <div
           className={`text-xs mt-1 ${
-            isUser ? "text-green-100" : "text-gray-500"
+            isUser ? "text-gray-300" : "text-gray-500"
           }`}
         >
           {message.timestamp.toLocaleTimeString([], {

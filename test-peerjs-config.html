@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeerJS Configuration Test</title>
+    <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+</head>
+<body>
+    <h1>PeerJS Configuration Test</h1>
+    <div id="status">Testing configuration...</div>
+    <div id="logs"></div>
+
+    <script>
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            console.log(message);
+        }
+
+        function updateStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.style.color = isError ? 'red' : 'green';
+        }
+
+        // Test configuration
+        const isDevelopment = window.location.hostname === 'localhost';
+        const peerHost = isDevelopment ? "localhost" : "0.peerjs.com";
+        const peerPort = isDevelopment ? 9000 : 443;
+        const isSecure = !isDevelopment;
+
+        log(`Environment: ${isDevelopment ? 'Development' : 'Production'}`);
+        log(`Host: ${peerHost}`);
+        log(`Port: ${peerPort}`);
+        log(`Secure: ${isSecure}`);
+
+        const config = {
+            host: peerHost,
+            port: peerPort,
+            secure: isSecure,
+            path: "/peerjs",
+            config: {
+                iceServers: [
+                    { urls: "stun:stun.l.google.com:19302" },
+                    { urls: "stun:stun1.l.google.com:19302" },
+                    { urls: "stun:stun2.l.google.com:19302" },
+                ],
+            },
+        };
+
+        log(`Full config: ${JSON.stringify(config, null, 2)}`);
+
+        // Test PeerJS connection
+        const peerId = `test-${Date.now()}`;
+        log(`Creating peer with ID: ${peerId}`);
+
+        const peer = new Peer(peerId, config);
+
+        peer.on('open', (id) => {
+            log(`✅ Peer connected successfully with ID: ${id}`);
+            updateStatus('PeerJS connection successful!');
+        });
+
+        peer.on('error', (error) => {
+            log(`❌ PeerJS error: ${error.type} - ${error.message}`);
+            updateStatus(`Connection failed: ${error.message}`, true);
+        });
+
+        peer.on('disconnected', () => {
+            log('⚠️ Peer disconnected');
+            updateStatus('Peer disconnected', true);
+        });
+
+        // Cleanup after 10 seconds
+        setTimeout(() => {
+            peer.destroy();
+            log('🧹 Peer destroyed for cleanup');
+        }, 10000);
+    </script>
+</body>
+</html>
