@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Languages, Loader2, X, RotateCcw, Globe } from "lucide-react";
 import { useTranslation, SUPPORTED_LANGUAGES } from "@/hooks/useTranslation";
+import { Message } from "@/types/chat";
 
-interface Message {
-  id: string;
-  content: string;
-  sender: "user" | "therapist" | "ai";
-  timestamp: string;
-  type: "text" | "image" | "file" | "audio";
-  isRead: boolean;
-  status?: "sending" | "sent" | "delivered" | "failed";
+interface ExtendedMessage extends Message {
   originalContent?: string;
   isTranslated?: boolean;
 }
@@ -74,14 +68,16 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
   const handleRevertTranslation = () => {
     const revertedMessages = messages.map((msg) => ({
       ...msg,
-      content: msg.originalContent || msg.content,
+      content: (msg as ExtendedMessage).originalContent || msg.content,
       originalContent: undefined,
       isTranslated: false,
     }));
     onMessagesUpdate(revertedMessages);
   };
 
-  const hasTranslatedMessages = messages.some((msg) => msg.isTranslated);
+  const hasTranslatedMessages = messages.some(
+    (msg) => (msg as ExtendedMessage).isTranslated
+  );
 
   if (!isOpen) return null;
 
@@ -187,7 +183,12 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
                   {messages.slice(0, 3).map((message) => (
                     <div key={message.id} className="text-sm">
                       <div className="font-medium text-gray-600">
-                        {message.sender === "user" ? "You" : "AI"}:
+                        {message.sender === "user"
+                          ? "You"
+                          : message.sender === "therapist"
+                          ? "Therapist"
+                          : "AI"}
+                        :
                       </div>
                       <div className="text-gray-800">
                         {message.content.length > 100

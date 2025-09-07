@@ -53,7 +53,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         <select
           value={selectedLanguage}
           onChange={(e) => handleLanguageChange(e.target.value)}
-          className="text-xs border border-gray-200 rounded-md px-2 py-1 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          className="text-xs border border-gray-200 rounded-md px-2 py-1 bg-white dark:bg-gray-700 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
         >
           {SUPPORTED_LANGUAGES.map((language) => (
             <option key={language.code} value={language.code}>

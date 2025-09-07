@@ -542,7 +542,9 @@ function TherapistSessionsContent() {
             id: data.id || generateUniqueMessageId(),
             content: data.content,
             sender: messageSender,
-            timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
+            timestamp: data.timestamp || new Date().toISOString(),
+            type: "text",
+            isRead: false,
           };
 
           // Check for duplicates before adding
@@ -897,7 +899,9 @@ function TherapistSessionsContent() {
       id: messageId,
       content,
       sender: "user",
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
+      type: "text",
+      isRead: false,
     };
 
     // Add to messages immediately (optimistic UI) and sort by timestamp

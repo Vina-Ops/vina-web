@@ -1,11 +1,13 @@
-import React from 'react';
+import React from "react";
 
 export interface Message {
   id: string;
-  content: string | React.ReactNode;
-  sender: "user" | "ai";
-  timestamp: Date;
-  type?: "text" | "audio";
+  content: string;
+  sender: "user" | "therapist" | "ai";
+  timestamp: string;
+  type: "text" | "audio" | "image" | "file";
+  isRead: boolean;
+  status?: "sending" | "sent" | "delivered" | "failed";
   audioUrl?: string;
   duration?: number;
   transcription?: string;
@@ -28,6 +30,7 @@ export interface AudioMessage {
 
 export interface ChatMessageProps {
   message: Message;
+  highlightQuery?: string;
 }
 
 export interface ChatMessagesProps {

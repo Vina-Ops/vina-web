@@ -55,7 +55,9 @@ export const useChatWebSocket = () => {
         id: `${Date.now()}-fallback-${Math.random().toString(36).substr(2, 9)}`,
         content: "I'm here to help you. What would you like to talk about?",
         sender: "ai",
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
+        type: "text",
+        isRead: false,
       };
       setMessages((prev) => [...prev, aiResponse]);
       setIsTyping(false);
@@ -80,7 +82,9 @@ export const useChatWebSocket = () => {
       id: `${Date.now()}-user-${Math.random().toString(36).substr(2, 9)}`,
       content: content.trim(),
       sender: "user",
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
+      type: "text",
+      isRead: false,
     };
     setMessages((prev) => [...prev, userMessage]);
     // console.log("Added user message to UI:", userMessage);

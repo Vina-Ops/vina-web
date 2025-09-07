@@ -18,7 +18,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     const groups: { [key: string]: Message[] } = {};
 
     messages.forEach((message) => {
-      const date = message.timestamp.toDateString();
+      const date = new Date(message.timestamp).toDateString();
       if (!groups[date]) {
         groups[date] = [];
       }
@@ -50,23 +50,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     }
   };
 
-  // Highlight search terms in text
-  const highlightSearchTerms = (text: string, query: string) => {
-    if (!query.trim()) return text;
-
-    const regex = new RegExp(`(${query})`, "gi");
-    const parts = text.split(regex);
-
-    return parts.map((part, index) =>
-      regex.test(part) ? (
-        <mark key={index} className="bg-yellow-200 px-1 rounded">
-          {part}
-        </mark>
-      ) : (
-        part
-      )
-    );
-  };
 
   const groupedResults = groupResultsByDate(results);
   const sortedDates = Object.keys(groupedResults).sort(
@@ -99,13 +82,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           {groupedResults[date].map((message) => (
             <div key={message.id} className="mb-4">
               <ChatMessage
-                message={{
-                  ...message,
-                  content:
-                    typeof message.content === "string"
-                      ? highlightSearchTerms(message.content, searchQuery)
-                      : message.content,
-                }}
+                message={message}
+                highlightQuery={searchQuery}
               />
             </div>
           ))}

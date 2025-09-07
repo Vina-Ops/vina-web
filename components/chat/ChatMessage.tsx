@@ -12,8 +12,26 @@ import {
   getLinkMetadata,
 } from "@/utils/link-utils";
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+export const ChatMessage: React.FC<ChatMessageProps> = ({ message, highlightQuery }) => {
   const isUser = message.sender === "user";
+
+  // Helper function to highlight search terms
+  const highlightText = (text: string, query?: string) => {
+    if (!query || !query.trim()) return text;
+    
+    const regex = new RegExp(`(${query})`, "gi");
+    const parts = text.split(regex);
+    
+    return parts.map((part, index) =>
+      regex.test(part) ? (
+        <mark key={index} className="bg-yellow-200 px-1 rounded">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
+  };
   const [linkMetadata, setLinkMetadata] = useState<
     Array<{
       url: string;
@@ -128,7 +146,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
               {translatedContent && (
                 <div className="relative">
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {getTextWithoutUrls(translatedContent)}
+                    {highlightText(getTextWithoutUrls(translatedContent), highlightQuery)}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
                     <span className="text-xs text-blue-600 flex items-center gap-1">
@@ -145,7 +163,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
               <div className={`${translatedContent ? "opacity-60" : ""}`}>
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
                   {typeof message.content === "string"
-                    ? getTextWithoutUrls(message.content)
+                    ? highlightText(getTextWithoutUrls(message.content), highlightQuery)
                     : message.content}
                 </p>
                 {translatedContent && (
@@ -182,7 +200,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           }`}
         >
           <div className="text-xs">
-            {message.timestamp.toLocaleTimeString([], {
+            {new Date(message.timestamp).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             })}

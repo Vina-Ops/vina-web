@@ -16,7 +16,7 @@ export const DateHeader: React.FC<DateHeaderProps> = ({
   const dateToShow =
     currentDate || (messages.length > 0 ? messages[0].timestamp : new Date());
 
-  const formattedDate = dateToShow.toLocaleDateString("en-US", {
+  const formattedDate = new Date(dateToShow).toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",

@@ -100,7 +100,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
       if (isAtBottom && sortedMessages.length > 0) {
         const latestMessage = sortedMessages[sortedMessages.length - 1];
-        const latestDate = latestMessage.timestamp.toDateString();
+        const latestDate = new Date(latestMessage.timestamp).toDateString();
         if (latestDate !== stickyDate) {
           isUpdating = true;
           setStickyDate(latestDate);

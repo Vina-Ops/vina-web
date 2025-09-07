@@ -50,8 +50,9 @@ export const ChatInput: React.FC<ChatInputWithTranslationProps> = ({
       id: `${Date.now()}-audio-${Math.random().toString(36).substr(2, 9)}`,
       content: "",
       sender: "user" as const,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
       type: "audio" as const,
+      isRead: false,
       audioUrl,
       duration,
     };

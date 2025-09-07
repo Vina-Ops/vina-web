@@ -216,8 +216,8 @@ export class ChatWebSocketService {
 
           // Parse timestamp from the message
           const timestamp = data.timestamp
-            ? new Date(data.timestamp)
-            : new Date();
+            ? new Date(data.timestamp).toISOString()
+            : new Date().toISOString();
           // console.log("🕐 Parsed timestamp:", timestamp);
 
           const message: Message = {
@@ -225,6 +225,8 @@ export class ChatWebSocketService {
             content: cleanedContent,
             sender: "ai",
             timestamp: timestamp,
+            type: "text",
+            isRead: false,
           };
           this.onMessageHandler(message);
         }
@@ -246,7 +248,9 @@ export class ChatWebSocketService {
             id: this.generateUniqueId(),
             content: data.content,
             sender: "ai", // Treat as AI response in the main chat
-            timestamp: new Date(data.timestamp),
+            timestamp: new Date(data.timestamp).toISOString(),
+            type: "text",
+            isRead: false,
           };
           this.onMessageHandler(message);
         }
@@ -261,8 +265,8 @@ export class ChatWebSocketService {
 
           // Parse timestamp from the message
           const timestamp = data.timestamp
-            ? new Date(data.timestamp)
-            : new Date();
+            ? new Date(data.timestamp).toISOString()
+            : new Date().toISOString();
           // console.log("🕐 Parsed human timestamp:", timestamp);
 
           const message: Message = {
@@ -270,6 +274,8 @@ export class ChatWebSocketService {
             content: data.human,
             sender: "user",
             timestamp: timestamp,
+            type: "text",
+            isRead: false,
           };
           this.onMessageHandler(message);
         }
@@ -285,7 +291,9 @@ export class ChatWebSocketService {
                 id: this.generateUniqueId(),
                 content: data.data.content,
                 sender: "ai",
-                timestamp: new Date(),
+                timestamp: new Date().toISOString(),
+                type: "text",
+                isRead: false,
               };
               this.onMessageHandler(message);
             }
