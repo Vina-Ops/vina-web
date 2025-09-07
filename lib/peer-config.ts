@@ -57,12 +57,6 @@ export const getPeerConfig = () => {
           username: "openrelayproject",
           credential: "openrelayproject",
         },
-        {
-          urls: "turn:openrelay.metered.ca:443?transport=tcp",
-          username: "openrelayproject",
-          credential: "openrelayproject",
-        },
-
         // Additional free TURN servers
         {
           urls: "turn:relay.metered.ca:80",
@@ -71,11 +65,6 @@ export const getPeerConfig = () => {
         },
         {
           urls: "turn:relay.metered.ca:443",
-          username: "openrelayproject",
-          credential: "openrelayproject",
-        },
-        {
-          urls: "turn:relay.metered.ca:443?transport=tcp",
           username: "openrelayproject",
           credential: "openrelayproject",
         },

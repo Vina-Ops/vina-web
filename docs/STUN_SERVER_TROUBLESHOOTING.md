@@ -1,10 +1,11 @@
 # STUN Server Troubleshooting Guide
 
-## Problem: STUN Host Lookup Errors
+## Problem: STUN and TURN Server Connection Errors
 
-**Error**: `ICE Candidate Error: {errorCode: 701, errorText: 'STUN host lookup received error.'}`
+**STUN Error**: `ICE Candidate Error: {errorCode: 701, errorText: 'STUN host lookup received error.'}`
+**TURN Error**: `ICE Candidate Error: {errorCode: 701, errorText: 'Failed to establish connection'}`
 
-This error indicates that some STUN servers in the configuration are not accessible or have DNS resolution issues.
+These errors indicate that some STUN/TURN servers in the configuration are not accessible or have connection issues.
 
 ## What Are STUN Servers?
 

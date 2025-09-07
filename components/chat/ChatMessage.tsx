@@ -60,7 +60,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         className={`max-w-xs lg:max-w-xl px-4 py-3 rounded-2xl shadow-sm ${
           isUser
             ? "bg-[#013F25] text-white rounded-br-md"
-            : "bg-[#013F25]/20 text-black rounded-bl-md"
+            : "bg-white text-black rounded-bl-md"
         }`}
       >
         {/* Audio Message */}

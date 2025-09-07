@@ -862,7 +862,7 @@ export default function TherapistChatPage() {
 
       {/* Main Chat Area */}
       <div className="py-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-[calc(100vh-400px)] flex flex-col">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700  flex flex-1 flex-col">
           {/* Chat Messages */}
           <div className="flex-1 min-h-0 overflow-y-auto p-4">
             <div className="space-y-4">
@@ -975,6 +975,7 @@ export default function TherapistChatPage() {
                   }}
                 />
               </div>
+
               <button
                 type="submit"
                 disabled={!chatMessage.trim() || !wsConnected}

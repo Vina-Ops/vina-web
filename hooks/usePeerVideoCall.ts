@@ -1064,21 +1064,37 @@ export const usePeerVideoCall = ({
 
     // Monitor ICE candidate errors
     pc.addEventListener("icecandidateerror", (event) => {
-      // Only log errors for non-critical STUN servers
-      const isCriticalError =
+      const isStunServer = event.url?.includes("stun:");
+      const isTurnServer = event.url?.includes("turn:");
+      
+      // Critical errors for essential STUN servers
+      const isCriticalStunError =
         event.errorCode === 701 &&
+        isStunServer &&
         (event.url?.includes("stun.l.google.com") ||
           event.url?.includes("stun.cloudflare.com") ||
           event.url?.includes("stun.stunprotocol.org"));
 
-      if (isCriticalError) {
-        console.error("❌ Critical ICE Candidate Error:", {
+      // TURN server errors are generally non-critical (we have multiple fallbacks)
+      const isTurnError = isTurnServer && event.errorCode === 701;
+
+      if (isCriticalStunError) {
+        console.error("❌ Critical STUN Server Error:", {
           errorCode: event.errorCode,
           errorText: event.errorText,
           url: event.url,
           address: event.address,
           port: event.port,
         });
+      } else if (isTurnError) {
+        console.warn(
+          "🔄 TURN Server Connection Failed (trying other servers):",
+          {
+            errorCode: event.errorCode,
+            errorText: event.errorText,
+            url: event.url,
+          }
+        );
       } else {
         console.warn(
           "⚠️ Non-critical ICE Candidate Error (continuing with other servers):",

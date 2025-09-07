@@ -12,7 +12,11 @@ import {
   Circle,
   Phone,
 } from "lucide-react";
-import { CallParticipant, NetworkStats, ConnectionDiagnostics } from "@/hooks/usePeerVideoCall";
+import {
+  CallParticipant,
+  NetworkStats,
+  ConnectionDiagnostics,
+} from "@/hooks/usePeerVideoCall";
 import ConnectionDiagnosticsComponent from "./ConnectionDiagnostics";
 
 interface VideoCallProps {
@@ -502,8 +506,11 @@ const VideoCall: React.FC<VideoCallProps> = ({
 
       {/* Connection Diagnostics */}
       {connectionDiagnostics && (
-        <div className="absolute top-20 left-4 max-w-sm">
-          <ConnectionDiagnosticsComponent 
+        <div
+          className="absolute top-20 left-4 max-w-sm z-30
+        "
+        >
+          <ConnectionDiagnosticsComponent
             diagnostics={connectionDiagnostics}
             className="bg-white/90 backdrop-blur-sm"
           />
