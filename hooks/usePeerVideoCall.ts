@@ -87,18 +87,19 @@ export const usePeerVideoCall = ({
   const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(
     new Map()
   );
-  const [connectionDiagnostics, setConnectionDiagnostics] = useState<ConnectionDiagnostics>({
-    iceConnectionState: "new",
-    iceGatheringState: "new",
-    connectionState: "new",
-    signalingState: "stable",
-    iceCandidates: 0,
-    turnServersUsed: [],
-    stunServersUsed: [],
-    connectionType: "unknown",
-    localCandidateType: "unknown",
-    remoteCandidateType: "unknown",
-  });
+  const [connectionDiagnostics, setConnectionDiagnostics] =
+    useState<ConnectionDiagnostics>({
+      iceConnectionState: "new",
+      iceGatheringState: "new",
+      connectionState: "new",
+      signalingState: "stable",
+      iceCandidates: 0,
+      turnServersUsed: [],
+      stunServersUsed: [],
+      connectionType: "unknown",
+      localCandidateType: "unknown",
+      remoteCandidateType: "unknown",
+    });
 
   // Track active calls to prevent duplicates and ensure proper cleanup
   const activeCallsRef = useRef<Map<string, MediaConnection>>(new Map());
@@ -253,14 +254,18 @@ export const usePeerVideoCall = ({
 
       // Check if we already have an active call from this peer
       if (activeCallsRef.current.has(call.peer)) {
-        console.log(`⚠️ Already have an active call from ${call.peer}, rejecting duplicate`);
+        console.log(
+          `⚠️ Already have an active call from ${call.peer}, rejecting duplicate`
+        );
         call.close();
         return;
       }
 
       // Check if we already have an incoming call
       if (incomingCall.isVisible && incomingCall.call) {
-        console.log(`⚠️ Already have an incoming call, rejecting new call from ${call.peer}`);
+        console.log(
+          `⚠️ Already have an incoming call, rejecting new call from ${call.peer}`
+        );
         call.close();
         return;
       }
@@ -354,10 +359,10 @@ export const usePeerVideoCall = ({
 
       if (stream) {
         incomingCall.call.answer(stream);
-        
+
         // Track this incoming call
         activeCallsRef.current.set(incomingCall.call.peer, incomingCall.call);
-        
+
         // Start monitoring ICE connection
         monitorIceConnection(incomingCall.call);
 
@@ -391,10 +396,10 @@ export const usePeerVideoCall = ({
           console.log(
             `📞 Incoming call ended by remote peer: ${incomingCall.call!.peer}`
           );
-          
+
           // Remove from active calls tracking
           activeCallsRef.current.delete(incomingCall.call!.peer);
-          
+
           setRemoteStreams((prev) => {
             const newMap = new Map(prev);
             newMap.delete(incomingCall.call!.peer);
@@ -403,7 +408,9 @@ export const usePeerVideoCall = ({
 
           // Check if we have any remaining active calls
           const remainingCalls = activeCallsRef.current.size;
-          console.log(`📞 Remaining active calls after incoming call end: ${remainingCalls}`);
+          console.log(
+            `📞 Remaining active calls after incoming call end: ${remainingCalls}`
+          );
 
           // Update call state when call is closed
           setCallState((prev) => ({
@@ -430,13 +437,13 @@ export const usePeerVideoCall = ({
         // Handle call error event for incoming calls
         incomingCall.call.on("error", (error) => {
           console.error(`❌ Incoming call error:`, error);
-          
+
           // Remove from active calls tracking
           activeCallsRef.current.delete(incomingCall.call!.peer);
-          
+
           // Check remaining calls
           const remainingCalls = activeCallsRef.current.size;
-          
+
           setCallState((prev) => ({
             ...prev,
             isInCall: remainingCalls > 0,
@@ -559,16 +566,18 @@ export const usePeerVideoCall = ({
           try {
             // Check if we already have an active call to this peer
             if (activeCallsRef.current.has(targetPeerId)) {
-              console.log(`⚠️ Already have an active call to ${targetPeerId}, skipping duplicate`);
+              console.log(
+                `⚠️ Already have an active call to ${targetPeerId}, skipping duplicate`
+              );
               continue;
             }
 
             const call = peer.call(targetPeerId, stream);
             calls.push(call);
-            
+
             // Track this call
             activeCallsRef.current.set(targetPeerId, call);
-            
+
             // Start monitoring ICE connection
             monitorIceConnection(call);
 
@@ -604,10 +613,10 @@ export const usePeerVideoCall = ({
 
             call.on("close", () => {
               console.log(`📞 Call with ${participant.id} ended`);
-              
+
               // Remove from active calls tracking
               activeCallsRef.current.delete(targetPeerId);
-              
+
               setRemoteStreams((prev) => {
                 const newMap = new Map(prev);
                 newMap.delete(participant.id);
@@ -641,10 +650,10 @@ export const usePeerVideoCall = ({
                 targetPeerId,
                 currentPeerId: peer.id,
               });
-              
+
               // Remove from active calls tracking on error
               activeCallsRef.current.delete(targetPeerId);
-              
+
               // Update call state on error
               const remainingCalls = activeCallsRef.current.size;
               setCallState((prev) => ({
@@ -996,7 +1005,7 @@ export const usePeerVideoCall = ({
     if (!pc) return;
 
     const updateDiagnostics = () => {
-      setConnectionDiagnostics(prev => ({
+      setConnectionDiagnostics((prev) => ({
         ...prev,
         iceConnectionState: pc.iceConnectionState,
         iceGatheringState: pc.iceGatheringState,
@@ -1006,44 +1015,46 @@ export const usePeerVideoCall = ({
     };
 
     // Monitor ICE connection state changes
-    pc.addEventListener('iceconnectionstatechange', () => {
+    pc.addEventListener("iceconnectionstatechange", () => {
       console.log(`🧊 ICE Connection State: ${pc.iceConnectionState}`);
       updateDiagnostics();
-      
-      if (pc.iceConnectionState === 'connected') {
-        console.log('✅ ICE connection established successfully');
-      } else if (pc.iceConnectionState === 'failed') {
-        console.error('❌ ICE connection failed - this usually means NAT traversal failed');
-        console.log('💡 Try using TURN servers or check firewall settings');
-      } else if (pc.iceConnectionState === 'disconnected') {
-        console.warn('⚠️ ICE connection disconnected');
+
+      if (pc.iceConnectionState === "connected") {
+        console.log("✅ ICE connection established successfully");
+      } else if (pc.iceConnectionState === "failed") {
+        console.error(
+          "❌ ICE connection failed - this usually means NAT traversal failed"
+        );
+        console.log("💡 Try using TURN servers or check firewall settings");
+      } else if (pc.iceConnectionState === "disconnected") {
+        console.warn("⚠️ ICE connection disconnected");
       }
     });
 
     // Monitor ICE gathering state
-    pc.addEventListener('icegatheringstatechange', () => {
+    pc.addEventListener("icegatheringstatechange", () => {
       console.log(`🔍 ICE Gathering State: ${pc.iceGatheringState}`);
       updateDiagnostics();
     });
 
     // Monitor connection state
-    pc.addEventListener('connectionstatechange', () => {
+    pc.addEventListener("connectionstatechange", () => {
       console.log(`🔗 Connection State: ${pc.connectionState}`);
       updateDiagnostics();
     });
 
     // Monitor ICE candidates
-    pc.addEventListener('icecandidate', (event) => {
+    pc.addEventListener("icecandidate", (event) => {
       if (event.candidate) {
-        console.log('🧊 ICE Candidate:', {
+        console.log("🧊 ICE Candidate:", {
           type: event.candidate.type,
           protocol: event.candidate.protocol,
           address: event.candidate.address,
           port: event.candidate.port,
           candidate: event.candidate.candidate,
         });
-        
-        setConnectionDiagnostics(prev => ({
+
+        setConnectionDiagnostics((prev) => ({
           ...prev,
           iceCandidates: prev.iceCandidates + 1,
           localCandidateType: event.candidate?.type || prev.localCandidateType,
@@ -1052,14 +1063,32 @@ export const usePeerVideoCall = ({
     });
 
     // Monitor ICE candidate errors
-    pc.addEventListener('icecandidateerror', (event) => {
-      console.error('❌ ICE Candidate Error:', {
-        errorCode: event.errorCode,
-        errorText: event.errorText,
-        url: event.url,
-        address: event.address,
-        port: event.port,
-      });
+    pc.addEventListener("icecandidateerror", (event) => {
+      // Only log errors for non-critical STUN servers
+      const isCriticalError =
+        event.errorCode === 701 &&
+        (event.url?.includes("stun.l.google.com") ||
+          event.url?.includes("stun.cloudflare.com") ||
+          event.url?.includes("stun.stunprotocol.org"));
+
+      if (isCriticalError) {
+        console.error("❌ Critical ICE Candidate Error:", {
+          errorCode: event.errorCode,
+          errorText: event.errorText,
+          url: event.url,
+          address: event.address,
+          port: event.port,
+        });
+      } else {
+        console.warn(
+          "⚠️ Non-critical ICE Candidate Error (continuing with other servers):",
+          {
+            errorCode: event.errorCode,
+            errorText: event.errorText,
+            url: event.url,
+          }
+        );
+      }
     });
 
     // Initial state

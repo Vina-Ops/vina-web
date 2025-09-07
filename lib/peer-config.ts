@@ -23,17 +23,14 @@ export const getPeerConfig = () => {
 
     config: {
       iceServers: [
-        // Google STUN servers
+        // Google STUN servers (most reliable)
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
         { urls: "stun:stun2.l.google.com:19302" },
         { urls: "stun:stun3.l.google.com:19302" },
         { urls: "stun:stun4.l.google.com:19302" },
-        
-        // Additional STUN servers for better connectivity
-        { urls: "stun:stun.ekiga.net" },
-        { urls: "stun:stun.ideasip.com" },
-        { urls: "stun:stun.schlund.de" },
+
+        // Reliable public STUN servers
         { urls: "stun:stun.stunprotocol.org:3478" },
         { urls: "stun:stun.voiparound.com" },
         { urls: "stun:stun.voipbuster.com" },
@@ -41,9 +38,14 @@ export const getPeerConfig = () => {
         { urls: "stun:stun.counterpath.com" },
         { urls: "stun:stun.1und1.de" },
         { urls: "stun:stun.gmx.net" },
-        { urls: "stun:stun.qq.com" },
-        { urls: "stun:stun.miwifi.com" },
-        
+
+        // Cloudflare STUN servers (very reliable)
+        { urls: "stun:stun.cloudflare.com:3478" },
+
+        // Additional reliable servers
+        { urls: "stun:stun.nextcloud.com:443" },
+        { urls: "stun:stun.voip.blackberry.com:3478" },
+
         // TURN servers for NAT traversal (always include for better connectivity)
         {
           urls: "turn:openrelay.metered.ca:80",
@@ -60,7 +62,7 @@ export const getPeerConfig = () => {
           username: "openrelayproject",
           credential: "openrelayproject",
         },
-        
+
         // Additional free TURN servers
         {
           urls: "turn:relay.metered.ca:80",

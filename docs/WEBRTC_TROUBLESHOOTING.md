@@ -25,13 +25,13 @@ iceServers: [
   { urls: "stun:stun2.l.google.com:19302" },
   { urls: "stun:stun3.l.google.com:19302" },
   { urls: "stun:stun4.l.google.com:19302" },
-  
+
   // Additional STUN servers
   { urls: "stun:stun.ekiga.net" },
   { urls: "stun:stun.ideasip.com" },
   { urls: "stun:stun.schlund.de" },
   { urls: "stun:stun.stunprotocol.org:3478" },
-  
+
   // TURN servers for NAT traversal
   {
     urls: "turn:openrelay.metered.ca:80",
@@ -77,6 +77,7 @@ config: {
 **File**: `hooks/usePeerVideoCall.ts`
 
 Added comprehensive logging for:
+
 - ICE connection state changes
 - ICE candidate gathering
 - Connection state transitions
@@ -107,6 +108,7 @@ Open browser DevTools (F12) and look for these logs:
 ```
 
 **Error indicators**:
+
 ```
 ❌ ICE connection failed - this usually means NAT traversal failed
 💡 Try using TURN servers or check firewall settings
@@ -118,16 +120,19 @@ Open browser DevTools (F12) and look for these logs:
 ### For Users
 
 1. **Check Internet Connection**
+
    - Ensure stable internet connection
    - Try refreshing the page
    - Test with a different network (mobile hotspot)
 
 2. **Browser Permissions**
+
    - Allow camera and microphone access
    - Check if browser is blocking WebRTC
    - Try a different browser (Chrome, Firefox, Safari)
 
 3. **Network Issues**
+
    - Disable VPN if using one
    - Check if corporate firewall is blocking WebRTC
    - Try from a different network
@@ -140,6 +145,7 @@ Open browser DevTools (F12) and look for these logs:
 ### For Developers
 
 1. **Check ICE Connection State**
+
    ```javascript
    // In browser console during a call
    console.log("ICE State:", pc.iceConnectionState);
@@ -147,10 +153,11 @@ Open browser DevTools (F12) and look for these logs:
    ```
 
 2. **Monitor ICE Candidates**
+
    ```javascript
-   pc.addEventListener('icecandidate', (event) => {
+   pc.addEventListener("icecandidate", (event) => {
      if (event.candidate) {
-       console.log('ICE Candidate:', event.candidate);
+       console.log("ICE Candidate:", event.candidate);
      }
    });
    ```
@@ -159,7 +166,13 @@ Open browser DevTools (F12) and look for these logs:
    ```javascript
    // Test if TURN servers are accessible
    const pc = new RTCPeerConnection({
-     iceServers: [{ urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }]
+     iceServers: [
+       {
+         urls: "turn:openrelay.metered.ca:80",
+         username: "openrelayproject",
+         credential: "openrelayproject",
+       },
+     ],
    });
    ```
 
@@ -170,6 +183,7 @@ Open browser DevTools (F12) and look for these logs:
 **Cause**: NAT traversal failed, no TURN servers available
 
 **Solutions**:
+
 - Ensure TURN servers are properly configured
 - Check if TURN servers are accessible
 - Try different TURN servers
@@ -180,6 +194,7 @@ Open browser DevTools (F12) and look for these logs:
 **Cause**: STUN servers unreachable or blocked
 
 **Solutions**:
+
 - Add more STUN servers
 - Check network connectivity to STUN servers
 - Try different STUN server providers
@@ -189,6 +204,7 @@ Open browser DevTools (F12) and look for these logs:
 **Cause**: Media stream issues, not ICE connectivity
 
 **Solutions**:
+
 - Check camera/microphone permissions
 - Verify media stream is being sent
 - Check if media tracks are enabled
@@ -198,6 +214,7 @@ Open browser DevTools (F12) and look for these logs:
 **Cause**: Network instability or ICE connection state changes
 
 **Solutions**:
+
 - Monitor connection state changes
 - Implement reconnection logic
 - Use connection state monitoring
@@ -205,6 +222,7 @@ Open browser DevTools (F12) and look for these logs:
 ## Testing Connectivity
 
 ### 1. Local Testing
+
 ```bash
 # Test with local PeerJS server
 npm run dev
@@ -212,6 +230,7 @@ npm run dev
 ```
 
 ### 2. Production Testing
+
 ```bash
 # Test with public PeerJS server
 npm run build
@@ -220,9 +239,11 @@ npm run start
 ```
 
 ### 3. ICE Connectivity Test
+
 Visit: https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/
 
 Add these servers:
+
 ```
 stun:stun.l.google.com:19302
 turn:openrelay.metered.ca:80
@@ -246,18 +267,21 @@ NEXT_PUBLIC_STUN_SERVER_URL=stun:your-stun-server.com:3478
 ## Monitoring and Analytics
 
 ### 1. Connection Quality Metrics
+
 - ICE connection state transitions
 - ICE candidate types used
 - TURN vs STUN server usage
 - Connection establishment time
 
 ### 2. Error Tracking
+
 - ICE candidate errors
 - Connection failures
 - Media stream issues
 - Network timeouts
 
 ### 3. User Experience Metrics
+
 - Call success rate
 - Connection establishment time
 - Call quality indicators
@@ -278,7 +302,7 @@ NEXT_PUBLIC_STUN_SERVER_URL=stun:your-stun-server.com:3478
 
 - **WebRTC Samples**: https://webrtc.github.io/samples/
 - **ICE Connectivity Test**: https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/
-- **TURN Server Providers**: 
+- **TURN Server Providers**:
   - Metered.ca (free tier available)
   - Xirsys
   - Twilio STUN/TURN
@@ -287,6 +311,7 @@ NEXT_PUBLIC_STUN_SERVER_URL=stun:your-stun-server.com:3478
 ## Contact
 
 If issues persist after following this guide, please:
+
 1. Check browser console for error logs
 2. Note the connection diagnostics information
 3. Test with different networks/browsers
