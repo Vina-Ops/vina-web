@@ -49,31 +49,31 @@ const navigation = [
     href: "/therapist/sessions",
     icon: MessageSquare,
   },
-  {
-    name: "Schedule",
-    href: "/therapist/schedule",
-    icon: Calendar,
-  },
-  {
-    name: "Patients",
-    href: "/therapist/patients",
-    icon: Heart,
-  },
-  {
-    name: "Reports",
-    href: "/therapist/reports",
-    icon: FileText,
-  },
-  {
-    name: "Analytics",
-    href: "/therapist/analytics",
-    icon: BarChart3,
-  },
-  {
-    name: "Notifications",
-    href: "/therapist/notifications",
-    icon: Bell,
-  },
+  // {
+  //   name: "Schedule",
+  //   href: "/therapist/schedule",
+  //   icon: Calendar,
+  // },
+  // {
+  //   name: "Patients",
+  //   href: "/therapist/patients",
+  //   icon: Heart,
+  // },
+  // {
+  //   name: "Reports",
+  //   href: "/therapist/reports",
+  //   icon: FileText,
+  // },
+  // {
+  //   name: "Analytics",
+  //   href: "/therapist/analytics",
+  //   icon: BarChart3,
+  // },
+  // {
+  //   name: "Notifications",
+  //   href: "/therapist/notifications",
+  //   icon: Bell,
+  // },
   {
     name: "Settings",
     href: "/therapist/settings",
@@ -127,7 +127,7 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
               </div>
               <nav className="flex-1 space-y-1 px-2 py-4">
                 {navigation.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isActive = pathname?.includes(item.href);
                   return (
                     <Link
                       key={item.name}
@@ -176,10 +176,10 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
 
           {/* Desktop sidebar */}
           <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-            <div className="flex flex-col flex-grow bg-white dark:bg-white/70 pb-4 overflow-y-auto">
+            <div className="flex flex-col flex-grow bg-white dark:bg-gray-800 pb-4 overflow-y-auto">
               <div className="flex items-center flex-shrink-0 px-4">
                 <Logo />
-                <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-dark-green">
+                <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-white">
                   Therapist Portal
                 </span>
               </div>
@@ -260,10 +260,8 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
             </div>
 
             {/* Page content */}
-            <main className="py-6">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-6">
-                {children}
-              </div>
+            <main className="">
+              <div className="">{children}</div>
             </main>
           </div>
         </div>

@@ -268,6 +268,9 @@ export default function ChatSessionPage() {
     // Create direct WebSocket connection (like therapist side) for better stability
     const ws = new WebSocket(wsUrl);
 
+    // Generate connection ID for tracking
+    const connectionId = `user-chat-${chatId}-${Date.now()}`;
+
     // Set up event handlers
     ws.onopen = () => {
       console.log("✅ User WebSocket connected successfully");
@@ -278,7 +281,6 @@ export default function ChatSessionPage() {
       setError(null); // Clear any previous errors
 
       // Track this connection
-      const connectionId = `user-chat-${chatId}-${Date.now()}`;
       wsMonitoringTracker.trackConnection(
         connectionId,
         "user-chat",
@@ -562,6 +564,8 @@ export default function ChatSessionPage() {
         console.log("🔌 Closing WebSocket on useEffect cleanup");
         ws.close(1000, "Effect cleanup");
       }
+      // Remove from monitoring tracker
+      wsMonitoringTracker.removeConnection(connectionId);
       stopHeartbeat();
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);

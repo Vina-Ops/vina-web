@@ -40,7 +40,6 @@ import { fetchToken } from "@/helpers/get-token";
 import { getMyTherapySessions } from "@/services/general-service";
 import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
-import { wsConnectionTracker } from "@/utils/websocket-connection-tracker";
 import { wsMonitoringTracker } from "@/utils/websocket-monitoring-tracker";
 import ConnectionStatus from "@/components/websocket/ConnectionStatus";
 import { generateUniqueMessageId } from "@/utils/message-id-generator";
@@ -440,6 +439,9 @@ function TherapistSessionsContent() {
 
     const ws = new WebSocket(wsUrl);
 
+    // Generate connection ID for tracking
+    const connectionId = `therapist-chat-${roomId}-${Date.now()}`;
+
     ws.onopen = () => {
       console.log("✅ WebSocket connected successfully");
       setWsConnection(ws);
@@ -451,12 +453,16 @@ function TherapistSessionsContent() {
       wsRetryCountRef.current = 0; // Reset ref as well
 
       // Track this connection
-      const connectionId = `therapist-chat-${roomId}-${Date.now()}`;
-      wsConnectionTracker.trackConnection(
+      wsMonitoringTracker.trackConnection(
         connectionId,
         "therapist-chat",
         ws,
-        window.location.pathname
+        wsUrl,
+        {
+          roomId,
+          userRole: "therapist",
+          page: window.location.pathname,
+        }
       );
 
       // Start heartbeat to keep connection alive
@@ -666,6 +672,8 @@ function TherapistSessionsContent() {
         console.log("🔌 Closing WebSocket on useEffect cleanup");
         ws.close(1000, "Effect cleanup");
       }
+      // Remove from monitoring tracker
+      wsMonitoringTracker.removeConnection(connectionId);
       stopHeartbeat();
     };
   }, [tokens, currentChatSession, user, showChat]);
@@ -973,9 +981,9 @@ function TherapistSessionsContent() {
   };
 
   return (
-    <div className="relative space-y-6">
+    <div className="relative space-y-6 m-">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="space-y-4 lg:flex lg:justify-between lg:items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Sessions
@@ -984,7 +992,7 @@ function TherapistSessionsContent() {
             Manage your therapy sessions and patient appointments
           </p>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex justify-between lg:justify-normal lg:items-center space-x-4">
           <ConnectionStatus />
           <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
             <Calendar className="h-4 w-4 mr-2" />
@@ -1156,9 +1164,9 @@ function TherapistSessionsContent() {
             {filteredSessions.map((session) => (
               <div
                 key={session.id}
-                className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="grid lg:flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                <div className="flex items-center space-x-4">
+                <div className="flex items-start lg:items-center space-x-4">
                   <img
                     className="h-12 w-12 rounded-full object-cover"
                     src={session.patientAvatar}
@@ -1168,7 +1176,7 @@ function TherapistSessionsContent() {
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                       {session.patientName}
                     </h3>
-                    <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="grid lg:flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                       <span className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
                         {formatDate(session.date)}
@@ -1196,10 +1204,10 @@ function TherapistSessionsContent() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3">
+                <div className="w-full flex justify-between lg:justify-normal lg:items-center gap-3 pt-3 lg:pt-0">
                   {/* Status Badge */}
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    className={`inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       statusColors[session.status]
                     }`}
                   >
@@ -1208,7 +1216,7 @@ function TherapistSessionsContent() {
 
                   {/* Type Badge */}
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    className={`inline-flex items-center w-fit   px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       typeColors[session.type]
                     }`}
                   >
@@ -1216,7 +1224,7 @@ function TherapistSessionsContent() {
                   </span>
 
                   {/* Actions */}
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     {session.status === "scheduled" && (
                       <>
                         <button
@@ -1281,7 +1289,6 @@ function TherapistSessionsContent() {
           )}
         </div>
       </div>
-      {/* Chat Interface - Full Screen */}
 
       {/* Chat Interface - Full Screen */}
       {showChat && currentChatSession && (

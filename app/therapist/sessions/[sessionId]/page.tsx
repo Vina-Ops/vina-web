@@ -704,7 +704,7 @@ export default function TherapistChatPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[500px]">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin" />
           <span>Loading session...</span>
@@ -715,7 +715,7 @@ export default function TherapistChatPage() {
 
   if (error || !session) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[500px]">
         <div className="text-center">
           <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -734,79 +734,77 @@ export default function TherapistChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white sticky top-0 dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.push("/therapist/sessions")}
-                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md"
-                title="Back to Sessions"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <div className="flex items-center space-x-3">
-                <img
-                  className="h-10 w-10 rounded-full object-cover"
-                  src={session.patientAvatar}
-                  alt={session.patientName}
-                />
-                <div>
-                  <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {session.patientName}
-                  </h1>
-                  <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      {formatDate(session.date)}
-                    </span>
-                    <span className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {formatTime(session.time)}
-                    </span>
-                  </div>
+    <div className="relative h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+      {/* Header - Fixed at top */}
+      <div className="flex-shrink-0 sticky top-0 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="grid lg:flex items-center justify-between p-4">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => router.push("/therapist/sessions")}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md"
+              title="Back to Sessions"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="flex items-center space-x-3">
+              <img
+                className="h-10 w-10 rounded-full object-cover"
+                src={session.patientAvatar}
+                alt={session.patientName}
+              />
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {session.patientName}
+                </h1>
+                <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                  <span className="flex items-center">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    {formatDate(session.date)}
+                  </span>
+                  <span className="flex items-center">
+                    <Clock className="h-4 w-4 mr-1" />
+                    {formatTime(session.time)}
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              {/* Connection Status Indicator */}
-              <div className="flex items-center space-x-1">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    wsConnected
-                      ? "bg-green-500 animate-pulse"
-                      : wsConnecting
-                      ? "bg-yellow-500 animate-pulse"
-                      : "bg-red-500"
-                  }`}
-                />
-                <span
-                  className={`text-xs ${
-                    wsConnected
-                      ? "text-green-600 dark:text-green-400"
-                      : wsConnecting
-                      ? "text-yellow-600 dark:text-yellow-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {wsConnected
-                    ? "Connected"
+          </div>
+          <div className="flex items-center space-x-2">
+            {/* Connection Status Indicator */}
+            <div className="flex items-center space-x-1">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  wsConnected
+                    ? "bg-green-500 animate-pulse"
                     : wsConnecting
-                    ? "Connecting..."
-                    : "Disconnected"}
-                </span>
-              </div>
-              <ConnectionStatus />
-              <button
-                onClick={handleStartVideoCall}
-                className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md"
-                title="Start Video Call"
+                    ? "bg-yellow-500 animate-pulse"
+                    : "bg-red-500"
+                }`}
+              />
+              <span
+                className={`text-xs ${
+                  wsConnected
+                    ? "text-green-600 dark:text-green-400"
+                    : wsConnecting
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : "text-red-600 dark:text-red-400"
+                }`}
               >
-                <Video className="h-5 w-5" />
-              </button>
+                {wsConnected
+                  ? "Connected"
+                  : wsConnecting
+                  ? "Connecting..."
+                  : "Disconnected"}
+              </span>
             </div>
+            <ConnectionStatus />
+            <button
+              onClick={handleStartVideoCall}
+              className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-md"
+              title="Start Video Call"
+            >
+              <Video className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </div>
@@ -814,13 +812,13 @@ export default function TherapistChatPage() {
       {/* Connection Status Banner */}
       {!wsConnected && (
         <div
-          className={`border-l-4 p-3 mt-2 ${
+          className={`absolute z-50 top-20 left-0 right-0 flex-shrink-0 border-l-4 p-3 ${
             wsConnecting
               ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400"
               : "bg-red-50 dark:bg-red-900/20 border-red-400"
           }`}
         >
-          <div className="flex items-center space-x-2">
+          <div className="grid lg:flex items-center space-x-2">
             <div
               className={`w-2 h-2 rounded-full ${
                 wsConnecting ? "bg-yellow-500" : "bg-red-500"
@@ -860,10 +858,10 @@ export default function TherapistChatPage() {
         </div>
       )}
 
-      {/* Main Chat Area */}
-      <div className="py-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700  flex flex-1 flex-col">
-          {/* Chat Messages */}
+      {/* Main Chat Container - Flexible height */}
+      <div className="flex-1 h-[calc(100vh-200px)] min-h-0 p-4">
+        <div className="h-full bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col">
+          {/* Chat Messages - Scrollable area */}
           <div className="flex-1 min-h-0 overflow-y-auto p-4">
             <div className="space-y-4">
               {/* Welcome message */}
@@ -881,7 +879,7 @@ export default function TherapistChatPage() {
                   messagesEndRef={messagesEndRef}
                 />
               ) : (
-                <div className="text-center py-8">
+                <div className="text-center py-8 h-[calc(100vh-350px)]">
                   <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                     Chat with {session.patientName}
@@ -896,7 +894,7 @@ export default function TherapistChatPage() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Chat Input */}
+          {/* Chat Input - Fixed at bottom */}
           <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-4">
             {/* Connection Warning */}
             {!wsConnected && (

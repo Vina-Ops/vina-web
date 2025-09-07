@@ -1066,7 +1066,7 @@ export const usePeerVideoCall = ({
     pc.addEventListener("icecandidateerror", (event) => {
       const isStunServer = event.url?.includes("stun:");
       const isTurnServer = event.url?.includes("turn:");
-      
+
       // Critical errors for essential STUN servers
       const isCriticalStunError =
         event.errorCode === 701 &&

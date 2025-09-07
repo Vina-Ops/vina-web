@@ -21,6 +21,8 @@ import {
   LogOut,
   Shield,
   User,
+  Database,
+  Wifi,
 } from "lucide-react";
 import Logo from "@/components/logo";
 import { TopToastProvider } from "@/components/ui/toast";
@@ -60,6 +62,16 @@ const navigation = [
     name: "Activity",
     href: "/admin/activity",
     icon: Activity,
+  },
+  {
+    name: "WebSocket Monitor",
+    href: "/admin/websocket-monitor",
+    icon: Wifi,
+  },
+  {
+    name: "Redis Monitor",
+    href: "/admin/redis-monitor",
+    icon: Database,
   },
   {
     name: "Settings",

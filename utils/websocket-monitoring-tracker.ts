@@ -172,13 +172,13 @@ class WebSocketMonitoringTracker {
 
   // Cleanup old disconnected connections
   cleanup(): number {
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+    const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
     const toRemove: string[] = [];
 
     this.connections.forEach((connection, id) => {
       if (
         connection.status === "disconnected" &&
-        connection.lastActivity.getTime() < fiveMinutesAgo
+        connection.lastActivity.getTime() < tenMinutesAgo
       ) {
         toRemove.push(id);
       }
@@ -188,7 +188,9 @@ class WebSocketMonitoringTracker {
 
     if (toRemove.length > 0) {
       this.notifyListeners();
-      console.log(`Cleaned up ${toRemove.length} old connections`);
+      console.log(
+        `🧹 Cleaned up ${toRemove.length} old disconnected connections`
+      );
     }
 
     return toRemove.length;
@@ -219,9 +221,9 @@ class WebSocketMonitoringTracker {
 // Export singleton instance
 export const wsMonitoringTracker = new WebSocketMonitoringTracker();
 
-// Auto cleanup every 5 minutes
+// Auto cleanup every 10 minutes
 setInterval(() => {
   wsMonitoringTracker.cleanup();
-}, 5 * 60 * 1000);
+}, 10 * 60 * 1000);
 
 export default WebSocketMonitoringTracker;
