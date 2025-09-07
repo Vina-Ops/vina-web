@@ -65,12 +65,12 @@ export async function GET(request: NextRequest) {
     const info = await client.info();
     const infoObj = parseRedisInfo(info);
 
-    // Get memory usage
-    const memoryUsage = await client.memoryUsage();
-
     // Get client list
     const clientList = await client.clientList();
-    const clients = parseClientList(clientList);
+    const clients = {
+      connected: clientList.length,
+      blocked: clientList.filter((client) => client.flags.includes("b")).length,
+    };
 
     // Get database info
     const dbSize = await client.dbSize();
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
         result = {
           type,
           ttl: ttl === -1 ? "No expiration" : `${ttl} seconds`,
-          size: formatBytes(size),
+          size: formatBytes(size || 0),
         };
         break;
 
@@ -233,19 +233,6 @@ function parseRedisInfo(info: string): Record<string, any> {
   }
 
   return result;
-}
-
-function parseClientList(clientList: string): {
-  connected: number;
-  blocked: number;
-} {
-  const clients = clientList.split("\n").filter((line) => line.trim());
-  const blocked = clients.filter((client) => client.includes("flags=b")).length;
-
-  return {
-    connected: clients.length,
-    blocked,
-  };
 }
 
 async function getKeyTypes(
