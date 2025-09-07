@@ -241,7 +241,7 @@ export default function ChatSessionPage() {
   const maxReconnectAttemptsRef = useRef(5);
 
   // WebSocket connection function with enhanced reconnection logic
-  const connectWebSocket = useCallback(() => {
+  const connectWebSocket = useCallback((connectionId: string) => {
     console.log("🔌 Attempting WebSocket connection (User Side)...");
     console.log("🔌 Tokens:", tokens ? "✅ Present" : "❌ Missing");
     console.log("🔌 ChatId:", chatId ? "✅ Present" : "❌ Missing");
@@ -268,8 +268,6 @@ export default function ChatSessionPage() {
     // Create direct WebSocket connection (like therapist side) for better stability
     const ws = new WebSocket(wsUrl);
 
-    // Generate connection ID for tracking
-    const connectionId = `user-chat-${chatId}-${Date.now()}`;
 
     // Set up event handlers
     ws.onopen = () => {
@@ -479,7 +477,8 @@ export default function ChatSessionPage() {
         setTimeout(() => {
           // Always try to reconnect
           console.log("🔄 Reconnecting user WebSocket...");
-          connectWebSocket();
+          const newConnectionId = `user-chat-${chatId}-${Date.now()}`;
+          connectWebSocket(newConnectionId);
         }, delay);
       } else {
         console.log("✅ WebSocket closed normally (user leaving page)");
@@ -549,9 +548,12 @@ export default function ChatSessionPage() {
       return;
     }
 
+    // Generate connection ID for tracking (moved outside connectWebSocket)
+    const connectionId = `user-chat-${chatId}-${Date.now()}`;
+
     console.log("✅ WebSocket effect - all data present, connecting...");
     // Connect to WebSocket
-    const ws = connectWebSocket();
+    const ws = connectWebSocket(connectionId);
     if (!ws) {
       console.log("❌ WebSocket connection failed");
       return;
@@ -975,7 +977,8 @@ export default function ChatSessionPage() {
                     onClick={() => {
                       console.log("🔄 Manual reconnection triggered");
                       if (tokens && chatId && user) {
-                        connectWebSocket();
+                        const newConnectionId = `user-chat-${chatId}-${Date.now()}`;
+                        connectWebSocket(newConnectionId);
                       }
                     }}
                     className="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
