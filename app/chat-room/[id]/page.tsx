@@ -257,10 +257,14 @@ export default function ChatSessionPage() {
         return null;
       }
 
-      // Don't create a new connection if one already exists and is open
+      // Close existing connection if it exists
       if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-        console.log("🔄 WebSocket already connected, skipping new connection");
-        return wsConnection;
+        console.log(
+          "🔌 Closing existing WebSocket connection before creating new one"
+        );
+        wsConnection.close(1000, "Replaced by new connection");
+        setWsConnection(null);
+        setWsConnected(false);
       }
 
       // Set up WebSocket connection for chat messages
@@ -484,7 +488,7 @@ export default function ChatSessionPage() {
           setTimeout(() => {
             // Always try to reconnect
             console.log("🔄 Reconnecting user WebSocket...");
-            const newConnectionId = `user-chat-${chatId}-${Date.now()}`;
+            const newConnectionId = `user-chat-${chatId}-${user?.id}`;
             connectWebSocket(newConnectionId);
           }, delay);
         } else {
@@ -557,8 +561,8 @@ export default function ChatSessionPage() {
       return;
     }
 
-    // Generate connection ID for tracking (moved outside connectWebSocket)
-    const connectionId = `user-chat-${chatId}-${Date.now()}`;
+    // Generate consistent connection ID for tracking (based on chatId and user)
+    const connectionId = `user-chat-${chatId}-${user?.id}`;
 
     console.log("✅ WebSocket effect - all data present, connecting...");
     // Connect to WebSocket
@@ -578,6 +582,9 @@ export default function ChatSessionPage() {
       // Remove from monitoring tracker
       wsMonitoringTracker.removeConnection(connectionId);
       stopHeartbeat();
+      // Clear connection state
+      setWsConnection(null);
+      setWsConnected(false);
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
@@ -991,7 +998,7 @@ export default function ChatSessionPage() {
                     onClick={() => {
                       console.log("🔄 Manual reconnection triggered");
                       if (tokens && chatId && user) {
-                        const newConnectionId = `user-chat-${chatId}-${Date.now()}`;
+                        const newConnectionId = `user-chat-${chatId}-${user?.id}`;
                         connectWebSocket(newConnectionId);
                       }
                     }}

@@ -416,10 +416,14 @@ function TherapistSessionsContent() {
       return;
     }
 
-    // Don't create a new connection if one already exists for this session
+    // Close existing connection if it exists
     if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-      console.log("WebSocket already connected, skipping new connection");
-      return;
+      console.log(
+        "🔌 Closing existing WebSocket connection before creating new one"
+      );
+      wsConnection.close(1000, "Replaced by new connection");
+      setWsConnection(null);
+      setWsConnected(false);
     }
 
     const roomId = currentChatSession.id;
@@ -439,8 +443,8 @@ function TherapistSessionsContent() {
 
     const ws = new WebSocket(wsUrl);
 
-    // Generate connection ID for tracking
-    const connectionId = `therapist-chat-${roomId}-${Date.now()}`;
+    // Generate consistent connection ID for tracking (based on roomId and user)
+    const connectionId = `therapist-chat-${roomId}-${user?.id}`;
 
     ws.onopen = () => {
       console.log("✅ WebSocket connected successfully");

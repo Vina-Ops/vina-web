@@ -351,7 +351,7 @@ export default function TherapistChatPage() {
     setWsError(null);
 
     const ws = new WebSocket(wsUrl);
-    const connectionId = `therapist-chat-${roomId}-${Date.now()}`;
+    const connectionId = `therapist-chat-${roomId}-${user?.id}`;
 
     // Track this connection immediately
     const isTracked = wsMonitoringTracker.trackConnection(

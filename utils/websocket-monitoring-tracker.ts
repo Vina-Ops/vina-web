@@ -37,12 +37,15 @@ class WebSocketMonitoringTracker {
     url: string,
     metadata?: Record<string, any>
   ): boolean {
+    // Check for existing connections of the same type and close them
+    this.closeConnectionsByType(type, id);
+
     // Check if at limit
     if (this.getActiveCount() >= this.MAX_CONNECTIONS) {
       console.warn(
-        `Connection limit reached (${this.MAX_CONNECTIONS}). Cannot create new connection.`
+        `Connection limit reached (${this.MAX_CONNECTIONS}). Closing oldest connections.`
       );
-      return false;
+      this.closeOldestConnections(2); // Close 2 oldest connections
     }
 
     const connectionInfo: ConnectionInfo = {
@@ -215,6 +218,30 @@ class WebSocketMonitoringTracker {
   // Get connections by type
   getConnectionsByType(type: string): ConnectionInfo[] {
     return Array.from(this.connections.values()).filter((c) => c.type === type);
+  }
+
+  // Close connections by type (excluding the current one being created)
+  closeConnectionsByType(type: string, excludeId?: string): string[] {
+    const connectionsToClose = Array.from(this.connections.values())
+      .filter(
+        (c) => c.type === type && c.id !== excludeId && c.status === "connected"
+      )
+      .sort((a, b) => a.lastActivity.getTime() - b.lastActivity.getTime()); // Close oldest first
+
+    const closedIds: string[] = [];
+    connectionsToClose.forEach((connection) => {
+      if (connection.websocket.readyState === WebSocket.OPEN) {
+        console.log(`🔌 Closing existing ${type} connection: ${connection.id}`);
+        connection.websocket.close(1000, "Replaced by new connection");
+        closedIds.push(connection.id);
+      }
+    });
+
+    if (closedIds.length > 0) {
+      console.log(`🧹 Closed ${closedIds.length} existing ${type} connections`);
+    }
+
+    return closedIds;
   }
 }
 
