@@ -44,6 +44,10 @@ interface VideoCallProps {
   isCallIncoming: boolean;
   onAccept: () => void;
   onReject: () => void;
+  // ICE Reconnection props
+  isReconnecting?: boolean;
+  reconnectionAttempts?: number;
+  maxReconnectionAttempts?: number;
 }
 
 const VideoCall: React.FC<VideoCallProps> = ({
@@ -71,6 +75,10 @@ const VideoCall: React.FC<VideoCallProps> = ({
   isCallIncoming,
   onAccept,
   onReject,
+  // ICE Reconnection props
+  isReconnecting = false,
+  reconnectionAttempts = 0,
+  maxReconnectionAttempts = 5,
 }) => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
@@ -89,39 +97,98 @@ const VideoCall: React.FC<VideoCallProps> = ({
     return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Calculate video layout based on participant count
-  const getVideoLayout = () => {
-    const totalParticipants = 1 + remoteStreams.size; // Local + remote
+  // State for floating video position and size
+  const [floatingVideoPosition, setFloatingVideoPosition] = useState({
+    x: 20,
+    y: 20,
+  });
+  const [floatingVideoSize, setFloatingVideoSize] = useState({
+    width: 200,
+    height: 150,
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeStart, setResizeStart] = useState({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
+  const [isMinimized, setIsMinimized] = useState(false);
 
-    if (totalParticipants === 1) {
-      return "grid-cols-1";
-    } else if (totalParticipants === 2) {
-      return "grid-cols-2";
-    } else if (totalParticipants <= 4) {
-      return "grid-cols-2";
-    } else if (totalParticipants <= 6) {
-      return "grid-cols-3";
-    } else {
-      return "grid-cols-4";
+  // Handle floating video drag
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - floatingVideoPosition.x,
+        y: e.clientY - floatingVideoPosition.y,
+      });
     }
   };
 
-  // Get video size classes based on participant count
-  const getVideoSizeClasses = () => {
-    const totalParticipants = 1 + remoteStreams.size;
-
-    if (totalParticipants === 1) {
-      return "h-full w-full";
-    } else if (totalParticipants === 2) {
-      return "h-full w-full";
-    } else if (totalParticipants <= 4) {
-      return "h-64 w-full";
-    } else if (totalParticipants <= 6) {
-      return "h-48 w-full";
-    } else {
-      return "h-40 w-full";
-    }
+  // Handle floating video resize
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeStart({
+      x: e.clientX,
+      y: e.clientY,
+      width: floatingVideoSize.width,
+      height: floatingVideoSize.height,
+    });
   };
+
+  // Add global mouse event listeners for dragging and resizing
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        const newX = e.clientX - dragStart.x;
+        const newY = e.clientY - dragStart.y;
+
+        // Keep within screen bounds
+        const maxX = window.innerWidth - floatingVideoSize.width;
+        const maxY = window.innerHeight - floatingVideoSize.height - 100; // Account for control bar
+
+        setFloatingVideoPosition({
+          x: Math.max(0, Math.min(newX, maxX)),
+          y: Math.max(0, Math.min(newY, maxY)),
+        });
+      }
+
+      if (isResizing) {
+        const deltaX = e.clientX - resizeStart.x;
+        const deltaY = e.clientY - resizeStart.y;
+
+        const newWidth = Math.max(
+          150,
+          Math.min(400, resizeStart.width + deltaX)
+        );
+        const newHeight = Math.max(
+          100,
+          Math.min(300, resizeStart.height + deltaY)
+        );
+
+        setFloatingVideoSize({ width: newWidth, height: newHeight });
+      }
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+    };
+
+    if (isDragging || isResizing) {
+      document.addEventListener("mousemove", handleGlobalMouseMove);
+      document.addEventListener("mouseup", handleGlobalMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleGlobalMouseMove);
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
+    };
+  }, [isDragging, isResizing, dragStart, resizeStart, floatingVideoSize]);
 
   useEffect(() => {
     console.log("VideoCall: localStream changed:", localStream);
@@ -180,6 +247,15 @@ const VideoCall: React.FC<VideoCallProps> = ({
                 <Circle className="w-3 h-3 animate-pulse fill-current" />
                 <span className="text-sm">
                   Recording: {formatDuration(recordingDuration)}
+                </span>
+              </div>
+            )}
+            {isReconnecting && (
+              <div className="flex items-center space-x-2 text-yellow-400">
+                <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+                <span className="text-sm">
+                  Reconnecting... ({reconnectionAttempts}/
+                  {maxReconnectionAttempts})
                 </span>
               </div>
             )}
@@ -348,15 +424,52 @@ const VideoCall: React.FC<VideoCallProps> = ({
         </div>
       )}
 
-      {/* Video Grid */}
-      <div
-        className={`grid ${getVideoLayout()} gap-2 h-full p-4 ${
-          callDuration > 0 ? "pt-32" : "pt-20"
-        }`}
-      >
-        {/* Local Video */}
+      {/* Main Video Area - Full Screen Remote Video */}
+      <div className={`h-full w-full ${callDuration > 0 ? "pt-32" : "pt-20"}`}>
+        {/* Remote Video - Full Screen */}
+        {remoteStreams.size > 0 ? (
+          Array.from(remoteStreams.entries()).map(([userId, stream]) => {
+            const participant = participants.find((p) => p.id === userId);
+            return (
+              <div key={userId} className="relative h-full w-full bg-gray-800">
+                <video
+                  ref={(el) => {
+                    if (el) remoteVideoRefs.current.set(userId, el);
+                  }}
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-sm px-3 py-2 rounded-lg">
+                  {participant?.name || "Unknown"}
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          // No remote video - show placeholder
+          <div className="h-full w-full bg-gray-900 flex items-center justify-center">
+            <div className="text-center text-white">
+              <div className="w-24 h-24 bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <Phone className="h-12 w-12 text-gray-400" />
+              </div>
+              <p className="text-xl">Waiting for video...</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Floating Local Video - Picture in Picture */}
+      {localStream && (
         <div
-          className={`relative ${getVideoSizeClasses()} bg-gray-900 rounded-lg overflow-hidden`}
+          className="absolute z-30 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border-2 border-white/20 cursor-move select-none"
+          style={{
+            left: floatingVideoPosition.x,
+            top: floatingVideoPosition.y,
+            width: isMinimized ? 120 : floatingVideoSize.width,
+            height: isMinimized ? 90 : floatingVideoSize.height,
+          }}
+          onMouseDown={handleMouseDown}
         >
           <video
             ref={localVideoRef}
@@ -366,18 +479,6 @@ const VideoCall: React.FC<VideoCallProps> = ({
             className="w-full h-full object-cover"
             onLoadedMetadata={() => {
               console.log("VideoCall: Local video metadata loaded");
-              console.log(
-                "VideoCall: Local video readyState:",
-                localVideoRef.current?.readyState
-              );
-              console.log(
-                "VideoCall: Local video videoWidth:",
-                localVideoRef.current?.videoWidth
-              );
-              console.log(
-                "VideoCall: Local video videoHeight:",
-                localVideoRef.current?.videoHeight
-              );
             }}
             onCanPlay={() => {
               console.log("VideoCall: Local video can play");
@@ -386,39 +487,41 @@ const VideoCall: React.FC<VideoCallProps> = ({
               console.error("VideoCall: Local video error:", e);
             }}
           />
+
+          {/* Local Video Overlay */}
           <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
             You {isMuted && "🔇"} {!isVideoEnabled && "📷❌"}
           </div>
+
           {isScreenSharing && (
-            <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+            <div className="absolute top-2 right-8 bg-blue-600 text-white text-xs px-2 py-1 rounded">
               🖥️ Screen
             </div>
           )}
-        </div>
 
-        {/* Remote Videos */}
-        {Array.from(remoteStreams.entries()).map(([userId, stream]) => {
-          const participant = participants.find((p) => p.id === userId);
-          return (
+          {/* Minimize/Maximize Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMinimized(!isMinimized);
+            }}
+            className="absolute top-2 right-2 w-6 h-6 bg-black bg-opacity-50 text-white text-xs rounded hover:bg-opacity-70 flex items-center justify-center"
+            title={isMinimized ? "Maximize" : "Minimize"}
+          >
+            {isMinimized ? "⤢" : "⤡"}
+          </button>
+
+          {/* Resize Handle - Only show when not minimized */}
+          {!isMinimized && (
             <div
-              key={userId}
-              className={`relative ${getVideoSizeClasses()} bg-gray-800 rounded-lg overflow-hidden`}
+              className="absolute bottom-0 right-0 w-4 h-4 bg-white/30 cursor-se-resize"
+              onMouseDown={handleResizeMouseDown}
             >
-              <video
-                ref={(el) => {
-                  if (el) remoteVideoRefs.current.set(userId, el);
-                }}
-                autoPlay
-                playsInline
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                {participant?.name || "Unknown"}
-              </div>
+              <div className="absolute bottom-0 right-0 w-0 h-0 border-l-4 border-l-transparent border-b-4 border-b-white/60"></div>
             </div>
-          );
-        })}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Control Bar */}
       <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-4">

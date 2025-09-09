@@ -117,6 +117,13 @@ export const usePeerVideoCall = ({
     bandwidth: 0,
   });
 
+  // ICE Reconnection state
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  const [reconnectionAttempts, setReconnectionAttempts] = useState(0);
+  const [maxReconnectionAttempts] = useState(5);
+  const [reconnectionTimeout, setReconnectionTimeout] =
+    useState<NodeJS.Timeout | null>(null);
+
   // Refs
   const peerRef = useRef<Peer | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -126,6 +133,9 @@ export const usePeerVideoCall = ({
   const networkStatsTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializedRef = useRef(false);
   const isDestroyedRef = useRef(false);
+  const activeConnectionsRef = useRef<Map<string, RTCPeerConnection>>(
+    new Map()
+  );
 
   // Generate deterministic peer ID
   const generatePeerId = useCallback(
@@ -134,6 +144,100 @@ export const usePeerVideoCall = ({
     },
     []
   );
+
+  // ICE Reconnection function
+  const attemptIceReconnection = useCallback(
+    async (connectionId: string) => {
+      if (isReconnecting || reconnectionAttempts >= maxReconnectionAttempts) {
+        console.log(
+          "🔄 ICE reconnection skipped - already reconnecting or max attempts reached"
+        );
+        return;
+      }
+
+      const pc = activeConnectionsRef.current.get(connectionId);
+      if (!pc) {
+        console.log("🔄 No active connection found for ICE reconnection");
+        return;
+      }
+
+      console.log(
+        `🔄 Attempting ICE reconnection (attempt ${
+          reconnectionAttempts + 1
+        }/${maxReconnectionAttempts})`
+      );
+      setIsReconnecting(true);
+      setReconnectionAttempts((prev) => prev + 1);
+
+      try {
+        // Clear any existing timeout
+        if (reconnectionTimeout) {
+          clearTimeout(reconnectionTimeout);
+        }
+
+        // Attempt ICE restart
+        const offer = await pc.createOffer({ iceRestart: true });
+        await pc.setLocalDescription(offer);
+
+        // Set a timeout for reconnection attempt
+        const timeout = setTimeout(() => {
+          if (
+            pc.iceConnectionState !== "connected" &&
+            pc.iceConnectionState !== "completed"
+          ) {
+            console.warn(
+              "🔄 ICE reconnection timeout - will retry if attempts remaining"
+            );
+            setIsReconnecting(false);
+
+            if (reconnectionAttempts < maxReconnectionAttempts) {
+              // Retry after a delay
+              setTimeout(() => {
+                attemptIceReconnection(connectionId);
+              }, 2000 * (reconnectionAttempts + 1)); // Exponential backoff
+            } else {
+              console.error(
+                "❌ ICE reconnection failed after maximum attempts"
+              );
+              setCallState((prev) => ({
+                ...prev,
+                isInCall: false,
+                isCallActive: false,
+              }));
+            }
+          }
+        }, 10000); // 10 second timeout
+
+        setReconnectionTimeout(timeout);
+      } catch (error) {
+        console.error("❌ ICE reconnection failed:", error);
+        setIsReconnecting(false);
+
+        // Retry after a delay if attempts remaining
+        if (reconnectionAttempts < maxReconnectionAttempts) {
+          setTimeout(() => {
+            attemptIceReconnection(connectionId);
+          }, 3000 * (reconnectionAttempts + 1));
+        }
+      }
+    },
+    [
+      isReconnecting,
+      reconnectionAttempts,
+      maxReconnectionAttempts,
+      reconnectionTimeout,
+    ]
+  );
+
+  // Reset reconnection state when connection is successful
+  const resetReconnectionState = useCallback(() => {
+    setIsReconnecting(false);
+    setReconnectionAttempts(0);
+    if (reconnectionTimeout) {
+      clearTimeout(reconnectionTimeout);
+      setReconnectionTimeout(null);
+    }
+  }, [reconnectionTimeout]);
 
   // Initialize peer with proper error handling
   const initializePeer = useCallback(async (): Promise<Peer | null> => {
@@ -715,6 +819,13 @@ export const usePeerVideoCall = ({
       callTimeoutRef.current = null;
     }
 
+    // Clear reconnection timeout and reset state
+    if (reconnectionTimeout) {
+      clearTimeout(reconnectionTimeout);
+      setReconnectionTimeout(null);
+    }
+    resetReconnectionState();
+
     // Close all tracked active calls
     activeCallsRef.current.forEach((call, peerId) => {
       console.log(`📞 Closing tracked call to: ${peerId}`);
@@ -1004,6 +1115,10 @@ export const usePeerVideoCall = ({
     const pc = call.peerConnection;
     if (!pc) return;
 
+    const connectionId = call.peer;
+    // Store the connection for reconnection purposes
+    activeConnectionsRef.current.set(connectionId, pc);
+
     const updateDiagnostics = () => {
       setConnectionDiagnostics((prev) => ({
         ...prev,
@@ -1019,15 +1134,31 @@ export const usePeerVideoCall = ({
       console.log(`🧊 ICE Connection State: ${pc.iceConnectionState}`);
       updateDiagnostics();
 
-      if (pc.iceConnectionState === "connected") {
+      if (
+        pc.iceConnectionState === "connected" ||
+        pc.iceConnectionState === "completed"
+      ) {
         console.log("✅ ICE connection established successfully");
+        resetReconnectionState();
       } else if (pc.iceConnectionState === "failed") {
-        console.error(
-          "❌ ICE connection failed - this usually means NAT traversal failed"
-        );
+        console.error("❌ ICE connection failed - attempting reconnection");
         console.log("💡 Try using TURN servers or check firewall settings");
+        // Attempt ICE reconnection
+        attemptIceReconnection(connectionId);
       } else if (pc.iceConnectionState === "disconnected") {
-        console.warn("⚠️ ICE connection disconnected");
+        console.warn(
+          "⚠️ ICE connection disconnected - attempting reconnection"
+        );
+        // Attempt ICE reconnection after a short delay
+        setTimeout(() => {
+          if (pc.iceConnectionState === "disconnected") {
+            attemptIceReconnection(connectionId);
+          }
+        }, 2000);
+      } else if (pc.iceConnectionState === "checking") {
+        console.log("🔍 ICE connection checking - gathering candidates");
+      } else if (pc.iceConnectionState === "new") {
+        console.log("🆕 ICE connection new - initializing");
       }
     });
 
@@ -1121,6 +1252,9 @@ export const usePeerVideoCall = ({
     currentPeerId,
     networkStats,
     connectionDiagnostics,
+    isReconnecting,
+    reconnectionAttempts,
+    maxReconnectionAttempts,
 
     // Actions
     startCall,
