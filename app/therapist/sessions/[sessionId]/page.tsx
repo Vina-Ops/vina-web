@@ -339,7 +339,7 @@ export default function TherapistChatPage() {
 
     const roomId = session.id;
     const baseUrl =
-      process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
+      process.env.NEXT_PUBLIC_WS_BASE_URL;
     const wsUrl = `${baseUrl}/safe-space/${roomId}?token=${tokens}`;
 
     console.log("Creating therapist chat WebSocket connection to:", wsUrl);

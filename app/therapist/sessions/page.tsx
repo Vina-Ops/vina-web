@@ -427,8 +427,7 @@ function TherapistSessionsContent() {
     }
 
     const roomId = currentChatSession.id;
-    const baseUrl =
-      process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
+    const baseUrl = process.env.NEXT_PUBLIC_WS_BASE_URL;
     const wsUrl = `${baseUrl}/safe-space/${roomId}?token=${tokens}`;
 
     console.log("Creating therapist chat WebSocket connection to:", wsUrl);

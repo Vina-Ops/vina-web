@@ -275,8 +275,7 @@ export default function ChatSessionPage() {
       }
 
       // Set up WebSocket connection for chat messages
-      const baseUrl =
-        process.env.NEXT_PUBLIC_WS_BASE_URL || "wss://vina-ai.onrender.com";
+      const baseUrl = process.env.NEXT_PUBLIC_WS_BASE_URL;
       const wsUrl = `${baseUrl}/safe-space/${chatId}?token=${tokens}`;
 
       console.log("Creating user WebSocket connection to:", wsUrl);

@@ -16,7 +16,7 @@ export const getWebSocketUrl = (endpoint: string = "/api/vina"): string => {
 
   if (!baseUrl) {
     console.warn("No API URL configured, using fallback");
-    return `wss://vina-ai.onrender.com${endpoint}`;
+    return `process.env.NEXT_PUBLIC_WS_URL${endpoint}`;
   }
 
   // Convert HTTP/HTTPS to WSS
