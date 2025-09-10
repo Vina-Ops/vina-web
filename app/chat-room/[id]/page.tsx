@@ -113,6 +113,10 @@ export default function ChatSessionPage() {
     isReconnecting,
     reconnectionAttempts,
     maxReconnectionAttempts,
+    callQueue,
+    callWaitingState,
+    acceptQueuedCall,
+    rejectQueuedCall,
   } = usePeerVideoCall({
     currentUserId: (user as any)?.id || "", // Type assertion for user ID
     roomId: chatId, // Use the chat room ID from URL
@@ -1301,6 +1305,11 @@ export default function ChatSessionPage() {
           isReconnecting={isReconnecting}
           reconnectionAttempts={reconnectionAttempts}
           maxReconnectionAttempts={maxReconnectionAttempts}
+          // Call Queue props
+          callQueue={callQueue}
+          callWaitingState={callWaitingState}
+          onAcceptQueuedCall={acceptQueuedCall}
+          onRejectQueuedCall={rejectQueuedCall}
         />
       )}
 

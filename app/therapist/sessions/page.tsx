@@ -989,7 +989,7 @@ function TherapistSessionsContent() {
   };
 
   return (
-    <div className="relative space-y-6 m-">
+    <div className="relative space-y-6 m-4">
       {/* Header */}
       <div className="space-y-4 lg:flex lg:justify-between lg:items-center">
         <div>
@@ -1098,6 +1098,7 @@ function TherapistSessionsContent() {
           </div>
         </div>
       </div>
+
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
@@ -1180,7 +1181,7 @@ function TherapistSessionsContent() {
                     src={session.patientAvatar}
                     alt={session.patientName}
                   />
-                  <div>
+                  <div className="flex-1 bg-greener">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                       {session.patientName}
                     </h3>

@@ -18,6 +18,8 @@ import {
   ConnectionDiagnostics,
 } from "@/hooks/usePeerVideoCall";
 import ConnectionDiagnosticsComponent from "./ConnectionDiagnostics";
+import CallWaitingOverlay from "./CallWaitingOverlay";
+import CallWaitingIndicator from "./CallWaitingIndicator";
 
 interface VideoCallProps {
   isOpen: boolean;
@@ -48,6 +50,15 @@ interface VideoCallProps {
   isReconnecting?: boolean;
   reconnectionAttempts?: number;
   maxReconnectionAttempts?: number;
+  // Call Queue props
+  callQueue?: any[];
+  callWaitingState?: {
+    hasWaitingCalls: boolean;
+    waitingCallsCount: number;
+    queuedCalls: any[];
+  };
+  onAcceptQueuedCall?: (callId: string) => void;
+  onRejectQueuedCall?: (callId: string) => void;
 }
 
 const VideoCall: React.FC<VideoCallProps> = ({
@@ -79,6 +90,15 @@ const VideoCall: React.FC<VideoCallProps> = ({
   isReconnecting = false,
   reconnectionAttempts = 0,
   maxReconnectionAttempts = 5,
+  // Call Queue props
+  callQueue = [],
+  callWaitingState = {
+    hasWaitingCalls: false,
+    waitingCallsCount: 0,
+    queuedCalls: [],
+  },
+  onAcceptQueuedCall = () => {},
+  onRejectQueuedCall = () => {},
 }) => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
@@ -116,6 +136,47 @@ const VideoCall: React.FC<VideoCallProps> = ({
     height: 0,
   });
   const [isMinimized, setIsMinimized] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastTimeout, setToastTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Show toast message
+  const showToast = (message: string) => {
+    setToastMessage(message);
+
+    // Clear existing toast timeout
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+
+    // Hide toast after 3 seconds
+    const timeout = setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+
+    setToastTimeout(timeout);
+  };
+
+  // Handle screen click to show/hide controls
+  const handleScreenClick = () => {
+    setShowControls(true);
+
+    // Clear existing timeout
+    if (controlsTimeout) {
+      clearTimeout(controlsTimeout);
+    }
+
+    // Set new timeout to hide controls after 3 seconds
+    const timeout = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+
+    setControlsTimeout(timeout);
+  };
 
   // Handle floating video drag
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -124,6 +185,18 @@ const VideoCall: React.FC<VideoCallProps> = ({
       setDragStart({
         x: e.clientX - floatingVideoPosition.x,
         y: e.clientY - floatingVideoPosition.y,
+      });
+    }
+  };
+
+  // Handle touch events for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.target === e.currentTarget) {
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setDragStart({
+        x: touch.clientX - floatingVideoPosition.x,
+        y: touch.clientY - floatingVideoPosition.y,
       });
     }
   };
@@ -189,6 +262,48 @@ const VideoCall: React.FC<VideoCallProps> = ({
       document.removeEventListener("mouseup", handleGlobalMouseUp);
     };
   }, [isDragging, isResizing, dragStart, resizeStart, floatingVideoSize]);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (controlsTimeout) {
+        clearTimeout(controlsTimeout);
+      }
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
+    };
+  }, [controlsTimeout, toastTimeout]);
+
+  // Monitor ICE connection state changes for toast notifications
+  useEffect(() => {
+    if (connectionDiagnostics) {
+      const { iceConnectionState } = connectionDiagnostics;
+
+      if (
+        iceConnectionState === "connected" ||
+        iceConnectionState === "completed"
+      ) {
+        showToast("✅ Connection established");
+      } else if (iceConnectionState === "failed") {
+        showToast("❌ Connection failed - attempting reconnection");
+      } else if (iceConnectionState === "disconnected") {
+        showToast("⚠️ Connection lost - attempting reconnection");
+      }
+    }
+  }, [connectionDiagnostics?.iceConnectionState]);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     console.log("VideoCall: localStream changed:", localStream);
@@ -346,49 +461,87 @@ const VideoCall: React.FC<VideoCallProps> = ({
         <div className="absolute inset-0 z-20 bg-black bg-opacity-90 flex flex-col items-center justify-center">
           <div className="text-center text-white">
             {/* Ringing Animation */}
-            <div className="mb-8">
+            <div className={isMobile ? "mb-6" : "mb-8"}>
               <div className="relative">
-                <div className="w-24 h-24 bg-blue-600 rounded-full mx-auto animate-pulse"></div>
-                <div className="absolute inset-0 w-24 h-24 bg-blue-400 rounded-full mx-auto animate-ping"></div>
-                <div className="absolute inset-2 w-20 h-20 bg-blue-200 rounded-full mx-auto animate-pulse"></div>
+                <div
+                  className={`${
+                    isMobile ? "w-20 h-20" : "w-24 h-24"
+                  } bg-blue-600 rounded-full mx-auto animate-pulse`}
+                ></div>
+                <div
+                  className={`absolute inset-0 ${
+                    isMobile ? "w-20 h-20" : "w-24 h-24"
+                  } bg-blue-400 rounded-full mx-auto animate-ping`}
+                ></div>
+                <div
+                  className={`absolute inset-2 ${
+                    isMobile ? "w-16 h-16" : "w-20 h-20"
+                  } bg-blue-200 rounded-full mx-auto animate-pulse`}
+                ></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Phone className="h-12 w-12 text-white" />
+                  <Phone className={isMobile ? "h-10 w-10" : "h-12 w-12"} />
                 </div>
               </div>
             </div>
 
             {/* Call Status Text */}
-            <h2 className="text-3xl font-bold mb-4">
+            <h2
+              className={`${isMobile ? "text-2xl" : "text-3xl"} font-bold ${
+                isMobile ? "mb-3" : "mb-4"
+              }`}
+            >
               {isCallOutgoing ? "Calling..." : "Incoming Call"}
             </h2>
 
             {isCallOutgoing ? (
-              <div className="text-xl text-gray-300 mb-8">
+              <div
+                className={`${isMobile ? "text-lg" : "text-xl"} text-gray-300 ${
+                  isMobile ? "mb-6" : "mb-8"
+                }`}
+              >
                 <p>Ringing...</p>
-                <p className="text-sm text-gray-400 mt-2">
+                <p
+                  className={`${
+                    isMobile ? "text-xs" : "text-sm"
+                  } text-gray-400 mt-2`}
+                >
                   Waiting for {participants[0]?.name || "recipient"} to answer
                 </p>
               </div>
             ) : (
-              <div className="text-xl text-gray-300 mb-8">
+              <div
+                className={`${isMobile ? "text-lg" : "text-xl"} text-gray-300 ${
+                  isMobile ? "mb-6" : "mb-8"
+                }`}
+              >
                 <p>From: {participants[0]?.name || "Unknown"}</p>
-                <p className="text-sm text-gray-400 mt-2">
+                <p
+                  className={`${
+                    isMobile ? "text-xs" : "text-sm"
+                  } text-gray-400 mt-2`}
+                >
                   Tap to answer or swipe to decline
                 </p>
               </div>
             )}
 
             {/* Call Controls */}
-            <div className="flex items-center justify-center space-x-6">
+            <div
+              className={`flex items-center justify-center ${
+                isMobile ? "space-x-8" : "space-x-6"
+              }`}
+            >
               {isCallOutgoing ? (
                 <>
                   {/* Cancel Call Button */}
                   <button
                     onClick={onClose}
-                    className="p-4 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors"
+                    className={`${
+                      isMobile ? "p-5" : "p-4"
+                    } bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors`}
                     title="Cancel Call"
                   >
-                    <Phone className="h-8 w-8 rotate-135" />
+                    <Phone className={isMobile ? "h-10 w-10" : "h-8 w-8"} />
                   </button>
                 </>
               ) : (
@@ -396,19 +549,23 @@ const VideoCall: React.FC<VideoCallProps> = ({
                   {/* Reject Call Button */}
                   <button
                     onClick={onReject}
-                    className="p-4 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors"
+                    className={`${
+                      isMobile ? "p-5" : "p-4"
+                    } bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors`}
                     title="Reject Call"
                   >
-                    <Phone className="h-8 w-8 rotate-135" />
+                    <Phone className={isMobile ? "h-10 w-10" : "h-8 w-8"} />
                   </button>
 
                   {/* Accept Call Button */}
                   <button
                     onClick={onAccept}
-                    className="p-4 bg-green-600 hover:bg-green-700 text-white rounded-full transition-colors"
+                    className={`${
+                      isMobile ? "p-5" : "p-4"
+                    } bg-green-600 hover:bg-green-700 text-white rounded-full transition-colors`}
                     title="Accept Call"
                   >
-                    <Phone className="h-8 w-8" />
+                    <Phone className={isMobile ? "h-10 w-10" : "h-8 w-8"} />
                   </button>
                 </>
               )}
@@ -424,8 +581,26 @@ const VideoCall: React.FC<VideoCallProps> = ({
         </div>
       )}
 
+      {/* Call Waiting Overlay - Show when there are queued calls and no active incoming call */}
+      {callWaitingState.hasWaitingCalls &&
+        !isCallIncoming &&
+        !isCallOutgoing && (
+          <CallWaitingOverlay
+            queuedCalls={callWaitingState.queuedCalls}
+            waitingCallsCount={callWaitingState.waitingCallsCount}
+            onAcceptQueuedCall={onAcceptQueuedCall}
+            onRejectQueuedCall={onRejectQueuedCall}
+            isMobile={isMobile}
+          />
+        )}
+
       {/* Main Video Area - Full Screen Remote Video */}
-      <div className={`h-full w-full ${callDuration > 0 ? "pt-32" : "pt-20"}`}>
+      <div
+        className={`h-full w-full ${
+          callDuration > 0 ? "pt-32" : "pt-20"
+        } cursor-pointer`}
+        onClick={handleScreenClick}
+      >
         {/* Remote Video - Full Screen */}
         {remoteStreams.size > 0 ? (
           Array.from(remoteStreams.entries()).map(([userId, stream]) => {
@@ -459,17 +634,18 @@ const VideoCall: React.FC<VideoCallProps> = ({
         )}
       </div>
 
-      {/* Floating Local Video - Picture in Picture */}
+      {/* Floating Local Video - Small rectangle on top */}
       {localStream && (
         <div
-          className="absolute z-30 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border-2 border-white/20 cursor-move select-none"
+          className="absolute z-30 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border-2 border-white/20 cursor-move select-none touch-none"
           style={{
-            left: floatingVideoPosition.x,
-            top: floatingVideoPosition.y,
-            width: isMinimized ? 120 : floatingVideoSize.width,
-            height: isMinimized ? 90 : floatingVideoSize.height,
+            right: isMobile ? 10 : 20,
+            top: isMobile ? 10 : 20,
+            width: isMinimized ? (isMobile ? 100 : 120) : isMobile ? 150 : 200,
+            height: isMinimized ? (isMobile ? 75 : 90) : isMobile ? 110 : 150,
           }}
           onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
         >
           <video
             ref={localVideoRef}
@@ -523,100 +699,160 @@ const VideoCall: React.FC<VideoCallProps> = ({
         </div>
       )}
 
-      {/* Control Bar */}
-      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 p-4">
-        <div className="flex items-center justify-center space-x-4">
-          {/* Mute Button */}
-          <button
-            onClick={onToggleMute}
-            className={`p-3 rounded-full transition-colors ${
-              isMuted
-                ? "bg-red-600 hover:bg-red-700 text-white"
-                : "bg-gray-700 hover:bg-gray-600 text-white"
+      {/* Control Bar - Conditionally shown */}
+      {showControls && (
+        <div
+          className={`absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 transition-opacity duration-300 ${
+            isMobile ? "p-6" : "p-4"
+          }`}
+        >
+          <div
+            className={`flex items-center justify-center ${
+              isMobile ? "space-x-6" : "space-x-4"
             }`}
-            title={isMuted ? "Unmute" : "Mute"}
           >
-            {isMuted ? (
-              <MicOff className="h-6 w-6" />
-            ) : (
-              <Mic className="h-6 w-6" />
-            )}
-          </button>
+            {/* Mute Button */}
+            <button
+              onClick={onToggleMute}
+              className={`${
+                isMobile ? "p-4" : "p-3"
+              } rounded-full transition-colors ${
+                isMuted
+                  ? "bg-red-600 hover:bg-red-700 text-white"
+                  : "bg-gray-700 hover:bg-gray-600 text-white"
+              }`}
+              title={isMuted ? "Unmute" : "Mute"}
+            >
+              {isMuted ? (
+                <MicOff className={isMobile ? "h-7 w-7" : "h-6 w-6"} />
+              ) : (
+                <Mic className={isMobile ? "h-7 w-7" : "h-6 w-6"} />
+              )}
+            </button>
 
-          {/* Video Button */}
-          <button
-            onClick={onToggleVideo}
-            className={`p-3 rounded-full transition-colors ${
-              !isVideoEnabled
-                ? "bg-red-600 hover:bg-red-700 text-white"
-                : "bg-gray-700 hover:bg-gray-600 text-white"
-            }`}
-            title={!isVideoEnabled ? "Enable Video" : "Disable Video"}
-          >
-            {!isVideoEnabled ? (
-              <VideoOff className="h-6 w-6" />
-            ) : (
-              <Video className="h-6 w-6" />
-            )}
-          </button>
+            {/* Video Button */}
+            <button
+              onClick={onToggleVideo}
+              className={`${
+                isMobile ? "p-4" : "p-3"
+              } rounded-full transition-colors ${
+                !isVideoEnabled
+                  ? "bg-red-600 hover:bg-red-700 text-white"
+                  : "bg-gray-700 hover:bg-gray-600 text-white"
+              }`}
+              title={!isVideoEnabled ? "Enable Video" : "Disable Video"}
+            >
+              {!isVideoEnabled ? (
+                <VideoOff className={isMobile ? "h-7 w-7" : "h-6 w-6"} />
+              ) : (
+                <Video className={isMobile ? "h-7 w-7" : "h-6 w-6"} />
+              )}
+            </button>
 
-          {/* Screen Share Button */}
-          <button
-            onClick={onToggleScreenShare}
-            className={`p-3 rounded-full transition-colors ${
-              isScreenSharing
-                ? "bg-blue-600 hover:bg-blue-700 text-white"
-                : "bg-gray-700 hover:bg-gray-600 text-white"
-            }`}
-            title={isScreenSharing ? "Stop Screen Share" : "Start Screen Share"}
-          >
-            <Monitor className="h-6 w-6" />
-          </button>
+            {/* Screen Share Button */}
+            <button
+              onClick={onToggleScreenShare}
+              className={`${
+                isMobile ? "p-4" : "p-3"
+              } rounded-full transition-colors ${
+                isScreenSharing
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-gray-700 hover:bg-gray-600 text-white"
+              }`}
+              title={
+                isScreenSharing ? "Stop Screen Share" : "Start Screen Share"
+              }
+            >
+              <Monitor className={isMobile ? "h-7 w-7" : "h-6 w-6"} />
+            </button>
 
-          {/* Recording Button */}
-          <button
-            onClick={isRecording ? onStopRecording : onStartRecording}
-            className={`p-3 rounded-full transition-colors ${
-              isRecording
-                ? "bg-red-600 hover:bg-red-700 text-white"
-                : "bg-gray-700 hover:bg-gray-600 text-white"
-            }`}
-            title={isRecording ? "Stop Recording" : "Start Recording"}
-          >
-            {isRecording ? (
-              <Square className="h-6 w-6" />
-            ) : (
-              <Circle className="h-6 w-6" />
-            )}
-          </button>
+            {/* Recording Button */}
+            <button
+              onClick={isRecording ? onStopRecording : onStartRecording}
+              className={`${
+                isMobile ? "p-4" : "p-3"
+              } rounded-full transition-colors ${
+                isRecording
+                  ? "bg-red-600 hover:bg-red-700 text-white"
+                  : "bg-gray-700 hover:bg-gray-600 text-white"
+              }`}
+              title={isRecording ? "Stop Recording" : "Start Recording"}
+            >
+              {isRecording ? (
+                <Square className={isMobile ? "h-7 w-7" : "h-6 w-6"} />
+              ) : (
+                <Circle className={isMobile ? "h-7 w-7" : "h-6 w-6"} />
+              )}
+            </button>
 
-          {/* End Call Button */}
-          <button
-            onClick={onClose}
-            className="p-3 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors"
-            title="End Call"
-          >
-            <Phone className="h-6 w-6 rotate-135" />
-          </button>
+            {/* End Call Button */}
+            <button
+              onClick={onClose}
+              className={`${
+                isMobile ? "p-4" : "p-3"
+              } bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors`}
+              title="End Call"
+            >
+              <Phone className={isMobile ? "h-7 w-7" : "h-6 w-6"} />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Participant Count Badge */}
-      <div className="absolute top-20 right-4 bg-black bg-opacity-75 text-white text-xs px-3 py-2 rounded-full">
+      <div
+        className={`absolute ${
+          isMobile ? "top-16 right-2" : "top-20 right-4"
+        } bg-black bg-opacity-75 text-white ${
+          isMobile ? "text-xs px-2 py-1" : "text-xs px-3 py-2"
+        } rounded-full`}
+      >
         {1 + remoteStreams.size} participant
         {1 + remoteStreams.size !== 1 ? "s" : ""}
       </div>
 
-      {/* Connection Diagnostics */}
-      {connectionDiagnostics && (
+      {/* Call Waiting Indicator - Show when in active call but have waiting calls */}
+      {callWaitingState.hasWaitingCalls &&
+        !isCallIncoming &&
+        !isCallOutgoing &&
+        callDuration > 0 && (
+          <CallWaitingIndicator
+            queuedCalls={callWaitingState.queuedCalls}
+            waitingCallsCount={callWaitingState.waitingCallsCount}
+            onAcceptQueuedCall={onAcceptQueuedCall}
+            onRejectQueuedCall={onRejectQueuedCall}
+            isMobile={isMobile}
+          />
+        )}
+
+      {/* Connection Diagnostics - Only show when reconnecting */}
+      {connectionDiagnostics && isReconnecting && (
         <div
-          className="absolute top-20 left-4 max-w-sm z-30
-        "
+          className={`absolute ${
+            isMobile ? "top-16 left-2" : "top-20 left-4"
+          } ${isMobile ? "max-w-xs" : "max-w-sm"} z-30`}
         >
           <ConnectionDiagnosticsComponent
             diagnostics={connectionDiagnostics}
             className="bg-white/90 backdrop-blur-sm"
           />
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          className={`absolute ${
+            isMobile ? "top-2" : "top-4"
+          } left-1/2 transform -translate-x-1/2 z-50`}
+        >
+          <div
+            className={`bg-black/80 text-white ${
+              isMobile ? "px-3 py-2 text-sm" : "px-4 py-2"
+            } rounded-lg shadow-lg backdrop-blur-sm max-w-xs mx-auto`}
+          >
+            {toastMessage}
+          </div>
         </div>
       )}
     </div>

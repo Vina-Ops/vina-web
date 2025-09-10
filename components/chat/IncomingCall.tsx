@@ -20,7 +20,7 @@ export default function IncomingCall({
   onReject,
 }: IncomingCallProps) {
   const { settings } = useNotification();
-  
+
   // Play incoming call sound when call becomes visible
   useEffect(() => {
     if (isVisible && settings.incomingCallSoundEnabled) {
@@ -63,13 +63,13 @@ export default function IncomingCall({
           <div className="flex items-center justify-center space-x-4">
             <button
               onClick={onAccept}
-              className="w-14 h-14 bg-green-600 text-white rounded-full hover:bg-green-700 flex items-center justify-center"
+              className="w-14 h-14 bg-green text-white rounded-full hover:bg-green/70 flex items-center justify-center"
             >
               <Phone className="h-6 w-6" />
             </button>
             <button
               onClick={onReject}
-              className="w-14 h-14 bg-red-600 text-white rounded-full hover:bg-red-700 flex items-center justify-center"
+              className="w-14 h-14 bg-red text-white rounded-full hover:bg-red/70 flex items-center justify-center"
             >
               <PhoneOff className="h-6 w-6" />
             </button>
@@ -92,4 +92,3 @@ export default function IncomingCall({
     </div>
   );
 }
-

@@ -32,6 +32,20 @@ export interface IncomingCall {
   call: MediaConnection | null;
 }
 
+export interface QueuedCall {
+  id: string;
+  call: MediaConnection;
+  caller: CallParticipant;
+  timestamp: Date;
+  isWaiting: boolean;
+}
+
+export interface CallWaitingState {
+  hasWaitingCalls: boolean;
+  waitingCallsCount: number;
+  queuedCalls: QueuedCall[];
+}
+
 export interface NetworkStats {
   latency: number;
   packetLoss: number;
@@ -108,6 +122,12 @@ export const usePeerVideoCall = ({
     isVisible: false,
     caller: null,
     call: null,
+  });
+  const [callQueue, setCallQueue] = useState<QueuedCall[]>([]);
+  const [callWaitingState, setCallWaitingState] = useState<CallWaitingState>({
+    hasWaitingCalls: false,
+    waitingCallsCount: 0,
+    queuedCalls: [],
   });
   const [isConnecting, setIsConnecting] = useState(false);
   const [currentPeerId, setCurrentPeerId] = useState<string>("");
@@ -239,6 +259,127 @@ export const usePeerVideoCall = ({
     }
   }, [reconnectionTimeout]);
 
+  // Call queue management functions
+  const addToCallQueue = useCallback(
+    (call: MediaConnection, caller: CallParticipant) => {
+      const queuedCall: QueuedCall = {
+        id: call.peer,
+        call,
+        caller,
+        timestamp: new Date(),
+        isWaiting: true,
+      };
+
+      setCallQueue((prev) => {
+        const newQueue = [...prev, queuedCall];
+        setCallWaitingState({
+          hasWaitingCalls: true,
+          waitingCallsCount: newQueue.length,
+          queuedCalls: newQueue,
+        });
+        return newQueue;
+      });
+
+      console.log(
+        `📞 Added call to queue from ${caller.name}. Queue size: ${
+          callQueue.length + 1
+        }`
+      );
+    },
+    [callQueue.length]
+  );
+
+  const removeFromCallQueue = useCallback((callId: string) => {
+    setCallQueue((prev) => {
+      const newQueue = prev.filter((queuedCall) => queuedCall.id !== callId);
+      setCallWaitingState({
+        hasWaitingCalls: newQueue.length > 0,
+        waitingCallsCount: newQueue.length,
+        queuedCalls: newQueue,
+      });
+      return newQueue;
+    });
+  }, []);
+
+  const getNextQueuedCall = useCallback((): QueuedCall | null => {
+    return callQueue.length > 0 ? callQueue[0] : null;
+  }, [callQueue]);
+
+  const processNextQueuedCall = useCallback(() => {
+    const nextCall = getNextQueuedCall();
+    if (nextCall) {
+      console.log(
+        `📞 Processing next queued call from ${nextCall.caller.name}`
+      );
+
+      // Remove from queue
+      removeFromCallQueue(nextCall.id);
+
+      // Set as incoming call
+      setIncomingCall({
+        isVisible: true,
+        caller: nextCall.caller,
+        call: nextCall.call,
+      });
+
+      // Update call state
+      setCallState((prev) => ({
+        ...prev,
+        isCallIncoming: true,
+      }));
+    }
+  }, [getNextQueuedCall, removeFromCallQueue]);
+
+  // Accept a specific queued call
+  const acceptQueuedCall = useCallback(
+    (queuedCallId: string) => {
+      const queuedCall = callQueue.find((call) => call.id === queuedCallId);
+      if (!queuedCall) {
+        console.log(`❌ Queued call ${queuedCallId} not found`);
+        return;
+      }
+
+      console.log(`📞 Accepting queued call from ${queuedCall.caller.name}`);
+
+      // Remove from queue
+      removeFromCallQueue(queuedCallId);
+
+      // Set as incoming call
+      setIncomingCall({
+        isVisible: true,
+        caller: queuedCall.caller,
+        call: queuedCall.call,
+      });
+
+      // Update call state
+      setCallState((prev) => ({
+        ...prev,
+        isCallIncoming: true,
+      }));
+    },
+    [callQueue, removeFromCallQueue]
+  );
+
+  // Reject a specific queued call
+  const rejectQueuedCall = useCallback(
+    (queuedCallId: string) => {
+      const queuedCall = callQueue.find((call) => call.id === queuedCallId);
+      if (!queuedCall) {
+        console.log(`❌ Queued call ${queuedCallId} not found`);
+        return;
+      }
+
+      console.log(`📞 Rejecting queued call from ${queuedCall.caller.name}`);
+
+      // Close the call
+      queuedCall.call.close();
+
+      // Remove from queue
+      removeFromCallQueue(queuedCallId);
+    },
+    [callQueue, removeFromCallQueue]
+  );
+
   // Initialize peer with proper error handling
   const initializePeer = useCallback(async (): Promise<Peer | null> => {
     // Check if peer is already initialized and not destroyed
@@ -365,15 +506,6 @@ export const usePeerVideoCall = ({
         return;
       }
 
-      // Check if we already have an incoming call
-      if (incomingCall.isVisible && incomingCall.call) {
-        console.log(
-          `⚠️ Already have an incoming call, rejecting new call from ${call.peer}`
-        );
-        call.close();
-        return;
-      }
-
       // Extract caller information from peer ID
       // Peer ID format: userId-roomId
       const peerIdParts = call.peer.split("-");
@@ -428,6 +560,26 @@ export const usePeerVideoCall = ({
       };
 
       console.log("📞 Caller participant created:", caller);
+
+      // Check if we already have an incoming call or are in an active call
+      if (incomingCall.isVisible && incomingCall.call) {
+        console.log(
+          `📞 Already have an incoming call, adding new call from ${caller.name} to queue`
+        );
+        // Add to queue instead of rejecting
+        addToCallQueue(call, caller);
+        return;
+      }
+
+      // Check if we're in an active call
+      if (callState.isInCall && callState.isCallActive) {
+        console.log(
+          `📞 Currently in active call, adding new call from ${caller.name} to queue`
+        );
+        // Add to queue instead of rejecting
+        addToCallQueue(call, caller);
+        return;
+      }
 
       setIncomingCall({
         isVisible: true,
@@ -493,6 +645,9 @@ export const usePeerVideoCall = ({
             );
             return newState;
           });
+
+          // Start call timer when call is answered (stream received)
+          startCallTimer();
         });
 
         // Handle call close event for incoming calls
@@ -586,8 +741,12 @@ export const usePeerVideoCall = ({
           call: null,
         });
 
-        startCallTimer();
         console.log("✅ Call accepted successfully");
+
+        // Process next queued call if any
+        setTimeout(() => {
+          processNextQueuedCall();
+        }, 1000); // Small delay to ensure current call is established
       }
     } catch (error) {
       console.error("❌ Failed to accept call:", error);
@@ -611,7 +770,12 @@ export const usePeerVideoCall = ({
       ...prev,
       isCallIncoming: false,
     }));
-  }, [incomingCall]);
+
+    // Process next queued call if any
+    setTimeout(() => {
+      processNextQueuedCall();
+    }, 500); // Small delay to ensure rejection is processed
+  }, [incomingCall, processNextQueuedCall]);
 
   // Start call
   const startCall = useCallback(
@@ -713,6 +877,9 @@ export const usePeerVideoCall = ({
                 );
                 return newState;
               });
+
+              // Start call timer when call is answered (stream received)
+              startCallTimer();
             });
 
             call.on("close", () => {
@@ -790,7 +957,6 @@ export const usePeerVideoCall = ({
             return newState;
           });
 
-          startCallTimer();
           console.log(
             "✅ Call started successfully with",
             calls.length,
@@ -1255,6 +1421,8 @@ export const usePeerVideoCall = ({
     isReconnecting,
     reconnectionAttempts,
     maxReconnectionAttempts,
+    callQueue,
+    callWaitingState,
 
     // Actions
     startCall,
@@ -1266,6 +1434,11 @@ export const usePeerVideoCall = ({
     toggleScreenShare,
     startRecording,
     stopRecording,
+
+    // Call Queue Actions
+    acceptQueuedCall,
+    rejectQueuedCall,
+    processNextQueuedCall,
 
     // Utilities
     getLocalStream,
