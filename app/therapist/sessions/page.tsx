@@ -37,6 +37,7 @@ import IncomingCall from "@/components/chat/IncomingCall";
 import { usePeerVideoCall, CallParticipant } from "@/hooks/usePeerVideoCall";
 import { useUser } from "@/context/user-context";
 import { fetchToken } from "@/helpers/get-token";
+import { fetchWsToken } from "@/helpers/get-ws-token";
 import { getMyTherapySessions } from "@/services/general-service";
 import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
@@ -107,6 +108,7 @@ function TherapistSessionsContent() {
     null
   );
   const [tokens, setTokens] = useState<string | undefined>(undefined);
+  const [wsTokens, setWsTokens] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [chatMessage, setChatMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -207,21 +209,27 @@ function TherapistSessionsContent() {
     });
   }, [user, currentChatSession, callState, isConnecting]);
 
-  // Fetch token on component mount
+  // Fetch tokens on component mount
   useEffect(() => {
-    const getToken = async () => {
+    const getTokens = async () => {
       try {
-        console.log("Fetching token...");
-        const token = await fetchToken();
-        console.log("Token received:", token);
-        console.log("Token type:", typeof token);
-        console.log("Token length:", token?.length);
+        console.log("Fetching tokens...");
+        const [token, wsToken] = await Promise.all([
+          fetchToken(),
+          fetchWsToken(),
+        ]);
+        console.log("Token received:", token ? "✅ Present" : "❌ Missing");
+        console.log(
+          "WS Token received:",
+          wsToken ? "✅ Present" : "❌ Missing"
+        );
         setTokens(token);
+        setWsTokens(wsToken);
       } catch (error) {
-        console.error("Failed to fetch token:", error);
+        console.error("Failed to fetch tokens:", error);
       }
     };
-    getToken();
+    getTokens();
   }, []);
 
   // Cleanup retry timeout on unmount
@@ -400,9 +408,9 @@ function TherapistSessionsContent() {
 
   // Connect to therapist chat WS for selected room using unified payloads
   useEffect(() => {
-    if (!tokens || !currentChatSession || !user) {
+    if (!wsTokens || !currentChatSession || !user) {
       console.log("Missing required data for WebSocket:", {
-        hasToken: !!tokens,
+        hasWsToken: !!wsTokens,
         hasSession: !!currentChatSession,
         hasUser: !!user,
         showChat,
@@ -428,13 +436,13 @@ function TherapistSessionsContent() {
 
     const roomId = currentChatSession.id;
     const baseUrl = process.env.NEXT_PUBLIC_WS_BASE_URL;
-    const wsUrl = `${baseUrl}/safe-space/${roomId}?token=${tokens}`;
+    const wsUrl = `${baseUrl}/safe-space/${roomId}?token=${wsTokens}`;
 
     console.log("Creating therapist chat WebSocket connection to:", wsUrl);
-    console.log("Token value:", tokens);
+    console.log("WS Token value:", wsTokens);
     console.log("Room ID:", roomId);
-    console.log("Token type:", typeof tokens);
-    console.log("Token length:", tokens?.length);
+    console.log("WS Token type:", typeof wsTokens);
+    console.log("WS Token length:", wsTokens?.length);
     console.log("Retry count:", wsRetryCount);
 
     setWsConnecting(true);
@@ -681,7 +689,7 @@ function TherapistSessionsContent() {
       wsMonitoringTracker.removeConnection(connectionId);
       stopHeartbeat();
     };
-  }, [tokens, currentChatSession, user, showChat]);
+  }, [wsTokens, currentChatSession, user, showChat]);
 
   // Play notification sound for new messages in therapist chat
   useEffect(() => {

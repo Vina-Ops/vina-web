@@ -12,8 +12,8 @@ import { NextResponse } from "next/server";
  */
 export async function POST(req: Request) {
   if (req.method === "POST") {
-    // Parse the request body as JSON and extract both tokens and rememberMe
-    const { accessToken, refreshToken, rememberMe } = await req.json();
+    // Parse the request body as JSON and extract tokens and rememberMe
+    const { accessToken, refreshToken, wsToken, rememberMe } = await req.json();
 
     if (accessToken && refreshToken) {
       // Always set maxAge for persistent cookies (avoid session cookies)
@@ -33,6 +33,14 @@ export async function POST(req: Request) {
         maxAge: rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7, // 30 days if rememberMe, 7 days otherwise
       };
 
+      const wsTokenOptions: any = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development",
+        sameSite: "strict",
+        path: "/",
+        maxAge: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 24, // 7 days if rememberMe, 1 day otherwise
+      };
+
       const accessTokenSerialized = serialize(
         "access_token",
         accessToken,
@@ -50,6 +58,16 @@ export async function POST(req: Request) {
 
       response.headers.set("Set-Cookie", accessTokenSerialized);
       response.headers.append("Set-Cookie", refreshTokenSerialized);
+
+      // Set ws_token cookie if provided
+      if (wsToken) {
+        const wsTokenSerialized = serialize(
+          "ws_token",
+          wsToken,
+          wsTokenOptions
+        );
+        response.headers.append("Set-Cookie", wsTokenSerialized);
+      }
 
       return response;
     } else {

@@ -29,6 +29,7 @@ import { LanguageSelector } from "@/components/chat/LanguageSelector";
 import { usePeerVideoCall, CallParticipant } from "@/hooks/usePeerVideoCall";
 import { useUser } from "@/context/user-context";
 import { fetchToken } from "@/helpers/get-token";
+import { fetchWsToken } from "@/helpers/get-ws-token";
 import {
   getTherapistByUuid,
   getMyTherapySessions,
@@ -70,6 +71,7 @@ export default function ChatSessionPage() {
   const { user } = useUser();
   const { settings } = useNotification();
   const [tokens, setTokens] = useState<string | undefined>(undefined);
+  const [wsTokens, setWsTokens] = useState<string | undefined>(undefined);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -141,20 +143,28 @@ export default function ChatSessionPage() {
       : false,
   }));
 
-  // Fetch token on component mount
+  // Fetch tokens on component mount
   useEffect(() => {
-    const getToken = async () => {
+    const getTokens = async () => {
       try {
-        console.log("🔑 Fetching token...");
-        const token = await fetchToken();
+        console.log("🔑 Fetching tokens...");
+        const [token, wsToken] = await Promise.all([
+          fetchToken(),
+          fetchWsToken(),
+        ]);
         console.log("🔑 Token fetched:", token ? "✅ Present" : "❌ Missing");
+        console.log(
+          "🔑 WS Token fetched:",
+          wsToken ? "✅ Present" : "❌ Missing"
+        );
         setTokens(token);
+        setWsTokens(wsToken);
       } catch (error) {
-        console.error("❌ Failed to fetch token:", error);
+        console.error("❌ Failed to fetch tokens:", error);
         setError("Failed to authenticate. Please refresh the page.");
       }
     };
-    getToken();
+    getTokens();
   }, []);
 
   // Initialize PeerJS for incoming calls when chat room loads
@@ -255,11 +265,11 @@ export default function ChatSessionPage() {
   const connectWebSocket = useCallback(
     (connectionId: string) => {
       console.log("🔌 Attempting WebSocket connection (User Side)...");
-      console.log("🔌 Tokens:", tokens ? "✅ Present" : "❌ Missing");
+      console.log("🔌 WS Tokens:", wsTokens ? "✅ Present" : "❌ Missing");
       console.log("🔌 ChatId:", chatId ? "✅ Present" : "❌ Missing");
       console.log("🔌 User:", user ? "✅ Present" : "❌ Missing");
 
-      if (!tokens || !chatId || !user) {
+      if (!wsTokens || !chatId || !user) {
         console.log("❌ Cannot connect WebSocket - missing required data");
         return null;
       }
@@ -276,7 +286,7 @@ export default function ChatSessionPage() {
 
       // Set up WebSocket connection for chat messages
       const baseUrl = process.env.NEXT_PUBLIC_WS_BASE_URL;
-      const wsUrl = `${baseUrl}/safe-space/${chatId}?token=${tokens}`;
+      const wsUrl = `${baseUrl}/safe-space/${chatId}?token=${wsTokens}`;
 
       console.log("Creating user WebSocket connection to:", wsUrl);
 
@@ -510,7 +520,7 @@ export default function ChatSessionPage() {
 
       return ws;
     },
-    [tokens, chatId, user, wsConnection]
+    [wsTokens, chatId, user, wsConnection]
   );
 
   // Heartbeat function to keep WebSocket alive
@@ -560,7 +570,7 @@ export default function ChatSessionPage() {
     console.log("🔄 ChatId:", chatId ? "✅ Present" : "❌ Missing");
     console.log("🔄 User:", user ? "✅ Present" : "❌ Missing");
 
-    if (!tokens || !chatId || !user) {
+    if (!wsTokens || !chatId || !user) {
       console.log(
         "❌ WebSocket effect - missing required data, skipping connection"
       );
@@ -595,7 +605,7 @@ export default function ChatSessionPage() {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [tokens, chatId, user]);
+  }, [wsTokens, chatId, user]);
 
   // Cleanup WebSocket connection when leaving the page or component unmounts
   useEffect(() => {

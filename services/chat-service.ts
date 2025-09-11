@@ -80,9 +80,9 @@ export class ChatWebSocketService {
     this.isConnecting = true;
 
     try {
-      // Get the access token for authentication
-      const { fetchToken } = await import("@/helpers/get-token");
-      const token = await fetchToken();
+      // Get the WebSocket token for authentication
+      const { fetchWsToken } = await import("@/helpers/get-ws-token");
+      const token = await fetchWsToken();
 
       // console.log("WebSocket auth - token available:", !!token);
 
