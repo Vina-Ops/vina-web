@@ -120,7 +120,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
   // State for floating video position and size
   const [floatingVideoPosition, setFloatingVideoPosition] = useState({
     x: 20,
-    y: 20,
+    y: 60,
   });
   const [floatingVideoSize, setFloatingVideoSize] = useState({
     width: 200,
@@ -347,66 +347,70 @@ const VideoCall: React.FC<VideoCallProps> = ({
   return (
     <div className="fixed inset-0 z-[999999] bg-black">
       {/* Header with call duration and network stats */}
-      <div className="absolute top-0 left-0 right-0 z-[99999]	 bg-black bg-opacity-75 text-white p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium">LIVE</span>
+      {showControls && (
+        <div className="absolute top-0 left-0 right-0 z-[99999]	 bg-black bg-opacity-75 text-white p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium">LIVE</span>
+              </div>
+              <div className="text-sm">
+                Call Duration: {formatDuration(callDuration)}
+              </div>
+              {isRecording && (
+                <div className="flex items-center space-x-2 text-red-400">
+                  <Circle className="w-3 h-3 animate-pulse fill-current" />
+                  <span className="text-sm">
+                    Recording: {formatDuration(recordingDuration)}
+                  </span>
+                </div>
+              )}
+              {isReconnecting && (
+                <div className="flex items-center space-x-2 text-yellow-400">
+                  <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm">
+                    Reconnecting... ({reconnectionAttempts}/
+                    {maxReconnectionAttempts})
+                  </span>
+                </div>
+              )}
             </div>
-            <div className="text-sm">
-              Call Duration: {formatDuration(callDuration)}
-            </div>
-            {isRecording && (
-              <div className="flex items-center space-x-2 text-red-400">
-                <Circle className="w-3 h-3 animate-pulse fill-current" />
-                <span className="text-sm">
-                  Recording: {formatDuration(recordingDuration)}
+
+            {/* Network Stats and Connection Diagnostics */}
+            <div className="flex items-center space-x-4 text-xs">
+              <div className="flex items-center space-x-2">
+                <span>🌐</span>
+                <span>{networkStats.bandwidth} kbps</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span>📊</span>
+                <span>{networkStats.latency}ms</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span>📉</span>
+                <span>{networkStats.packetLoss}%</span>
+              </div>
+              {/* Debug: Local Stream Status */}
+              <div className="flex items-center space-x-2">
+                <span>🎥</span>
+                <span
+                  className={localStream ? "text-green-400" : "text-red-400"}
+                >
+                  {localStream ? "Local OK" : "No Local"}
                 </span>
               </div>
-            )}
-            {isReconnecting && (
-              <div className="flex items-center space-x-2 text-yellow-400">
-                <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
-                <span className="text-sm">
-                  Reconnecting... ({reconnectionAttempts}/
-                  {maxReconnectionAttempts})
-                </span>
-              </div>
-            )}
-          </div>
+            </div>
 
-          {/* Network Stats and Connection Diagnostics */}
-          <div className="flex items-center space-x-4 text-xs">
-            <div className="flex items-center space-x-2">
-              <span>🌐</span>
-              <span>{networkStats.bandwidth} kbps</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span>📊</span>
-              <span>{networkStats.latency}ms</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span>📉</span>
-              <span>{networkStats.packetLoss}%</span>
-            </div>
-            {/* Debug: Local Stream Status */}
-            <div className="flex items-center space-x-2">
-              <span>🎥</span>
-              <span className={localStream ? "text-green-400" : "text-red-400"}>
-                {localStream ? "Local OK" : "No Local"}
-              </span>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-red-600 rounded-full transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
-
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-red-600 rounded-full transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
         </div>
-      </div>
+      )}
 
       {/* Debug Display - Only show when on call */}
       {callDuration > 0 && (
@@ -562,7 +566,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
                     onClick={onAccept}
                     className={`${
                       isMobile ? "p-5" : "p-4"
-                    } bg-green-600 hover:bg-green-700 text-white rounded-full transition-colors`}
+                    } bg-green hover:bg-green/70 text-white rounded-full transition-colors`}
                     title="Accept Call"
                   >
                     <Phone className={isMobile ? "h-10 w-10" : "h-8 w-8"} />
