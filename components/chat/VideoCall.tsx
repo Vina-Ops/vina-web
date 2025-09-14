@@ -413,7 +413,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
       )}
 
       {/* Debug Display - Only show when on call */}
-      {callDuration > 0 && (
+      {showControls && callDuration > 0 && (
         <div className="absolute top-20 left-0 right-0 z-10 bg-black bg-opacity-75 text-white p-3 text-xs">
           <div className="flex items-center justify-between max-w-4xl mx-auto">
             <div className="flex items-center space-x-6">

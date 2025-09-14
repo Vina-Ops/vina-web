@@ -8,6 +8,8 @@ export interface TranslationResult {
   targetLanguage: string;
   timestamp: string;
   error?: string;
+  provider?: string;
+  confidence?: number;
 }
 
 export interface LanguageDetectionResult {
@@ -16,6 +18,8 @@ export interface LanguageDetectionResult {
   detectedLanguage: string;
   timestamp: string;
   error?: string;
+  provider?: string;
+  confidence?: number;
 }
 
 export interface BatchTranslationResult {
@@ -62,7 +66,7 @@ export const useTranslation = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const [autoTranslate, setAutoTranslate] = useState<boolean>(false);
 
-  // Translate single text
+  // Translate single text with free API first, then fallback to OpenAI
   const translateText = useCallback(
     async (
       text: string,
@@ -72,7 +76,8 @@ export const useTranslation = () => {
       setIsTranslating(true);
 
       try {
-        const response = await fetch("/api/translate", {
+        // Try free translation API first
+        const freeResponse = await fetch("/api/translate-free", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -84,13 +89,44 @@ export const useTranslation = () => {
           }),
         });
 
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || "Translation failed");
+        if (freeResponse.ok) {
+          const freeResult = await freeResponse.json();
+          return {
+            success: true,
+            originalText: text,
+            translatedText: freeResult.translatedText,
+            sourceLanguage:
+              freeResult.detectedLanguage || sourceLanguage || "auto",
+            targetLanguage,
+            timestamp: new Date().toISOString(),
+            provider: freeResult.provider,
+          };
         }
 
-        return result;
+        // Fallback to OpenAI if free API fails
+        console.log("Free translation failed, falling back to OpenAI...");
+        const openaiResponse = await fetch("/api/translate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text,
+            targetLanguage,
+            sourceLanguage,
+          }),
+        });
+
+        const openaiResult = await openaiResponse.json();
+
+        if (!openaiResponse.ok) {
+          throw new Error(openaiResult.error || "Translation failed");
+        }
+
+        return {
+          ...openaiResult,
+          provider: "openai",
+        };
       } catch (error) {
         console.error("Translation error:", error);
         return {
@@ -109,26 +145,57 @@ export const useTranslation = () => {
     []
   );
 
-  // Detect language of text
+  // Detect language of text with free API first, then fallback to OpenAI
   const detectLanguage = useCallback(
     async (text: string): Promise<LanguageDetectionResult> => {
       setIsDetectingLanguage(true);
 
       try {
-        const response = await fetch(
+        // Try free language detection API first
+        const freeResponse = await fetch("/api/translate-free", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text,
+            action: "detect",
+          }),
+        });
+
+        if (freeResponse.ok) {
+          const freeResult = await freeResponse.json();
+          return {
+            success: true,
+            text,
+            detectedLanguage: freeResult.language,
+            timestamp: new Date().toISOString(),
+            provider: freeResult.provider,
+            confidence: freeResult.confidence,
+          };
+        }
+
+        // Fallback to OpenAI if free API fails
+        console.log(
+          "Free language detection failed, falling back to OpenAI..."
+        );
+        const openaiResponse = await fetch(
           `/api/translate?text=${encodeURIComponent(text)}`,
           {
             method: "GET",
           }
         );
 
-        const result = await response.json();
+        const openaiResult = await openaiResponse.json();
 
-        if (!response.ok) {
-          throw new Error(result.error || "Language detection failed");
+        if (!openaiResponse.ok) {
+          throw new Error(openaiResult.error || "Language detection failed");
         }
 
-        return result;
+        return {
+          ...openaiResult,
+          provider: "openai",
+        };
       } catch (error) {
         console.error("Language detection error:", error);
         return {
@@ -148,7 +215,7 @@ export const useTranslation = () => {
     []
   );
 
-  // Translate multiple messages
+  // Translate multiple messages with free API first, then fallback to OpenAI
   const translateMessages = useCallback(
     async (
       messages: any[],
@@ -158,25 +225,62 @@ export const useTranslation = () => {
       setIsBatchTranslating(true);
 
       try {
-        const response = await fetch("/api/translate", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            messages,
-            targetLanguage,
-            sourceLanguage,
-          }),
-        });
+        // For batch translation, we'll translate each message individually using the free API
+        const translatedMessages = [];
+        let hasErrors = false;
+        let errorMessages: string[] = [];
 
-        const result = await response.json();
+        for (const message of messages) {
+          try {
+            const translationResult = await translateText(
+              message.content,
+              targetLanguage,
+              sourceLanguage
+            );
 
-        if (!response.ok) {
-          throw new Error(result.error || "Batch translation failed");
+            if (translationResult.success) {
+              translatedMessages.push({
+                ...message,
+                content: translationResult.translatedText,
+                originalContent: message.content,
+                isTranslated: true,
+                translationProvider: translationResult.provider,
+              });
+            } else {
+              translatedMessages.push({
+                ...message,
+                originalContent: message.content,
+                isTranslated: false,
+                translationError: translationResult.error,
+              });
+              hasErrors = true;
+              errorMessages.push(
+                translationResult.error || "Translation failed"
+              );
+            }
+          } catch (error) {
+            translatedMessages.push({
+              ...message,
+              originalContent: message.content,
+              isTranslated: false,
+              translationError:
+                error instanceof Error ? error.message : "Translation failed",
+            });
+            hasErrors = true;
+            errorMessages.push(
+              error instanceof Error ? error.message : "Translation failed"
+            );
+          }
         }
 
-        return result;
+        return {
+          success: !hasErrors,
+          messages: translatedMessages,
+          targetLanguage,
+          sourceLanguage: sourceLanguage || "auto",
+          timestamp: new Date().toISOString(),
+          error: hasErrors ? errorMessages.join("; ") : undefined,
+        };
       } catch (error) {
         console.error("Batch translation error:", error);
         return {
@@ -192,7 +296,7 @@ export const useTranslation = () => {
         setIsBatchTranslating(false);
       }
     },
-    []
+    [translateText]
   );
 
   // Get language name from code

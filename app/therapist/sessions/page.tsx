@@ -418,11 +418,8 @@ function TherapistSessionsContent() {
       return;
     }
 
-    // Only connect if chat is open, but don't disconnect if it's closed
-    if (!showChat) {
-      console.log("Chat not open, skipping WebSocket connection");
-      return;
-    }
+    // Always maintain WebSocket connection for active sessions to receive messages
+    // even when chat UI is not open
 
     // Close existing connection if it exists
     if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
@@ -547,7 +544,7 @@ function TherapistSessionsContent() {
         ) {
           // Determine if the message is from the current user (therapist) or the patient
           const isFromCurrentUser = data.sender === (user as any)?.id;
-          const messageSender = isFromCurrentUser ? "user" : "ai";
+          const messageSender = isFromCurrentUser ? "therapist" : "user";
 
           const incoming: Message = {
             id: data.id || generateUniqueMessageId(),
@@ -697,7 +694,7 @@ function TherapistSessionsContent() {
       // Only play sound for incoming messages (not the first load)
       const newMessages = messages.slice(previousMessageCount);
       const hasIncomingMessages = newMessages.some(
-        (msg) => msg.sender === "ai" // "ai" represents messages from the patient
+        (msg) => msg.sender === "user" // "user" represents messages from the patient
       );
 
       if (hasIncomingMessages && settings.soundEnabled) {
@@ -909,7 +906,7 @@ function TherapistSessionsContent() {
     const outgoing: Message = {
       id: messageId,
       content,
-      sender: "user",
+      sender: "therapist",
       timestamp: new Date().toISOString(),
       type: "text",
       isRead: false,
