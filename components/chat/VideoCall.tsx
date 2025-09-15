@@ -432,14 +432,14 @@ const VideoCall: React.FC<VideoCallProps> = ({
                 <span>{networkStats.packetLoss}%</span>
               </div> */}
               {/* Debug: Local Stream Status */}
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <span>🎥</span>
                 <span
                   className={localStream ? "text-green-400" : "text-red-400"}
                 >
                   {localStream ? "Local OK" : "No Local"}
                 </span>
-              </div>
+              </div> */}
             </div>
 
             <button
@@ -465,10 +465,10 @@ const VideoCall: React.FC<VideoCallProps> = ({
                 <span>👥</span>
                 <span>Participants: {participants.length}</span>
               </div>
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <span>📹</span>
                 <span>Remote Streams: {remoteStreams.size}</span>
-              </div>
+              </div> */}
             </div>
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
