@@ -13,6 +13,7 @@ import { useTopToast } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
 import { getRoleBasedRedirectPath, User } from "@/utils/role-routing";
 import { useUser } from "@/context/user-context";
+import { useLanguage } from "@/context/language-context";
 
 const LoginPage = () => {
   const { callApi, loading, data, error } = useApi(loginUser);
@@ -20,6 +21,7 @@ const LoginPage = () => {
   const router = useRouter();
   const { register, handleSubmit, setValue } = useForm();
   const { setUser } = useUser();
+  const { t } = useLanguage();
 
   const onSubmit = async (formData: any) => {
     const { email, password } = formData;
@@ -87,13 +89,13 @@ const LoginPage = () => {
         }
       };
       setCookies();
-      showToast("Login successful!", { type: "success" });
+      showToast(t("auth.loginSuccess"), { type: "success" });
       // Handle successful login (e.g., redirect to dashboard)
     } catch (err) {
       // Handle error (e.g., show error message)
       console.error("Login failed:", err);
       // Optionally, you can set an error state to display a message to the user
-      showToast("Login failed. Please check your credentials.", {
+      showToast(t("auth.loginFailed"), {
         type: "error",
       });
     }
@@ -121,18 +123,18 @@ const LoginPage = () => {
   return (
     <div className="w-full max-w-lg  space-y-6">
       <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-dark-green">
-        Log In
+        {t("auth.logIn")}
       </h2>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <Input
           type="email"
-          placeholder="Enter email"
+          placeholder={t("auth.enterEmail")}
           {...register("email", { required: true })}
           required
         />
         <Input
           type="password"
-          placeholder="Enter password"
+          placeholder={t("auth.enterPassword")}
           {...register("password", { required: true })}
           required
         />
@@ -142,16 +144,16 @@ const LoginPage = () => {
           className="w-full"
           disabled={loading}
         >
-          {loading ? "Signing in..." : "Log In"}
+          {loading ? t("auth.signingIn") : t("auth.logIn")}
         </Button>
       </form>
 
       <div className="flex justify-between text-sm text-gray-600 dark:text-dark-green mt-4">
         <Link href="/auth/forgot-password" className="hover:underline">
-          Forgot your password?
+          {t("auth.forgotYourPassword")}
         </Link>
         <Link href="/auth/register" className="hover:underline">
-          Create a new account!
+          {t("auth.createNewAccount")}
         </Link>
       </div>
     </div>

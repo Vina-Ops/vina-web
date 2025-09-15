@@ -19,6 +19,7 @@ import {
 import { usePathname } from "next/navigation";
 import { useUser } from "@/context/user-context";
 import { getUserProfileByUuid } from "@/services/general-service";
+import { useLanguage } from "@/context/language-context";
 
 // Interface for user profile data based on API response
 interface UserProfile {
@@ -48,6 +49,7 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const { user: currentUser } = useUser();
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   // Update navigation items to reflect current path
   const updatedNavItems = defaultNavItems.map((item) => {
@@ -84,11 +86,11 @@ export default function ProfilePage() {
   const getRoleDisplayName = (role: string) => {
     switch (role) {
       case "customer":
-        return "Customer";
+        return t("pages.profile.customer");
       case "therapist":
-        return "Therapist";
+        return t("pages.profile.therapist");
       case "admin":
-        return "Administrator";
+        return t("pages.profile.administrator");
       default:
         return role.charAt(0).toUpperCase() + role.slice(1);
     }
@@ -120,7 +122,7 @@ export default function ProfilePage() {
           setEditedUser(data);
           setError(null);
         } catch (err) {
-          setError("Failed to load profile");
+          setError(t("pages.profile.failedToLoadProfile"));
           console.error("Error fetching user profile:", err);
         } finally {
           setLoading(false);
@@ -155,7 +157,7 @@ export default function ProfilePage() {
                 <div>
                   <div className="flex items-start justify-between">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                      Profile
+                      {t("pages.profile.title")}
                     </h1>
 
                     {!isEditing && !loading && user && (
@@ -164,7 +166,7 @@ export default function ProfilePage() {
                         className="flex items-center space-x-2 px-4 py-2 bg-green text-white rounded-lg hover:bg-green/80 transition-colors"
                       >
                         <Edit className="w-4 h-4" />
-                        <span>Edit Profile</span>
+                        <span>{t("pages.profile.editProfile")}</span>
                       </button>
                     )}
                     {isEditing && (
@@ -174,20 +176,20 @@ export default function ProfilePage() {
                           className="flex items-center space-x-2 px-4 py-2 bg-green text-white rounded-lg hover:bg-green/80 transition-colors"
                         >
                           <Save className="w-4 h-4" />
-                          <span>Save Changes</span>
+                          <span>{t("pages.profile.saveChanges")}</span>
                         </button>
                         <button
                           onClick={handleCancel}
                           className="flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         >
                           <X className="w-4 h-4" />
-                          <span>Cancel</span>
+                          <span>{t("pages.profile.cancel")}</span>
                         </button>
                       </div>
                     )}
                   </div>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Manage your personal information and preferences
+                    {t("pages.profile.subtitle")}
                   </p>
                 </div>
               </div>
@@ -204,7 +206,7 @@ export default function ProfilePage() {
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green mx-auto mb-4"></div>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Loading profile...
+                    {t("pages.profile.loadingProfile")}
                   </p>
                 </div>
               )}
@@ -228,13 +230,13 @@ export default function ProfilePage() {
                           {user.first_name} {user.last_name}
                         </h2>
                         <p className="text-gray-600 dark:text-gray-400 mb-4">
-                          Member since{" "}
+                          {t("pages.profile.memberSince")}{" "}
                           {new Date(user.created_at).toLocaleDateString()}
                         </p>
                         {!isEditing && (
                           <div className="text-left">
                             <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                              Bio
+                              {t("pages.profile.bio")}
                             </h3>
                             <p className="text-gray-600 dark:text-gray-400 text-sm">
                               {user.bio}
@@ -249,14 +251,14 @@ export default function ProfilePage() {
                   <div className="lg:col-span-2">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-                        Personal Information
+                        {t("pages.profile.personalInformation")}
                       </h3>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* First Name */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            First Name
+                            {t("pages.profile.firstName")}
                           </label>
                           {isEditing ? (
                             <input
@@ -278,7 +280,7 @@ export default function ProfilePage() {
                         {/* Last Name */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Last Name
+                            {t("pages.profile.lastName")}
                           </label>
                           {isEditing ? (
                             <input
@@ -300,7 +302,7 @@ export default function ProfilePage() {
                         {/* Email */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Email
+                            {t("pages.profile.email")}
                           </label>
                           {isEditing ? (
                             <input
@@ -322,7 +324,7 @@ export default function ProfilePage() {
                         {/* Gender */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Gender
+                            {t("pages.profile.gender")}
                           </label>
                           {isEditing ? (
                             <select
@@ -344,10 +346,18 @@ export default function ProfilePage() {
                                 backgroundImage: "none",
                               }}
                             >
-                              <option value="">Select Gender</option>
-                              <option value="male">Male</option>
-                              <option value="female">Female</option>
-                              <option value="other">Other</option>
+                              <option value="">
+                                {t("pages.profile.selectGender")}
+                              </option>
+                              <option value="male">
+                                {t("pages.profile.male")}
+                              </option>
+                              <option value="female">
+                                {t("pages.profile.female")}
+                              </option>
+                              <option value="other">
+                                {t("pages.profile.other")}
+                              </option>
                             </select>
                           ) : (
                             <div className="flex items-center space-x-2 text-gray-900 dark:text-white">
@@ -356,7 +366,7 @@ export default function ProfilePage() {
                                 {user.gender
                                   ? user.gender.charAt(0).toUpperCase() +
                                     user.gender.slice(1)
-                                  : "Not specified"}
+                                  : t("pages.profile.notSpecified")}
                               </span>
                             </div>
                           )}
@@ -365,7 +375,7 @@ export default function ProfilePage() {
                         {/* Date of Birth */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Date of Birth
+                            {t("pages.profile.dateOfBirth")}
                           </label>
                           {isEditing ? (
                             <input
@@ -382,7 +392,7 @@ export default function ProfilePage() {
                               <span>
                                 {user.dob
                                   ? formatDate(user.dob)
-                                  : "Not specified"}
+                                  : t("pages.profile.notSpecified")}
                               </span>
                             </div>
                           )}
@@ -391,7 +401,7 @@ export default function ProfilePage() {
                         {/* Role */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Role
+                            {t("pages.profile.role")}
                           </label>
                           <div className="flex items-center space-x-2 text-gray-900 dark:text-white">
                             <User className="w-4 h-4 text-gray-400" />
@@ -404,7 +414,7 @@ export default function ProfilePage() {
                       {isEditing && (
                         <div className="mt-6">
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Bio
+                            {t("pages.profile.bio")}
                           </label>
                           <textarea
                             value={editedUser?.bio || ""}

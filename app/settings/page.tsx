@@ -22,10 +22,12 @@ import {
 import { usePathname } from "next/navigation";
 import { useNotification } from "@/context/notification-context";
 import { useTopToast } from "@/components/ui/toast";
+import { useLanguage } from "@/context/language-context";
 
 // DeleteChatsModal Component
 const DeleteChatsModal: React.FC = () => {
   const { showToast } = useTopToast();
+  const { t } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -35,16 +37,13 @@ const DeleteChatsModal: React.FC = () => {
       const { deleteChatWithAI } = await import("@/services/general-service");
       await deleteChatWithAI();
       setShowModal(false);
-      showToast("All your chats with Vina have been deleted.", {
+      showToast(t("pages.settings.chatsDeleted"), {
         type: "success",
       });
     } catch (error) {
-      showToast(
-        "Failed to delete chats. Please try again or contact support.",
-        {
-          type: "error",
-        }
-      );
+      showToast(t("pages.settings.deleteFailed"), {
+        type: "error",
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -57,7 +56,7 @@ const DeleteChatsModal: React.FC = () => {
         onClick={() => setShowModal(true)}
       >
         <AlertTriangle className="h-5 w-5" />
-        Delete My Chats with Vina
+        {t("pages.settings.deleteMyChats")}
       </button>
 
       {showModal && (
@@ -65,14 +64,10 @@ const DeleteChatsModal: React.FC = () => {
           <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-md w-full p-6 relative">
             <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-400" />
-              Delete All Chats
+              {t("pages.settings.deleteAllChats")}
             </h3>
             <p className="mt-3 text-gray-700 dark:text-gray-200">
-              Are you sure you want to delete{" "}
-              <b className="font-bold uppercase text-sm">
-                all your chats with Vina
-              </b>
-              ? This action cannot be undone.
+              {t("pages.settings.deleteChatsConfirm")}
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
@@ -80,14 +75,16 @@ const DeleteChatsModal: React.FC = () => {
                 onClick={() => setShowModal(false)}
                 disabled={isDeleting}
               >
-                Cancel
+                {t("pages.settings.cancel")}
               </button>
               <button
                 className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition"
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                {isDeleting ? "Deleting..." : "Delete"}
+                {isDeleting
+                  ? t("pages.settings.deleting")
+                  : t("pages.settings.delete")}
               </button>
             </div>
           </div>
@@ -119,6 +116,7 @@ export default function SettingsPage() {
     toggleIncomingCallSound,
     setVolume,
   } = useNotification();
+  const { t } = useLanguage();
   const [settings, setSettings] = useState({
     notifications: true,
     emailUpdates: true,
@@ -147,28 +145,28 @@ export default function SettingsPage() {
 
   const settingsGroups: { title: string; items: SettingItem[] }[] = [
     {
-      title: "Notifications",
+      title: t("pages.settings.notifications"),
       items: [
         {
           id: "notifications",
-          title: "Push Notifications",
-          description: "Receive notifications for new messages and updates",
+          title: t("pages.settings.pushNotifications"),
+          description: t("pages.settings.pushNotificationsDesc"),
           icon: <Bell className="w-5 h-5" />,
           type: "toggle",
           value: settings.notifications,
         },
         {
           id: "emailUpdates",
-          title: "Email Updates",
-          description: "Receive email notifications for important updates",
+          title: t("pages.settings.emailUpdates"),
+          description: t("pages.settings.emailUpdatesDesc"),
           icon: <Mail className="w-5 h-5" />,
           type: "toggle",
           value: settings.emailUpdates,
         },
         {
           id: "soundEnabled",
-          title: "Sound Notifications",
-          description: "Play sound for new messages and notifications",
+          title: t("pages.settings.soundNotifications"),
+          description: t("pages.settings.soundNotificationsDesc"),
           icon: <Volume2 className="w-5 h-5" />,
           type: "toggle",
           value: notificationSettings.soundEnabled,
@@ -176,8 +174,8 @@ export default function SettingsPage() {
         },
         {
           id: "incomingCallSound",
-          title: "Incoming Call Sounds",
-          description: "Play sound for incoming video calls",
+          title: t("pages.settings.incomingCallSounds"),
+          description: t("pages.settings.incomingCallSoundsDesc"),
           icon: <Phone className="w-5 h-5" />,
           type: "toggle",
           value: notificationSettings.incomingCallSoundEnabled,
@@ -185,8 +183,8 @@ export default function SettingsPage() {
         },
         {
           id: "volume",
-          title: "Notification Volume",
-          description: "Adjust the volume of notification sounds",
+          title: t("pages.settings.notificationVolume"),
+          description: t("pages.settings.notificationVolumeDesc"),
           icon: <Volume2 className="w-5 h-5" />,
           type: "range",
           value: notificationSettings.volume,
@@ -198,20 +196,20 @@ export default function SettingsPage() {
       ],
     },
     {
-      title: "Appearance",
+      title: t("pages.settings.appearance"),
       items: [
         {
           id: "darkMode",
-          title: "Dark Mode",
-          description: "Switch between light and dark themes",
+          title: t("pages.settings.darkMode"),
+          description: t("pages.settings.darkModeDesc"),
           icon: <Palette className="w-5 h-5" />,
           type: "toggle",
           value: settings.darkMode,
         },
         {
           id: "language",
-          title: "Language",
-          description: "Choose your preferred language",
+          title: t("pages.settings.language"),
+          description: t("pages.settings.languageDesc"),
           icon: <Globe className="w-5 h-5" />,
           type: "select",
           value: settings.language,
@@ -225,28 +223,28 @@ export default function SettingsPage() {
       ],
     },
     {
-      title: "Privacy & Security",
+      title: t("pages.settings.privacySecurity"),
       items: [
         {
           id: "privacyMode",
-          title: "Privacy Mode",
-          description: "Hide sensitive information from screenshots",
+          title: t("pages.settings.privacyMode"),
+          description: t("pages.settings.privacyModeDesc"),
           icon: <Eye className="w-5 h-5" />,
           type: "toggle",
           value: settings.privacyMode,
         },
         {
           id: "twoFactorAuth",
-          title: "Two-Factor Authentication",
-          description: "Add an extra layer of security to your account",
+          title: t("pages.settings.twoFactorAuth"),
+          description: t("pages.settings.twoFactorAuthDesc"),
           icon: <Lock className="w-5 h-5" />,
           type: "toggle",
           value: settings.twoFactorAuth,
         },
         {
           id: "autoSave",
-          title: "Auto-Save",
-          description: "Automatically save your progress",
+          title: t("pages.settings.autoSave"),
+          description: t("pages.settings.autoSaveDesc"),
           icon: <Save className="w-5 h-5" />,
           type: "toggle",
           value: settings.autoSave,
@@ -372,10 +370,10 @@ export default function SettingsPage() {
               {/* Header */}
               <div className="mb-8 ml-4 md:ml-0">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  Settings
+                  {t("pages.settings.title")}
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Customize your experience and manage your preferences
+                  {t("pages.settings.subtitle")}
                 </p>
               </div>
 
@@ -406,14 +404,11 @@ export default function SettingsPage() {
                       <AlertTriangle className="h-5 w-5 text-red-400" />
 
                       <h3 className="ml-2 text-lg leading-6 font-medium text-red-800 dark:text-red-200">
-                        Danger Zone
+                        {t("pages.settings.dangerZone")}
                       </h3>
                     </div>
                     <div className="mt-4 text-sm text-red-700 dark:text-red-300">
-                      <p>
-                        These actions are irreversible and will affect all users
-                        on the platform.
-                      </p>
+                      <p>{t("pages.settings.dangerZoneDesc")}</p>
                     </div>
 
                     {/* Delete My Chats Modal Button and Modal */}
@@ -425,7 +420,7 @@ export default function SettingsPage() {
               {/* Save Button */}
               <div className="mt-8 flex justify-end">
                 <button className="px-6 py-2 bg-green text-white rounded-lg hover:bg-green/80 transition-colors font-medium">
-                  Save Changes
+                  {t("pages.settings.saveChanges")}
                 </button>
               </div>
             </div>

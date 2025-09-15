@@ -1,12 +1,129 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTheme } from "./ThemeProvider";
 import { Sun, Moon, Monitor } from "lucide-react";
 
-export const ThemeToggle = () => {
+interface PositionConfig {
+  placement?: "top" | "bottom" | "left" | "right" | "auto";
+  offset?: number;
+  mobilePlacement?: "top" | "bottom" | "left" | "right" | "auto";
+  mobileOffset?: number;
+  maxWidth?: string;
+  mobileMaxWidth?: string;
+}
+
+interface ThemeToggleProps {
+  position?: PositionConfig;
+  className?: string;
+  compact?: boolean;
+}
+
+export const ThemeToggle = ({
+  position = {},
+  className = "",
+  compact = false,
+}: ThemeToggleProps = {}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number;
+    left: number;
+    right?: number;
+  }>({ top: 0, left: 0, right: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Always call useTheme, but handle the error in the component
   const { theme, resolvedTheme, setTheme, isSystem } = useTheme();
+
+  // Calculate dropdown position
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const isMobile = viewportWidth < 768;
+
+      const {
+        placement = "auto",
+        offset = 8,
+        mobilePlacement = "bottom",
+        mobileOffset = 8,
+        maxWidth = "180px",
+        mobileMaxWidth = "200px",
+      } = position;
+
+      const effectivePlacement = isMobile ? mobilePlacement : placement;
+      const effectiveOffset = isMobile ? mobileOffset : offset;
+      const effectiveMaxWidth = isMobile ? mobileMaxWidth : maxWidth;
+
+      let newPosition: { top: number; left: number; right?: number } = {
+        top: 0,
+        left: 0,
+        right: 0,
+      };
+
+      if (effectivePlacement === "auto") {
+        // Auto-detect best placement
+        const spaceBelow = viewportHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+        const spaceRight = viewportWidth - buttonRect.right;
+        const spaceLeft = buttonRect.left;
+
+        if (spaceBelow >= 150 || spaceBelow > spaceAbove) {
+          newPosition = {
+            top: buttonRect.bottom + effectiveOffset,
+            left:
+              spaceRight >= 180
+                ? buttonRect.left
+                : Math.max(8, buttonRect.right - 180),
+            right: spaceRight < 180 ? 8 : undefined,
+          };
+        } else {
+          newPosition = {
+            top: buttonRect.top - 150 - effectiveOffset,
+            left:
+              spaceRight >= 180
+                ? buttonRect.left
+                : Math.max(8, buttonRect.right - 180),
+            right: spaceRight < 180 ? 8 : undefined,
+          };
+        }
+      } else {
+        // Use specified placement
+        switch (effectivePlacement) {
+          case "bottom":
+            newPosition = {
+              top: buttonRect.bottom + effectiveOffset,
+              left: buttonRect.left,
+              right: undefined,
+            };
+            break;
+          case "top":
+            newPosition = {
+              top: buttonRect.top - 150 - effectiveOffset,
+              left: buttonRect.left,
+              right: undefined,
+            };
+            break;
+          case "right":
+            newPosition = {
+              top: buttonRect.top,
+              left: buttonRect.right + effectiveOffset,
+              right: undefined,
+            };
+            break;
+          case "left":
+            newPosition = {
+              top: buttonRect.top,
+              left: buttonRect.left - 180 - effectiveOffset,
+              right: undefined,
+            };
+            break;
+        }
+      }
+
+      setDropdownPosition(newPosition);
+    }
+  }, [isOpen, position]);
 
   const themes = [
     { value: "light", label: "Light", icon: Sun },
@@ -18,17 +135,24 @@ export const ThemeToggle = () => {
   const CurrentIcon = currentTheme?.icon || Monitor;
 
   return (
-    <div className="relative">
+    <div className={`relative ${className}`}>
       {/* Main toggle button */}
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         aria-label={`Current theme: ${currentTheme?.label}. Click to change theme`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        className="relative p-2 flex justify-center items-center rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green focus:ring-offset-2 dark:focus:ring-offset-gray-900 group"
+        className={`relative flex justify-center items-center rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green focus:ring-offset-2 dark:focus:ring-offset-gray-900 group ${
+          compact ? "p-1.5" : "p-2"
+        }`}
         type="button"
       >
-        <CurrentIcon className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+        <CurrentIcon
+          className={`transition-transform duration-200 group-hover:scale-110 ${
+            compact ? "w-4 h-4" : "w-5 h-5"
+          }`}
+        />
 
         {/* System indicator */}
         {isSystem && (
@@ -41,13 +165,28 @@ export const ThemeToggle = () => {
         <>
           {/* Backdrop */}
           <div
-            className="fixed relative inset-0 z-[9998]"
+            className="fixed inset-0 z-[9998]"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
 
           {/* Menu */}
-          <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[9999]">
+          <div
+            ref={dropdownRef}
+            className="fixed bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[9999]"
+            style={{
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+              right: dropdownPosition.right,
+              maxWidth:
+                window.innerWidth < 768
+                  ? position.mobileMaxWidth || "200px"
+                  : position.maxWidth || "180px",
+              minWidth: "140px",
+            }}
+            role="listbox"
+            aria-label="Theme options"
+          >
             {themes.map((themeOption) => {
               const Icon = themeOption.icon;
               const isActive = theme === themeOption.value;
@@ -59,7 +198,7 @@ export const ThemeToggle = () => {
                     setTheme(themeOption.value);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex z-[70] items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
+                  className={`w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
                     isActive
                       ? "text-green dark:text-white bg-green/50 dark:bg-green/20"
                       : "text-gray-700 dark:text-gray-300"
