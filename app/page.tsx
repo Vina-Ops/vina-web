@@ -13,6 +13,7 @@ import Logo from "@/components/logo";
 import { DynamicChat } from "@/components/ui/DynamicChat";
 import { PopupMessageBubbles } from "@/components/ui/PopupMessageBubbles";
 import { LanguageSwitcher } from "@/components/language/LanguageSwitcher";
+import { MobileMenu } from "@/components/navigation/MobileMenu";
 import Image from "next/image";
 
 function HomePageContent() {
@@ -166,26 +167,48 @@ function HomePageContent() {
             </div>
           </div>
 
-          <div className="relative flex items-center space-x-2 md:space-x-4">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-4">
             <LanguageSwitcher />
             <ThemeToggle />
             <Link href="/therapist">
-              <button className="px-3 md:px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition hover:scale-105 text-sm md:text-base">
+              <button className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition hover:scale-105 text-base">
                 Therapists
               </button>
             </Link>
 
             <Link href="/auth/login">
-              <button className="px-3 md:px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition hover:scale-105 text-sm md:text-base">
+              <button className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition hover:scale-105 text-base">
                 {t("nav.login")}
               </button>
             </Link>
 
             <Link href="/?start=1">
-              <button className="px-4 md:px-5 py-3 bg-green text-white rounded-lg hover:bg-green/80 transition transform hover:scale-105 shadow-lg hover:shadow-xl text-sm md:text-base">
+              <button className="px-5 py-3 bg-green text-white rounded-lg hover:bg-green/80 transition transform hover:scale-105 shadow-lg hover:shadow-xl text-base">
                 {t("nav.getStarted")}
               </button>
             </Link>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden flex items-center space-x-2">
+            <LanguageSwitcher 
+              position={{
+                placement: "bottom",
+                mobilePlacement: "bottom",
+                offset: 8,
+                mobileOffset: 8
+              }}
+            />
+            <ThemeToggle 
+              position={{
+                placement: "bottom",
+                mobilePlacement: "bottom",
+                offset: 8,
+                mobileOffset: 8
+              }}
+            />
+            <MobileMenu />
           </div>
         </div>
       </nav>
