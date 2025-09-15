@@ -21,9 +21,9 @@ export const useChatWebSocket = () => {
       return newMessages;
     });
     setIsTyping(false);
-    
+
     // Play notification sound for incoming AI messages
-    if (message.sender === 'ai' && settings.soundEnabled) {
+    if (message.sender === "ai" && settings.soundEnabled) {
       notificationSound.play(settings.volume);
     }
   }, []);
@@ -146,6 +146,37 @@ export const useChatWebSocket = () => {
     }
   }, [isConnected, error]);
 
+  // Update a specific message by ID
+  const updateMessage = useCallback(
+    (messageId: string, updatedMessage: Partial<Message>) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId ? { ...msg, ...updatedMessage } : msg
+        )
+      );
+    },
+    []
+  );
+
+  // Add a new message or update existing one
+  const addOrUpdateMessage = useCallback((message: Message) => {
+    setMessages((prev) => {
+      const existingIndex = prev.findIndex((msg) => msg.id === message.id);
+      if (existingIndex >= 0) {
+        // Update existing message
+        const newMessages = [...prev];
+        newMessages[existingIndex] = {
+          ...newMessages[existingIndex],
+          ...message,
+        };
+        return newMessages;
+      } else {
+        // Add new message
+        return [...prev, message];
+      }
+    });
+  }, []);
+
   return {
     messages,
     isTyping,
@@ -154,5 +185,7 @@ export const useChatWebSocket = () => {
     error,
     sendMessage,
     clearError: () => setError(null),
+    updateMessage,
+    addOrUpdateMessage,
   };
 };

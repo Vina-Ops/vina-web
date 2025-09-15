@@ -12,16 +12,19 @@ import {
   getLinkMetadata,
 } from "@/utils/link-utils";
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message, highlightQuery }) => {
+export const ChatMessage: React.FC<ChatMessageProps> = ({
+  message,
+  highlightQuery,
+}) => {
   const isUser = message.sender === "user";
 
   // Helper function to highlight search terms
   const highlightText = (text: string, query?: string) => {
     if (!query || !query.trim()) return text;
-    
+
     const regex = new RegExp(`(${query})`, "gi");
     const parts = text.split(regex);
-    
+
     return parts.map((part, index) =>
       regex.test(part) ? (
         <mark key={index} className="bg-yellow-200 px-1 rounded">
@@ -146,7 +149,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, highlightQuer
               {translatedContent && (
                 <div className="relative">
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {highlightText(getTextWithoutUrls(translatedContent), highlightQuery)}
+                    {highlightText(
+                      getTextWithoutUrls(translatedContent),
+                      highlightQuery
+                    )}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
                     <span className="text-xs text-blue-600 flex items-center gap-1">
@@ -163,7 +169,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, highlightQuer
               <div className={`${translatedContent ? "opacity-60" : ""}`}>
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
                   {typeof message.content === "string"
-                    ? highlightText(getTextWithoutUrls(message.content), highlightQuery)
+                    ? highlightText(
+                        getTextWithoutUrls(message.content),
+                        highlightQuery
+                      )
                     : message.content}
                 </p>
                 {translatedContent && (
@@ -208,11 +217,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, highlightQuer
 
           {/* Translation Button - only for text messages */}
           {message.type !== "audio" && typeof message.content === "string" && (
-            <TranslationButton
-              text={message.content}
-              messageId={message.id}
-              className={isUser ? "text-gray-300" : "text-gray-500"}
-            />
+            <div className={`relative ${isUser ? "ml-auto" : "mr-auto"}`}>
+              <TranslationButton
+                text={message.content}
+                messageId={message.id}
+                className={isUser ? "text-gray-300" : "text-gray-500"}
+                isUserMessage={isUser}
+              />
+            </div>
           )}
         </div>
       </div>

@@ -141,7 +141,7 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
-            <Languages className="w-5 h-5 text-blue-600" />
+            <Languages className="w-5 h-5 text-green" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Translate Chat
             </h2>
@@ -171,7 +171,7 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
                   onClick={() => setSelectedLanguage(language.code)}
                   className={`flex items-center gap-2 p-2 rounded-md border transition-colors ${
                     selectedLanguage === language.code
-                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
+                      ? "border-green bg-green text-white dark:bg-green/20 dark:text-white"
                       : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
@@ -202,7 +202,7 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
               disabled={
                 isTranslating || isBatchTranslating || messages.length === 0
               }
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-green text-white rounded-md hover:bg-green/70 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isTranslating || isBatchTranslating ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -277,7 +277,7 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
             </button>
             <button
               onClick={onClose}
-              className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-3 py-1.5 text-sm bg-green text-white rounded-md hover:bg-green/70 transition-colors"
             >
               Done
             </button>

@@ -100,7 +100,7 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
   return (
     <TopToastProvider>
       <ThemeProvider>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 hide-scrollbar">
           {/* Mobile sidebar */}
           <div
             className={cn(

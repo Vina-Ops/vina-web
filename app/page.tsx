@@ -600,11 +600,11 @@ function HomePageContent() {
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl p-4 text-sm ml-8">
+                    <div className="bg-gradient-to-r from-green to-emerald-600 text-white rounded-2xl p-4 text-sm ml-8">
                       <div className="mb-1">
                         {t("therapist.chat.messages.user1")}
                       </div>
-                      <div className="text-xs text-green-100">
+                      <div className="text-xs text-green">
                         {t("therapist.chat.userTimestamp")}
                       </div>
                     </div>
@@ -857,7 +857,7 @@ function HomePageContent() {
                       </div>
 
                       {/* Right Content Area */}
-                      <div className="flex-1">
+                      <div className="flex-1 hidden lg:block">
                         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden min-h-[600px]">
                           {/* Step 1: Therapist Selection */}
                           {activeStep === 1 && (

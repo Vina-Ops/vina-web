@@ -10,6 +10,7 @@ interface TranslationButtonProps {
     targetLanguage: string
   ) => void;
   className?: string;
+  isUserMessage?: boolean;
 }
 
 export const TranslationButton: React.FC<TranslationButtonProps> = ({
@@ -17,6 +18,7 @@ export const TranslationButton: React.FC<TranslationButtonProps> = ({
   messageId,
   onTranslationComplete,
   className = "",
+  isUserMessage = false,
 }) => {
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const [translatedText, setTranslatedText] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export const TranslationButton: React.FC<TranslationButtonProps> = ({
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative`}>
       {/* Translation Button */}
       <button
         onClick={() => setShowLanguageSelector(!showLanguageSelector)}
@@ -73,9 +75,13 @@ export const TranslationButton: React.FC<TranslationButtonProps> = ({
 
       {/* Language Selector Dropdown */}
       {showLanguageSelector && (
-        <div className="absolute bottom-8 left-0 z-[80] bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto min-w-48">
+        <div
+          className={`absolute bottom-8 z-[80] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto min-w-48 ${
+            isUserMessage ? "right-0" : "left-0"
+          }`}
+        >
           <div className="p-2">
-            <div className="text-xs font-medium text-gray-500 mb-2 px-2">
+            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 px-2">
               Select language:
             </div>
             {SUPPORTED_LANGUAGES.map((language) => (
@@ -83,7 +89,7 @@ export const TranslationButton: React.FC<TranslationButtonProps> = ({
                 key={language.code}
                 onClick={() => handleTranslate(language.code)}
                 disabled={isTranslating}
-                className="w-full flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-100 rounded-md transition-colors disabled:opacity-50"
+                className="w-full flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors disabled:opacity-50 text-gray-700 dark:text-gray-300"
               >
                 <span className="text-base">{language.flag}</span>
                 <span>{language.name}</span>
@@ -95,34 +101,38 @@ export const TranslationButton: React.FC<TranslationButtonProps> = ({
 
       {/* Translation Display */}
       {showTranslation && translatedText && (
-        <div className="absolute bottom-8 left-0 z-50 bg-white border border-gray-200 rounded-lg shadow-lg max-w-sm p-3">
+        <div
+          className={`absolute bottom-8 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-w-sm p-3 ${
+            isUserMessage ? "right-0" : "left-0"
+          }`}
+        >
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="text-base">
                 {getLanguageFlag(targetLanguage)}
               </span>
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {getLanguageName(targetLanguage)}
               </span>
             </div>
             <div className="flex items-center gap-1">
               <button
                 onClick={handleShowOriginal}
-                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 title="Show original"
               >
                 <X className="w-3 h-3" />
               </button>
               <button
                 onClick={handleCloseTranslation}
-                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 title="Close translation"
               >
                 <Check className="w-3 h-3" />
               </button>
             </div>
           </div>
-          <div className="text-sm text-gray-800 leading-relaxed">
+          <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
             {translatedText}
           </div>
         </div>

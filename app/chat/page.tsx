@@ -21,8 +21,16 @@ import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
 
 export default function ChatPage() {
-  const { messages, isTyping, isConnecting, error, sendMessage, clearError } =
-    useChatWebSocket();
+  const {
+    messages,
+    isTyping,
+    isConnecting,
+    error,
+    sendMessage,
+    clearError,
+    updateMessage,
+    addOrUpdateMessage,
+  } = useChatWebSocket();
   const { isConnected } = useWebSocket();
   const { settings } = useNotification();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -263,8 +271,14 @@ export default function ChatPage() {
       <TranslationPanel
         messages={messages}
         onMessagesUpdate={(updatedMessages) => {
-          // Update messages in the chat context
-          // This would need to be implemented based on your chat state management
+          // Update messages in the chat context with robust state management
+          if (Array.isArray(updatedMessages)) {
+            updatedMessages.forEach((updatedMessage) => {
+              if (updatedMessage.id && addOrUpdateMessage) {
+                addOrUpdateMessage(updatedMessage);
+              }
+            });
+          }
           console.log("Messages updated:", updatedMessages);
         }}
         isOpen={showTranslationPanel}

@@ -23,29 +23,29 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
-      
+
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: "audio/webm;codecs=opus",
       });
       mediaRecorderRef.current = mediaRecorder;
-      
+
       const chunks: Blob[] = [];
-      
+
       mediaRecorder.ondataavailable = (event) => {
         chunks.push(event.data);
       };
-      
+
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(chunks, { type: "audio/webm" });
         const duration = (Date.now() - startTimeRef.current) / 1000;
         onAudioRecorded(audioBlob, duration);
-        
+
         // Stop all tracks
         if (streamRef.current) {
-          streamRef.current.getTracks().forEach(track => track.stop());
+          streamRef.current.getTracks().forEach((track) => track.stop());
         }
       };
-      
+
       startTimeRef.current = Date.now();
       mediaRecorder.start();
       setIsRecording(true);
@@ -71,7 +71,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
     <button
       onClick={isRecording ? stopRecording : startRecording}
       disabled={isProcessing}
-      className={`flex h-11 w-11 items-center justify-center rounded-lg transition-colors ${
+      className={`flex h-11 w-14 items-center justify-center rounded-lg transition-colors ${
         isRecording
           ? "bg-red-500 text-white hover:bg-red-600"
           : "bg-gray-200 text-gray-600 hover:bg-gray-300"

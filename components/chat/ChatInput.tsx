@@ -69,27 +69,27 @@ export const ChatInput: React.FC<ChatInputWithTranslationProps> = ({
           isRecording={isRecording}
           setIsRecording={setIsRecording}
         />
-        <div className="flex-1 relative">
-          <textarea
-            ref={textareaRef}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask Vina anything..."
-            className="w-full resize-none rounded-lg border py-2 mt-1 border-gray-300 px-4 pr-12 focus:border-green focus:outline-none focus:ring-1 focus:border-none focus:ring-green"
-            rows={1}
-            style={{
-              minHeight: "44px",
-              maxHeight: "100px",
-            }}
-          />
-        </div>
+        {/* <div className="flex-1 relative"> */}
+        <textarea
+          ref={textareaRef}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Ask Vina anything..."
+          className="w-full resize-none rounded-lg border py-2 mt-1 border-gray-300 px-4 pr-12 focus:border-green focus:outline-none focus:ring-1 focus:border-none  bg-white dark:bg-gray-800 focus:ring-green dark:text-white dark:placeholder:text-white"
+          rows={1}
+          style={{
+            minHeight: "44px",
+            maxHeight: "100px",
+          }}
+        />
+        {/* </div> */}
         {/* Translation Button */}
         {onOpenTranslation && (
           <button
             type="button"
             onClick={onOpenTranslation}
-            className="flex h-11 w-11 items-center justify-center rounded-lg bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200"
+            className="flex h-11 w-14 items-center justify-center rounded-lg bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200"
             title="Translate chat"
           >
             <Languages className="h-5 w-5" />
@@ -99,7 +99,7 @@ export const ChatInput: React.FC<ChatInputWithTranslationProps> = ({
         <button
           type="submit"
           disabled={!message.trim()}
-          className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#013F25] text-white transition-colors hover:bg-[#012A1A] disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="flex h-11 w-14 items-center justify-center rounded-lg bg-[#013F25] text-white transition-colors hover:bg-[#012A1A] disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           <Send className="h-5 w-5" />
         </button>

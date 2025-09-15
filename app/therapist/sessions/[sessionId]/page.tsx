@@ -816,7 +816,7 @@ export default function TherapistChatPage() {
       {/* Connection Status Banner */}
       {!wsConnected && (
         <div
-          className={`absolute z-[85] top-20 left-0 right-0 flex-shrink-0 border-l-4 p-3 ${
+          className={`absolute z-[85] top-24 lg:top-20 left-0 right-0 flex-shrink-0 border-l-4 p-3 ${
             wsConnecting
               ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400"
               : "bg-red-50 dark:bg-red-900/20 border-red-400"
@@ -899,7 +899,7 @@ export default function TherapistChatPage() {
           </div>
 
           {/* Chat Input - Fixed at bottom */}
-          <div className="flex-shrink-0 bg-white dark:bg-gray-800 absolute bottom-0 left-0 right-0 border-gray-200 dark:border-gray-700 px-3 pt-2">
+          <div className="flex-shrink-0 bg-white dark:bg-gray-800 z-[80] absolute bottom-0 left-0 right-0 border-gray-200 dark:border-gray-700 px-3 pt-2">
             {/* Connection Warning */}
             {!wsConnected && (
               <div
