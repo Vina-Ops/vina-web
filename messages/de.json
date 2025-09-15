@@ -49,14 +49,46 @@
     "registerSuccess": "Registrierung erfolgreich",
     "logoutSuccess": "Abmeldung erfolgreich"
   },
+  "nav": {
+    "alwaysListening": "Immer Zuhörend",
+    "login": "Anmelden",
+    "getStarted": "Loslegen"
+  },
+  "features": {
+    "title": "Warum Vina Wählen?",
+    "subtitle": "Erleben Sie die Zukunft der psychischen Gesundheitsunterstützung mit unserem fortschrittlichen KI-Begleiter.",
+    "alwaysAvailable": {
+      "title": "Immer Verfügbar",
+      "description": "Erhalten Sie Unterstützung, wann immer Sie sie brauchen, 24/7. Kein Warten, keine Termine, nur sofortige mitfühlende Gespräche."
+    },
+    "privacyFirst": {
+      "title": "Datenschutz Zuerst",
+      "description": "Ihre Gespräche sind privat und sicher. Wir verwenden fortschrittliche Verschlüsselung, um Ihre psychische Gesundheitsreise zu schützen."
+    },
+    "aiPowered": {
+      "title": "KI-Gestützt",
+      "description": "Fortschrittliche KI-Technologie bietet personalisierte Unterstützung, Verständnis und Führung, die auf Ihre einzigartigen Bedürfnisse zugeschnitten ist."
+    }
+  },
+  "hero": {
+    "title": "Ihr Psychisches Wohlbefinden",
+    "subtitle": "Begleiter",
+    "description": "Vina ist hier, um immer zuzuhören, zu unterstützen und Sie durch die Herausforderungen des Lebens mit mitfühlenden KI-gestützten Gesprächen zu führen.",
+    "cta": "Jetzt Chatten Beginnen",
+    "demo": "Demo Ansehen",
+    "available": "24/7 Verfügbar",
+    "privacy": "Datenschutz Zuerst",
+    "aiPowered": "KI-gestützt"
+  },
   "landing": {
     "hero": {
-      "title": "Ihr Begleiter für",
+      "title": "Vina",
       "subtitle": "psychisches Wohlbefinden",
       "description": "Vina ist hier, um immer zuzuhören, zu unterstützen und Sie durch die Herausforderungen des Lebens mit mitfühlenden KI-gestützten Gesprächen zu führen.",
       "startChatting": "Jetzt chatten beginnen",
       "watchDemo": "Demo ansehen",
-      "getStarted": "Loslegen"
+      "getStarted": "Loslegen",
+      "tryWithoutSigningUp": "Ohne Anmeldung versuchen"
     },
     "features": {
       "title": "Warum Vina wählen?",
@@ -80,11 +112,39 @@
       "activeUsers": "Aktive Nutzer",
       "conversations": "Gespräche",
       "satisfaction": "Zufriedenheit",
-      "availability": "Verfügbarkeit"
+      "availability": "Verfügbarkeit",
+      "users": "Aktive Nutzer",
+      "numbers": {
+        "users": "10K+",
+        "conversations": "50K+",
+        "satisfaction": "99%",
+        "availability": "24/7"
+      }
     },
     "testimonials": {
       "title": "Was unsere Nutzer sagen",
-      "subtitle": "Echte Geschichten von Menschen, die mit Vina Unterstützung gefunden haben"
+      "subtitle": "Echte Geschichten von Menschen, die mit Vina Unterstützung gefunden haben",
+      "starRating": "★★★★★",
+      "initials": {
+        "sarah": "S",
+        "mike": "M",
+        "emma": "E"
+      },
+      "sarah": {
+        "name": "Sarah Chen",
+        "role": "Marketing Managerin",
+        "text": "Vina war ein Wendepunkt für meine psychische Gesundheit. Die KI-Gespräche fühlen sich so natürlich und unterstützend an."
+      },
+      "mike": {
+        "name": "Mike Rodriguez",
+        "role": "Software-Ingenieur",
+        "text": "Ich liebe es, wie Vina immer verfügbar ist, wenn ich mit jemandem sprechen muss. Es ist wie einen unterstützenden Freund 24/7 zu haben."
+      },
+      "emma": {
+        "name": "Emma Thompson",
+        "role": "Lehrerin",
+        "text": "Die Datenschutz- und Sicherheitsfunktionen geben mir Seelenfrieden. Ich kann völlig ehrlich sein, ohne jegliches Urteil."
+      }
     },
     "cta": {
       "title": "Bereit, Ihre Wohlfühlreise zu beginnen?",
@@ -149,6 +209,193 @@
     "therapists": "Therapeuten",
     "reports": "Berichte",
     "analytics": "Analysen"
+  },
+  "team": {
+    "title": "Lernen Sie das Gehirn hinter Vina kennen",
+    "subtitle": "Die Visionäre",
+    "subtitleHighlight": "Die psychische Gesundheit von morgen aufbauen",
+    "description": "Lernen Sie die brillanten Köpfe hinter Vina kennen - ein vielfältiges Team von Innovatoren, Experten für psychische Gesundheit und Technologiepionieren, die zusammenarbeiten, um zugängliche psychische Gesundheitsversorgung zu revolutionieren.",
+    "joinMission": "Treten Sie unserer Mission bei",
+    "joinDescription": "Wir suchen immer leidenschaftliche Menschen, die einen Unterschied in der psychischen Gesundheitsversorgung machen möchten. Treten Sie unserem Team bei und helfen Sie uns, die Zukunft der zugänglichen Therapie zu gestalten.",
+    "viewPositions": "Offene Stellen anzeigen",
+    "contactUs": "Kontaktieren Sie uns",
+    "members": {
+      "sarah": {
+        "name": "Prince Igwe",
+        "role": "Backend- und KI-Agent-Ingenieur",
+        "description": "Vielseitiger Backend-Architekt mit Expertise in Echtzeitsystemen und KI-Programmierung, leidenschaftlich für skalierbare, sichere digitale Gesundheitsplattformen."
+      },
+      "james": {
+        "name": "James Asaolu",
+        "role": "Frontend-Ingenieur",
+        "description": "Leidenschaftlicher und selbstmotivierter Frontend-Ingenieur mit gutem Auge für pixelperfektes Design und Durst nach zuverlässigen und wirkungsvollen Systemen."
+      }
+    }
+  },
+  "therapist": {
+    "title": "Verbinden Sie sich mit",
+    "titleHighlight": "Lizenzierten Therapeuten",
+    "description": "Erhalten Sie personalisierte Unterstützung von qualifizierten Fachkräften für psychische Gesundheit durch sichere Videogespräche und Echtzeit-Messaging.",
+    "badge": "Professionelle psychische Gesundheitsunterstützung",
+    "features": {
+      "videoSessions": {
+        "title": "HD-Videositzungen",
+        "description": "Hochauflösende Videogespräche mit professionellen Therapeuten in einer sicheren, privaten Umgebung, die für Komfort und Vertraulichkeit konzipiert ist."
+      },
+      "messaging": {
+        "title": "24/7-Messaging",
+        "description": "Kontinuierliche Unterstützung durch sicheres Messaging mit Ihrem zugewiesenen Therapeuten, verfügbar, wann immer Sie Führung benötigen."
+      },
+      "licensed": {
+        "title": "Lizenzierte Fachkräfte",
+        "description": "Verbinden Sie sich mit qualifizierten, lizenzierten Therapeuten, die sich auf verschiedene Bereiche der psychischen Gesundheit und des Wohlbefindens spezialisiert haben."
+      },
+      "hipaa": {
+        "title": "HIPAA-konform",
+        "description": "End-to-End-Verschlüsselung und HIPAA-Compliance stellen sicher, dass Ihre Gespräche vollständig vertraulich und sicher bleiben."
+      }
+    },
+    "chat": {
+      "therapistName": "Dr. Sarah Johnson",
+      "therapistTitle": "Lizenzierte klinische Psychologin",
+      "status": "Online • Jetzt verfügbar",
+      "avatar": "Dr. S",
+      "timestamp1": "Dr. Johnson • 14:30",
+      "timestamp2": "Dr. Johnson • 14:33",
+      "userTimestamp": "Sie • 14:32",
+      "messages": {
+        "therapist1": "Guten Morgen! Wie fühlen Sie sich heute?",
+        "user1": "Ich fühle mich in letzter Zeit wegen der Arbeit ängstlich. Der Druck war überwältigend.",
+        "therapist2": "Ich verstehe, und es ist völlig normal, sich so zu fühlen. Arbeitsstress kann wirklich belastend sein. Was war für Sie in letzter Zeit am herausforderndsten?",
+        "user2": "Ich denke, es sind die Fristen und das Gefühl, nicht genug zu tun. Außerdem habe ich nicht gut geschlafen...",
+        "therapist3": "Das klingt wirklich schwierig. Schlaf ist so wichtig für unsere psychische Gesundheit. Haben Sie Entspannungstechniken vor dem Schlafengehen ausprobiert? Ich würde Ihnen gerne helfen, Strategien zu finden, die für Sie funktionieren. 💙"
+      },
+      "placeholder": "Geben Sie Ihre Nachricht ein...",
+      "badges": {
+        "hipaa": "🔒 HIPAA-konform",
+        "licensed": "✅ Lizenziert"
+      }
+    },
+    "videoCall": {
+      "title": "Erleben Sie Professionelle Video-Therapie",
+      "subtitle": "Verbinden Sie sich von Angesicht zu Angesicht mit lizenzierten Therapeuten über unsere sichere HD-Video-Plattform",
+      "therapistName": "Dr. Sarah Johnson",
+      "therapistTitle": "Lizenzierte Klinische Psychologin",
+      "status": "Online • Jetzt verfügbar",
+      "connectionQuality": "HD",
+      "duration": "00:15:32",
+      "features": {
+        "hdVideo": {
+          "title": "HD-Videoqualität",
+          "description": "Kristallklare Videoanrufe mit professioneller Audioqualität für die beste Therapieerfahrung"
+        },
+        "secure": {
+          "title": "Ende-zu-Ende-Verschlüsselung",
+          "description": "Ihre Videositzungen sind vollständig verschlüsselt und HIPAA-konform für maximale Privatsphäre"
+        },
+        "scheduling": {
+          "title": "Flexible Terminplanung",
+          "description": "Buchen Sie Sitzungen, die in Ihren Zeitplan passen, mit einfachen Umplanungs- und Stornierungsoptionen"
+        }
+      }
+    },
+    "videoCallFlow": {
+      "title": "Wie Video-Therapie Funktioniert",
+      "subtitle": "Erleben Sie die komplette Reise von der Therapeutenauswahl bis zu Ihrer sicheren Videositzung",
+      "navigationTitle": "Prozessschritte",
+      "step1": {
+        "title": "Wählen Sie Ihren Therapeuten",
+        "description": "Durchsuchen Sie unser Netzwerk lizenzierter Fachkräfte und finden Sie die perfekte Übereinstimmung für Ihre Bedürfnisse",
+        "selectButton": "Dr. Sarah Johnson auswählen"
+      },
+      "step2": {
+        "title": "Planen Sie Ihre Sitzung",
+        "description": "Wählen Sie eine Zeit, die für Sie funktioniert, aus den verfügbaren Terminen im Kalender Ihres Therapeuten",
+        "confirmButton": "Termin bestätigen"
+      },
+      "step3": {
+        "title": "Vor-Sitzung Einrichtung",
+        "description": "Führen Sie eine schnelle technische Überprüfung durch und überprüfen Sie Ihre Sitzungsziele vor der Verbindung",
+        "readyButton": "Ich bin bereit zu starten"
+      },
+      "step4": {
+        "title": "Starten Sie Ihre Sitzung",
+        "description": "Verbinden Sie sich sicher mit Ihrem Therapeuten in einer privaten, verschlüsselten Video-Umgebung",
+        "endCallButton": "Sitzung beenden"
+      }
+    },
+    "cta": {
+      "findTherapist": "Finden Sie Ihren Therapeuten",
+      "learnMore": "Mehr erfahren",
+      "description": "Treten Sie Tausenden von Nutzern bei, die Unterstützung über unsere Plattform gefunden haben"
+    }
+  },
+  "popupBubbles": {
+    "messages": [
+      "Fühlen Sie sich überwältigt? Ich bin hier, um zuzuhören 🌟",
+      "Sie sind nicht allein auf dieser Reise 💙",
+      "Atmen Sie tief durch, Sie machen das großartig ✨",
+      "Psychische Gesundheit ist wichtig, und Sie auch 💚",
+      "Jeder Schritt nach vorne ist Fortschritt 🌱",
+      "Ihre Gefühle sind gültig und wichtig 💜",
+      "Lassen Sie uns das zusammen durcharbeiten 🤗",
+      "Sie haben die Kraft in sich ⚡",
+      "Es ist okay, manchmal nicht okay zu sein 🌧️",
+      "Selbstfürsorge ist nicht egoistisch, sie ist notwendig 💆‍♀️",
+      "Sie machen Fortschritte, auch wenn es klein ist 🐌",
+      "Ihre psychische Gesundheit ist eine Priorität 🎯",
+      "Morgen ist ein neuer Tag mit neuen Möglichkeiten 🌅",
+      "Sie sind stärker, als Sie denken 💪",
+      "Es ist mutig, um Hilfe zu bitten 🦁",
+      "Sie verdienen Frieden und Glück 🕊️",
+      "Atmen Sie tief durch und lassen Sie los 🌬️",
+    
+      "Kleine Schritte führen zu großen Veränderungen 🪜",
+      "Feiern Sie Ihre Siege, egal wie groß 🎉"
+    ]
+  },
+  "dynamicChat": {
+    "title": "Gesprächstyp wählen",
+    "autoPlay": "Gespräche automatisch abspielen",
+    "status": {
+      "typing": "Tippen...",
+      "online": "Online"
+    },
+    "conversations": {
+      "work": {
+        "title": "Arbeitsstress",
+        "description": "Umgang mit Arbeitsdruck und Fristen",
+        "messages": {
+          "ai1": "Hallo! Ich bin hier, um zuzuhören und Sie zu unterstützen. Wie fühlen Sie sich heute? 🌟",
+          "user1": "Hallo Vina, ich fühle mich in letzter Zeit ein wenig überwältigt von der Arbeit und allem...",
+          "ai2": "Ich höre Sie, und es ist völlig normal, sich so zu fühlen. Arbeitsstress kann wirklich belastend sein. Was war für Sie in letzter Zeit am herausforderndsten?",
+          "user2": "Ich denke, es sind die Fristen und das Gefühl, nicht genug zu tun. Außerdem habe ich nicht gut geschlafen...",
+          "ai3": "Das klingt wirklich schwierig. Schlaf ist so wichtig für unsere psychische Gesundheit. Haben Sie Entspannungstechniken vor dem Schlafengehen ausprobiert? Ich würde Ihnen gerne helfen, Strategien zu finden, die für Sie funktionieren. 💙"
+        }
+      },
+      "sleep": {
+        "title": "Schlafprobleme",
+        "description": "Verbesserung der Schlafqualität und Entspannung",
+        "messages": {
+          "ai1": "Guten Morgen! Wie haben Sie letzte Nacht geschlafen? 😊",
+          "user1": "Eigentlich hatte ich zum ersten Mal seit Wochen eine wirklich gute Nachtruhe!",
+          "ai2": "Das ist wunderbar zu hören! Was denken Sie, hat Ihnen geholfen, besser zu schlafen?",
+          "user2": "Ich habe die Atemübungen ausprobiert, die Sie vorgeschlagen haben. Sie haben wirklich geholfen, meinen Geist zu beruhigen.",
+          "ai3": "Ich bin so froh, dass das für Sie funktioniert hat! Beständigkeit ist der Schlüssel. Möchten Sie andere Entspannungstechniken erkunden? 🌸"
+        }
+      },
+      "general": {
+        "title": "Allgemeine Unterstützung",
+        "description": "Allgemeine emotionale Unterstützung und Gespräch",
+        "messages": {
+          "ai1": "Hallo! Ich habe bemerkt, dass Sie heute still waren. Alles in Ordnung? 🤗",
+          "user1": "Ich fühle mich nur ein wenig niedergeschlagen. Nichts Spezifisches, nur einer dieser Tage.",
+          "ai2": "Diese Tage sind völlig normal und gültig. Manchmal müssen wir nur unsere Gefühle anerkennen, ohne zu versuchen, sie zu reparieren. Wie wäre es, wenn wir einfach über das sprechen, was Ihnen in den Sinn kommt?",
+          "user2": "Das klingt schön. Vielleicht brauche ich nur jemanden, mit dem ich ohne Druck sprechen kann.",
+          "ai3": "Genau! Ich bin hier für genau das. Kein Druck, kein Urteil, nur ein aufmerksames Ohr. Was haben Sie im Sinn? 💭"
+        }
+      }
+    }
   },
   "footer": {
     "privacy": "Datenschutz",

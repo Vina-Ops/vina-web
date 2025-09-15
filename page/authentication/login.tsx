@@ -36,6 +36,8 @@ const LoginPage = () => {
       // storeReturnUrl();
       // Redirect to the return URL or dashboard
       // window.location.href = data?.returnUrl || "/dashboard";
+
+      console.log(response);
       const setCookies = async () => {
         const data = await fetch("/api/set-cookie", {
           method: "POST",
@@ -45,7 +47,7 @@ const LoginPage = () => {
           body: JSON.stringify({
             accessToken: (response as any)?.access_token,
             refreshToken: (response as any)?.refresh_token,
-            wsToken: (response as any)?.ws_token,
+            wsToken: (response as any)?.ws_token || "token",
             rememberMe: true, // Always persist cookies to avoid logout on refresh
           }),
         });
@@ -73,12 +75,12 @@ const LoginPage = () => {
               router.push(redirectPath);
             } else {
               // Fallback to dashboard if user profile fetch fails
-              router.push("/home");
+              // router.push("/home");
             }
           } catch (error) {
             console.error("Error fetching user profile:", error);
             // Fallback to dashboard
-            router.push("/home");
+            // router.push("/home");
           }
 
           localStorage.removeItem("2fa_user_id");

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Logo from "../logo";
+import { useLanguage } from "@/context/language-context";
 
 interface Message {
   id: string;
@@ -10,144 +11,9 @@ interface Message {
   delay: number;
 }
 
-const conversationTypes = [
-  {
-    id: 0,
-    title: "Work Stress",
-    icon: "💼",
-    description: "Dealing with work pressure and deadlines",
-  },
-  {
-    id: 1,
-    title: "Sleep Issues",
-    icon: "😴",
-    description: "Improving sleep quality and relaxation",
-  },
-  {
-    id: 2,
-    title: "General Support",
-    icon: "🤗",
-    description: "General emotional support and conversation",
-  },
-];
+// This will be generated dynamically based on translations
 
-const conversations = [
-  // Work Conversation
-  [
-    {
-      id: "1",
-      sender: "ai" as const,
-      content:
-        "Hello! I'm here to listen and support you. How are you feeling today? 🌟",
-      delay: 0,
-    },
-    {
-      id: "2",
-      sender: "user" as const,
-      content:
-        "Hi Vina, I've been feeling a bit overwhelmed lately with work and everything...",
-      delay: 1,
-    },
-    {
-      id: "3",
-      sender: "ai" as const,
-      content:
-        "I hear you, and it's completely normal to feel that way. Work stress can really take a toll. What specifically has been the most challenging for you lately?",
-      delay: 2.5,
-    },
-    {
-      id: "4",
-      sender: "user" as const,
-      content:
-        "I think it's the deadlines and feeling like I'm not doing enough. Plus, I haven't been sleeping well...",
-      delay: 4,
-    },
-    {
-      id: "5",
-      sender: "ai" as const,
-      content:
-        "That sounds really tough. Sleep is so important for our mental health. Have you tried any relaxation techniques before bed? I'd love to help you find some strategies that work for you. 💙",
-      delay: 5.5,
-    },
-  ],
-
-  // Sleep Conversation
-  [
-    {
-      id: "1",
-      sender: "ai" as const,
-      content: "Good morning! How did you sleep last night? 😊",
-      delay: 0,
-    },
-    {
-      id: "2",
-      sender: "user" as const,
-      content:
-        "Actually, I had a really good night's sleep for the first time in weeks!",
-      delay: 1,
-    },
-    {
-      id: "3",
-      sender: "ai" as const,
-      content:
-        "That's wonderful to hear! What do you think helped you sleep better?",
-      delay: 2.5,
-    },
-    {
-      id: "4",
-      sender: "user" as const,
-      content:
-        "I tried the breathing exercises you suggested. They really helped calm my mind.",
-      delay: 4,
-    },
-    {
-      id: "5",
-      sender: "ai" as const,
-      content:
-        "I'm so glad those worked for you! Consistency is key. Would you like to explore some other relaxation techniques? 🌸",
-      delay: 5.5,
-    },
-  ],
-
-  // General Conversation
-  [
-    {
-      id: "1",
-      sender: "ai" as const,
-      content:
-        "Hi there! I noticed you've been quiet today. Everything okay? 🤗",
-      delay: 0,
-    },
-    {
-      id: "2",
-      sender: "user" as const,
-      content:
-        "I'm just feeling a bit down. Nothing specific, just one of those days.",
-      delay: 1,
-    },
-    {
-      id: "3",
-      sender: "ai" as const,
-      content:
-        "Those days are completely normal and valid. Sometimes we just need to acknowledge our feelings without trying to fix them. How about we just chat about whatever comes to mind?",
-      delay: 2.5,
-    },
-    {
-      id: "4",
-      sender: "user" as const,
-      content:
-        "That sounds nice. Maybe I just need someone to talk to without any pressure.",
-      delay: 4,
-    },
-    {
-      id: "5",
-      sender: "ai" as const,
-      content:
-        "Exactly! I'm here for exactly that. No pressure, no judgment, just a listening ear. What's on your mind? 💭",
-      delay: 5.5,
-    },
-  ],
-];
+// This will be generated dynamically based on translations
 
 export const DynamicChat: React.FC = () => {
   const [currentConversation, setCurrentConversation] = useState(0);
@@ -156,6 +22,134 @@ export const DynamicChat: React.FC = () => {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { t } = useLanguage();
+
+  // Generate conversation types from translations
+  const conversationTypes = [
+    {
+      id: 0,
+      title: t("dynamicChat.conversations.work.title"),
+      icon: "💼",
+      description: t("dynamicChat.conversations.work.description"),
+    },
+    {
+      id: 1,
+      title: t("dynamicChat.conversations.sleep.title"),
+      icon: "😴",
+      description: t("dynamicChat.conversations.sleep.description"),
+    },
+    {
+      id: 2,
+      title: t("dynamicChat.conversations.general.title"),
+      icon: "🤗",
+      description: t("dynamicChat.conversations.general.description"),
+    },
+  ];
+
+  // Generate conversations from translations
+  const conversations = [
+    // Work Conversation
+    [
+      {
+        id: "1",
+        sender: "ai" as const,
+        content: t("dynamicChat.conversations.work.messages.ai1"),
+        delay: 0,
+      },
+      {
+        id: "2",
+        sender: "user" as const,
+        content: t("dynamicChat.conversations.work.messages.user1"),
+        delay: 1,
+      },
+      {
+        id: "3",
+        sender: "ai" as const,
+        content: t("dynamicChat.conversations.work.messages.ai2"),
+        delay: 2.5,
+      },
+      {
+        id: "4",
+        sender: "user" as const,
+        content: t("dynamicChat.conversations.work.messages.user2"),
+        delay: 4,
+      },
+      {
+        id: "5",
+        sender: "ai" as const,
+        content: t("dynamicChat.conversations.work.messages.ai3"),
+        delay: 5.5,
+      },
+    ],
+
+    // Sleep Conversation
+    [
+      {
+        id: "1",
+        sender: "ai" as const,
+        content: t("dynamicChat.conversations.sleep.messages.ai1"),
+        delay: 0,
+      },
+      {
+        id: "2",
+        sender: "user" as const,
+        content: t("dynamicChat.conversations.sleep.messages.user1"),
+        delay: 1,
+      },
+      {
+        id: "3",
+        sender: "ai" as const,
+        content: t("dynamicChat.conversations.sleep.messages.ai2"),
+        delay: 2.5,
+      },
+      {
+        id: "4",
+        sender: "user" as const,
+        content: t("dynamicChat.conversations.sleep.messages.user2"),
+        delay: 4,
+      },
+      {
+        id: "5",
+        sender: "ai" as const,
+        content: t("dynamicChat.conversations.sleep.messages.ai3"),
+        delay: 5.5,
+      },
+    ],
+
+    // General Conversation
+    [
+      {
+        id: "1",
+        sender: "ai" as const,
+        content: t("dynamicChat.conversations.general.messages.ai1"),
+        delay: 0,
+      },
+      {
+        id: "2",
+        sender: "user" as const,
+        content: t("dynamicChat.conversations.general.messages.user1"),
+        delay: 1,
+      },
+      {
+        id: "3",
+        sender: "ai" as const,
+        content: t("dynamicChat.conversations.general.messages.ai2"),
+        delay: 2.5,
+      },
+      {
+        id: "4",
+        sender: "user" as const,
+        content: t("dynamicChat.conversations.general.messages.user2"),
+        delay: 4,
+      },
+      {
+        id: "5",
+        sender: "ai" as const,
+        content: t("dynamicChat.conversations.general.messages.ai3"),
+        delay: 5.5,
+      },
+    ],
+  ];
 
   const scrollToBottom = () => {
     const chatContainer = document.querySelector(".chat-messages-container");
@@ -249,7 +243,7 @@ export const DynamicChat: React.FC = () => {
       {/* Conversation Selector */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 lg:w-64 flex-shrink-0">
         <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm">
-          Choose Conversation Type
+          {t("dynamicChat.title")}
         </h3>
         <div className="space-y-2">
           {conversationTypes.map((type) => (
@@ -287,7 +281,7 @@ export const DynamicChat: React.FC = () => {
               className="rounded text-green-500 focus:ring-green-500 peer-[&:checked]:bg-green"
             />
             <span className="text-sm text-gray-700 dark:text-gray-300">
-              Auto-play conversations
+              {t("dynamicChat.autoPlay")}
             </span>
           </label>
         </div>
@@ -305,7 +299,9 @@ export const DynamicChat: React.FC = () => {
             </div>
             <div className="text-xs text-gray-500 flex items-center">
               <div className="w-2 h-2 bg-green rounded-full mr-2 animate-pulse"></div>
-              {isTyping ? "Typing..." : "Online"}
+              {isTyping
+                ? t("dynamicChat.status.typing")
+                : t("dynamicChat.status.online")}
             </div>
           </div>
         </div>

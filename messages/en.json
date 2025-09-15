@@ -49,14 +49,51 @@
     "registerSuccess": "Registration successful",
     "logoutSuccess": "Logout successful"
   },
+  "nav": {
+    "alwaysListening": "Always Listening",
+    "login": "Sign In",
+    "getStarted": "Get Started"
+  },
+  "features": {
+    "title": "Why Choose Vina?",
+    "subtitle": "Experience the future of mental wellness support with our advanced AI companion.",
+    "alwaysAvailable": {
+      "title": "Always Available",
+      "description": "Get support whenever you need it, 24/7. No waiting, no appointments, just instant compassionate conversation."
+    },
+    "privacyFirst": {
+      "title": "Privacy First",
+      "description": "Your conversations are private and secure. We use advanced encryption to protect your mental wellness journey."
+    },
+    "aiPowered": {
+      "title": "AI Powered",
+      "description": "Advanced AI technology provides personalized support, understanding, and guidance tailored to your unique needs."
+    }
+  },
+  "hero": {
+    "title": "Your Mental Wellness",
+    "subtitle": "Companion",
+    "description": "Vina is here to always listen, support, and guide you through life's challenges with compassionate AI-powered conversations.",
+    "cta": "Start Chatting Now",
+    "demo": "Watch Demo",
+    "available": "24/7 Available",
+    "privacy": "Privacy First",
+    "aiPowered": "AI Powered"
+  },
   "landing": {
     "hero": {
-      "title": "Your Mental Wellness",
+      "title": "Vina",
       "subtitle": "Companion",
       "description": "Vina is here to always listen, support, and guide you through life's challenges with compassionate AI-powered conversations.",
-      "startChatting": "Start Chatting Now",
+      "cta": "Start Chatting Now",
+      "demo": "Watch Demo",
+      "available": "24/7 Available",
+      "privacy": "Privacy First",
+      "aiPowered": "AI Powered",
+      "startChatting": "Start Chatting",
       "watchDemo": "Watch Demo",
-      "getStarted": "Get Started"
+      "getStarted": "Get Started",
+      "tryWithoutSigningUp": "Try Without Signing Up"
     },
     "features": {
       "title": "Why Choose Vina?",
@@ -80,11 +117,39 @@
       "activeUsers": "Active Users",
       "conversations": "Conversations",
       "satisfaction": "Satisfaction",
-      "availability": "Availability"
+      "availability": "Availability",
+      "users": "Active Users",
+      "numbers": {
+        "users": "10K+",
+        "conversations": "50K+",
+        "satisfaction": "99%",
+        "availability": "24/7"
+      }
     },
     "testimonials": {
       "title": "What Our Users Say",
-      "subtitle": "Real stories from people who found support with Vina"
+      "subtitle": "Real stories from people who found support with Vina",
+      "starRating": "★★★★★",
+      "initials": {
+        "sarah": "S",
+        "mike": "M",
+        "emma": "E"
+      },
+      "sarah": {
+        "name": "Sarah Chen",
+        "role": "Marketing Manager",
+        "text": "Vina has been a game-changer for my mental health. The AI conversations feel so natural and supportive."
+      },
+      "mike": {
+        "name": "Mike Rodriguez",
+        "role": "Software Engineer",
+        "text": "I love how Vina is always available when I need someone to talk to. It's like having a supportive friend 24/7."
+      },
+      "emma": {
+        "name": "Emma Thompson",
+        "role": "Teacher",
+        "text": "The privacy and security features give me peace of mind. I can be completely honest without any judgment."
+      }
     },
     "cta": {
       "title": "Ready to Start Your Wellness Journey?",
@@ -149,6 +214,192 @@
     "therapists": "Therapists",
     "reports": "Reports",
     "analytics": "Analytics"
+  },
+  "team": {
+    "title": "Meet the Big Brain Behind Vina",
+    "subtitle": "The Visionaries",
+    "subtitleHighlight": "Building Tomorrow's Mental Health",
+    "description": "Meet the brilliant minds behind Vina - a diverse team of innovators, mental health experts, and technology pioneers working together to revolutionize accessible mental healthcare.",
+    "joinMission": "Join Our Mission",
+    "joinDescription": "We're always looking for passionate individuals who want to make a difference in mental healthcare. Join our team and help us build the future of accessible therapy.",
+    "viewPositions": "View Open Positions",
+    "contactUs": "Contact Us",
+    "members": {
+      "sarah": {
+        "name": "Prince Igwe",
+        "role": "Backend and AI Agent Engineer",
+        "description": "Versatile backend architect with expertise in real-time systems and AI programming, with a passion for scalable, secure digital health platforms."
+      },
+      "james": {
+        "name": "James Asaolu",
+        "role": "Frontend Engineer",
+        "description": "Passionate and self-motivated frontend engineer with good eye for pixel perfect design and thirst for reliable and impactful systems."
+      }
+    }
+  },
+  "therapist": {
+    "title": "Connect with",
+    "titleHighlight": "Licensed Therapists",
+    "description": "Get personalized support from qualified mental health professionals through secure video calls and real-time messaging.",
+    "badge": "Professional Mental Health Support",
+    "features": {
+      "videoSessions": {
+        "title": "HD Video Sessions",
+        "description": "High-definition video calls with professional therapists in a secure, private environment designed for comfort and confidentiality."
+      },
+      "messaging": {
+        "title": "24/7 Messaging",
+        "description": "Continuous support through secure messaging with your assigned therapist, available whenever you need guidance."
+      },
+      "licensed": {
+        "title": "Licensed Professionals",
+        "description": "Connect with qualified, licensed therapists who specialize in various areas of mental health and wellness."
+      },
+      "hipaa": {
+        "title": "HIPAA Compliant",
+        "description": "End-to-end encryption and HIPAA compliance ensure your conversations remain completely confidential and secure."
+      }
+    },
+    "chat": {
+      "therapistName": "Dr. Sarah Johnson",
+      "therapistTitle": "Licensed Clinical Psychologist",
+      "status": "Online • Available now",
+      "avatar": "Dr. S",
+      "timestamp1": "Dr. Johnson • 2:30 PM",
+      "timestamp2": "Dr. Johnson • 2:33 PM",
+      "userTimestamp": "You • 2:32 PM",
+      "messages": {
+        "therapist1": "Good morning! How are you feeling today?",
+        "user1": "I've been feeling anxious about work lately. The pressure has been overwhelming.",
+        "therapist2": "I understand. Let's work through this together. Can you tell me more about what's causing the anxiety?",
+        "user2": "I think it's the deadlines and feeling like I'm not doing enough. Plus, I haven't been sleeping well...",
+        "therapist3": "That sounds really tough. Sleep is so important for our mental health. Have you tried any relaxation techniques before bed? I'd love to help you find some strategies that work for you. 💙"
+      },
+      "placeholder": "Type your message...",
+      "badges": {
+        "hipaa": "🔒 HIPAA Compliant",
+        "licensed": "✅ Licensed"
+      }
+    },
+    "videoCall": {
+      "title": "Experience Professional Video Therapy",
+      "subtitle": "Connect face-to-face with licensed therapists through our secure, HD video platform",
+      "therapistName": "Dr. Sarah Johnson",
+      "therapistTitle": "Licensed Clinical Psychologist",
+      "status": "Online • Available now",
+      "connectionQuality": "HD",
+      "duration": "00:15:32",
+      "features": {
+        "hdVideo": {
+          "title": "HD Video Quality",
+          "description": "Crystal clear video calls with professional-grade audio for the best therapy experience"
+        },
+        "secure": {
+          "title": "End-to-End Encryption",
+          "description": "Your video sessions are fully encrypted and HIPAA compliant for maximum privacy"
+        },
+        "scheduling": {
+          "title": "Flexible Scheduling",
+          "description": "Book sessions that fit your schedule with easy rescheduling and cancellation options"
+        }
+      }
+    },
+    "videoCallFlow": {
+      "title": "How Video Therapy Works",
+      "subtitle": "Experience the complete journey from therapist selection to your secure video session",
+      "navigationTitle": "Process Steps",
+      "step1": {
+        "title": "Choose Your Therapist",
+        "description": "Browse our network of licensed professionals and find the perfect match for your needs",
+        "selectButton": "Select Dr. Sarah Johnson"
+      },
+      "step2": {
+        "title": "Schedule Your Session",
+        "description": "Pick a time that works for you from available slots in your therapist's calendar",
+        "confirmButton": "Confirm Appointment"
+      },
+      "step3": {
+        "title": "Pre-Session Setup",
+        "description": "Complete a quick technical check and review your session goals before connecting",
+        "readyButton": "I'm Ready to Start"
+      },
+      "step4": {
+        "title": "Start Your Session",
+        "description": "Connect securely with your therapist in a private, encrypted video environment",
+        "endCallButton": "End Session"
+      }
+    },
+    "cta": {
+      "findTherapist": "Find Your Therapist",
+      "learnMore": "Learn More",
+      "description": "Join thousands of users who have found support through our platform"
+    }
+  },
+  "popupBubbles": {
+    "messages": [
+      "Feeling overwhelmed? I'm here to listen 🌟",
+      "You're not alone in this journey 💙",
+      "Take a deep breath, you're doing great ✨",
+      "Mental health matters, and so do you 💚",
+      "Every step forward is progress 🌱",
+      "Your feelings are valid and important 💜",
+      "Let's work through this together 🤗",
+      "You have the strength within you ⚡",
+      "It's okay to not be okay sometimes 🌧️",
+      "Self-care isn't selfish, it's necessary 💆‍♀️",
+      "You're making progress, even if it's small 🐌",
+      "Your mental health is a priority 🎯",
+      "Tomorrow is a new day with new possibilities 🌅",
+      "You're stronger than you think 💪",
+      "It's brave to ask for help 🦁",
+      "You deserve peace and happiness 🕊️",
+      "Take a deep breath and let it go 🌬️",
+      "Small steps lead to big changes 🪜",
+      "Celebrate your wins, no matter the size 🎉"
+    ]
+  },
+  "dynamicChat": {
+    "title": "Choose Conversation Type",
+    "autoPlay": "Auto-play conversations",
+    "status": {
+      "typing": "Typing...",
+      "online": "Online"
+    },
+    "conversations": {
+      "work": {
+        "title": "Work Stress",
+        "description": "Dealing with work pressure and deadlines",
+        "messages": {
+          "ai1": "Hello! I'm here to listen and support you. How are you feeling today? 🌟",
+          "user1": "Hi Vina, I've been feeling a bit overwhelmed lately with work and everything...",
+          "ai2": "I hear you, and it's completely normal to feel that way. Work stress can really take a toll. What specifically has been the most challenging for you lately?",
+          "user2": "I think it's the deadlines and feeling like I'm not doing enough. Plus, I haven't been sleeping well...",
+          "ai3": "That sounds really tough. Sleep is so important for our mental health. Have you tried any relaxation techniques before bed? I'd love to help you find some strategies that work for you. 💙"
+        }
+      },
+      "sleep": {
+        "title": "Sleep Issues",
+        "description": "Improving sleep quality and relaxation",
+        "messages": {
+          "ai1": "Good morning! How did you sleep last night? 😊",
+          "user1": "Actually, I had a really good night's sleep for the first time in weeks!",
+          "ai2": "That's wonderful to hear! What do you think helped you sleep better?",
+          "user2": "I tried the breathing exercises you suggested. They really helped calm my mind.",
+          "ai3": "I'm so glad those worked for you! Consistency is key. Would you like to explore some other relaxation techniques? 🌸"
+        }
+      },
+      "general": {
+        "title": "General Support",
+        "description": "General emotional support and conversation",
+        "messages": {
+          "ai1": "Hi there! I noticed you've been quiet today. Everything okay? 🤗",
+          "user1": "I'm just feeling a bit down. Nothing specific, just one of those days.",
+          "ai2": "Those days are completely normal and valid. Sometimes we just need to acknowledge our feelings without trying to fix them. How about we just chat about whatever comes to mind?",
+          "user2": "That sounds nice. Maybe I just need someone to talk to without any pressure.",
+          "ai3": "Exactly! I'm here for exactly that. No pressure, no judgment, just a listening ear. What's on your mind? 💭"
+        }
+      }
+    }
   },
   "footer": {
     "privacy": "Privacy",

@@ -117,7 +117,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
     return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // State for floating video position and size
+  // State for floating video position and size (will be initialized after isMobile)
   const [floatingVideoPosition, setFloatingVideoPosition] = useState({
     x: 20,
     y: 60,
@@ -252,14 +252,42 @@ const VideoCall: React.FC<VideoCallProps> = ({
       setIsResizing(false);
     };
 
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (isDragging && e.touches.length > 0) {
+        const touch = e.touches[0];
+        const newX = touch.clientX - dragStart.x;
+        const newY = touch.clientY - dragStart.y;
+
+        // Keep within screen bounds
+        const maxX = window.innerWidth - floatingVideoSize.width;
+        const maxY = window.innerHeight - floatingVideoSize.height - 100; // Account for control bar
+
+        setFloatingVideoPosition({
+          x: Math.max(0, Math.min(newX, maxX)),
+          y: Math.max(0, Math.min(newY, maxY)),
+        });
+      }
+    };
+
+    const handleGlobalTouchEnd = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+    };
+
     if (isDragging || isResizing) {
       document.addEventListener("mousemove", handleGlobalMouseMove);
       document.addEventListener("mouseup", handleGlobalMouseUp);
+      document.addEventListener("touchmove", handleGlobalTouchMove, {
+        passive: false,
+      });
+      document.addEventListener("touchend", handleGlobalTouchEnd);
     }
 
     return () => {
       document.removeEventListener("mousemove", handleGlobalMouseMove);
       document.removeEventListener("mouseup", handleGlobalMouseUp);
+      document.removeEventListener("touchmove", handleGlobalTouchMove);
+      document.removeEventListener("touchend", handleGlobalTouchEnd);
     };
   }, [isDragging, isResizing, dragStart, resizeStart, floatingVideoSize]);
 
@@ -304,6 +332,18 @@ const VideoCall: React.FC<VideoCallProps> = ({
 
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // Initialize floating video position and size based on mobile state
+  useEffect(() => {
+    setFloatingVideoPosition({
+      x: isMobile ? 10 : 20,
+      y: isMobile ? 10 : 60,
+    });
+    setFloatingVideoSize({
+      width: isMobile ? 150 : 200,
+      height: isMobile ? 110 : 150,
+    });
+  }, [isMobile]);
 
   useEffect(() => {
     console.log("VideoCall: localStream changed:", localStream);
@@ -643,10 +683,18 @@ const VideoCall: React.FC<VideoCallProps> = ({
         <div
           className="absolute z-30 bg-gray-900 rounded-lg overflow-hidden shadow-2xl border-2 border-white/20 cursor-move select-none touch-none"
           style={{
-            right: isMobile ? 10 : 20,
-            top: isMobile ? 10 : 20,
-            width: isMinimized ? (isMobile ? 100 : 120) : isMobile ? 150 : 200,
-            height: isMinimized ? (isMobile ? 75 : 90) : isMobile ? 110 : 150,
+            left: floatingVideoPosition.x,
+            top: floatingVideoPosition.y,
+            width: isMinimized
+              ? isMobile
+                ? 100
+                : 120
+              : floatingVideoSize.width,
+            height: isMinimized
+              ? isMobile
+                ? 75
+                : 90
+              : floatingVideoSize.height,
           }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}

@@ -49,14 +49,46 @@
     "registerSuccess": "Inscription réussie",
     "logoutSuccess": "Déconnexion réussie"
   },
+  "nav": {
+    "alwaysListening": "Toujours à l'Écoute",
+    "login": "Se Connecter",
+    "getStarted": "Commencer"
+  },
+  "features": {
+    "title": "Pourquoi Choisir Vina ?",
+    "subtitle": "Découvrez l'avenir du soutien au bien-être mental avec notre compagnon IA avancé.",
+    "alwaysAvailable": {
+      "title": "Toujours Disponible",
+      "description": "Obtenez du soutien quand vous en avez besoin, 24h/24 et 7j/7. Pas d'attente, pas de rendez-vous, juste une conversation compatissante instantanée."
+    },
+    "privacyFirst": {
+      "title": "Confidentialité d'Abord",
+      "description": "Vos conversations sont privées et sécurisées. Nous utilisons un chiffrement avancé pour protéger votre parcours de bien-être mental."
+    },
+    "aiPowered": {
+      "title": "Alimenté par l'IA",
+      "description": "La technologie IA avancée fournit un soutien personnalisé, une compréhension et des conseils adaptés à vos besoins uniques."
+    }
+  },
+  "hero": {
+    "title": "Votre Bien-être Mental",
+    "subtitle": "Companion",
+    "description": "Vina est là pour toujours écouter, soutenir et vous guider à travers les défis de la vie avec des conversations compatissantes alimentées par l'IA.",
+    "cta": "Commencer à Discuter Maintenant",
+    "demo": "Voir la Démo",
+    "available": "Disponible 24/7",
+    "privacy": "Confidentialité d'Abord",
+    "aiPowered": "Alimenté par IA"
+  },
   "landing": {
     "hero": {
-      "title": "Votre compagnon",
+      "title": "Vina",
       "subtitle": "de bien-être mental",
       "description": "Vina est là pour toujours écouter, soutenir et vous guider à travers les défis de la vie avec des conversations compatissantes alimentées par l'IA.",
-      "startChatting": "Commencer à discuter maintenant",
+      "startChatting": "Commencer à discuter",
       "watchDemo": "Voir la démo",
-      "getStarted": "Commencer"
+      "getStarted": "Commencer",
+      "tryWithoutSigningUp": "Essayer sans s'inscrire"
     },
     "features": {
       "title": "Pourquoi choisir Vina ?",
@@ -80,11 +112,39 @@
       "activeUsers": "Utilisateurs actifs",
       "conversations": "Conversations",
       "satisfaction": "Satisfaction",
-      "availability": "Disponibilité"
+      "availability": "Disponibilité",
+      "users": "Utilisateurs actifs",
+      "numbers": {
+        "users": "10K+",
+        "conversations": "50K+",
+        "satisfaction": "99%",
+        "availability": "24/7"
+      }
     },
     "testimonials": {
       "title": "Ce que disent nos utilisateurs",
-      "subtitle": "Vraies histoires de personnes qui ont trouvé du soutien avec Vina"
+      "subtitle": "Vraies histoires de personnes qui ont trouvé du soutien avec Vina",
+      "starRating": "★★★★★",
+      "initials": {
+        "sarah": "S",
+        "mike": "M",
+        "emma": "E"
+      },
+      "sarah": {
+        "name": "Sarah Chen",
+        "role": "Responsable Marketing",
+        "text": "Vina a été un changement de jeu pour ma santé mentale. Les conversations IA semblent si naturelles et encourageantes."
+      },
+      "mike": {
+        "name": "Mike Rodriguez",
+        "role": "Ingénieur Logiciel",
+        "text": "J'adore comment Vina est toujours disponible quand j'ai besoin de parler à quelqu'un. C'est comme avoir un ami encourageant 24/7."
+      },
+      "emma": {
+        "name": "Emma Thompson",
+        "role": "Enseignante",
+        "text": "Les fonctionnalités de confidentialité et de sécurité me donnent la tranquillité d'esprit. Je peux être complètement honnête sans aucun jugement."
+      }
     },
     "cta": {
       "title": "Prêt à commencer votre parcours de bien-être ?",
@@ -149,6 +209,193 @@
     "therapists": "Thérapeutes",
     "reports": "Rapports",
     "analytics": "Analyses"
+  },
+  "team": {
+    "title": "Rencontrez le Cerveau derrière Vina",
+    "subtitle": "Les Visionnaires",
+    "subtitleHighlight": "Construire la Santé Mentale de Demain",
+    "description": "Rencontrez les esprits brillants derrière Vina - une équipe diversifiée d'innovateurs, d'experts en santé mentale et de pionniers technologiques travaillant ensemble pour révolutionner les soins de santé mentale accessibles.",
+    "joinMission": "Rejoignez Notre Mission",
+    "joinDescription": "Nous recherchons toujours des personnes passionnées qui veulent faire une différence dans les soins de santé mentale. Rejoignez notre équipe et aidez-nous à construire l'avenir de la thérapie accessible.",
+    "viewPositions": "Voir les Postes Ouverts",
+    "contactUs": "Contactez-Nous",
+    "members": {
+      "sarah": {
+        "name": "Prince Igwe",
+        "role": "Ingénieur Backend et Agent IA",
+        "description": "Architecte backend polyvalent avec expertise en systèmes temps réel et programmation IA, passionné par les plateformes de santé numérique évolutives et sécurisées."
+      },
+      "james": {
+        "name": "James Asaolu",
+        "role": "Ingénieur Frontend",
+        "description": "Ingénieur frontend passionné et autonome avec un bon œil pour le design pixel perfect et une soif de systèmes fiables et impactants."
+      }
+    }
+  },
+  "therapist": {
+    "title": "Connectez-vous avec des",
+    "titleHighlight": "Thérapeutes Agréés",
+    "description": "Obtenez un soutien personnalisé de professionnels qualifiés de la santé mentale grâce à des appels vidéo sécurisés et à la messagerie en temps réel.",
+    "badge": "Soutien Professionnel en Santé Mentale",
+    "features": {
+      "videoSessions": {
+        "title": "Séances Vidéo HD",
+        "description": "Appels vidéo haute définition avec des thérapeutes professionnels dans un environnement sécurisé et privé conçu pour le confort et la confidentialité."
+      },
+      "messaging": {
+        "title": "Messagerie 24/7",
+        "description": "Soutien continu par messagerie sécurisée avec votre thérapeute assigné, disponible chaque fois que vous avez besoin de conseils."
+      },
+      "licensed": {
+        "title": "Professionnels Agréés",
+        "description": "Connectez-vous avec des thérapeutes qualifiés et agréés qui se spécialisent dans divers domaines de la santé mentale et du bien-être."
+      },
+      "hipaa": {
+        "title": "Conforme HIPAA",
+        "description": "Le chiffrement de bout en bout et la conformité HIPAA garantissent que vos conversations restent complètement confidentielles et sécurisées."
+      }
+    },
+    "chat": {
+      "therapistName": "Dr. Sarah Johnson",
+      "therapistTitle": "Psychologue Clinicienne Agréée",
+      "status": "En ligne • Disponible maintenant",
+      "avatar": "Dr. S",
+      "timestamp1": "Dr. Johnson • 14:30",
+      "timestamp2": "Dr. Johnson • 14:33",
+      "userTimestamp": "Vous • 14:32",
+      "messages": {
+        "therapist1": "Bonjour ! Comment vous sentez-vous aujourd'hui ?",
+        "user1": "J'ai été anxieux au sujet du travail récemment. La pression a été écrasante.",
+        "therapist2": "Je vous comprends, et c'est tout à fait normal de ressentir cela. Le stress au travail peut vraiment peser. Qu'est-ce qui a été le plus difficile pour vous récemment ?",
+        "user2": "Je pense que ce sont les délais et le sentiment de ne pas en faire assez. De plus, je n'ai pas bien dormi...",
+        "therapist3": "Cela semble vraiment difficile. Le sommeil est si important pour notre santé mentale. Avez-vous essayé des techniques de relaxation avant de vous coucher ? J'aimerais vous aider à trouver des stratégies qui fonctionnent pour vous. 💙"
+      },
+      "placeholder": "Tapez votre message...",
+      "badges": {
+        "hipaa": "🔒 Conforme HIPAA",
+        "licensed": "✅ Agréé"
+      }
+    },
+    "videoCall": {
+      "title": "Découvrez la Thérapie Vidéo Professionnelle",
+      "subtitle": "Connectez-vous en face à face avec des thérapeutes agréés via notre plateforme vidéo sécurisée HD",
+      "therapistName": "Dr. Sarah Johnson",
+      "therapistTitle": "Psychologue Clinicienne Agréée",
+      "status": "En ligne • Disponible maintenant",
+      "connectionQuality": "HD",
+      "duration": "00:15:32",
+      "features": {
+        "hdVideo": {
+          "title": "Qualité Vidéo HD",
+          "description": "Appels vidéo cristallins avec audio de qualité professionnelle pour la meilleure expérience thérapeutique"
+        },
+        "secure": {
+          "title": "Chiffrement de Bout en Bout",
+          "description": "Vos sessions vidéo sont entièrement chiffrées et conformes HIPAA pour une confidentialité maximale"
+        },
+        "scheduling": {
+          "title": "Planification Flexible",
+          "description": "Réservez des sessions qui s'adaptent à votre emploi du temps avec des options de reprogrammation et d'annulation faciles"
+        }
+      }
+    },
+    "videoCallFlow": {
+      "title": "Comment Fonctionne la Thérapie Vidéo",
+      "subtitle": "Découvrez le parcours complet de la sélection du thérapeute à votre session vidéo sécurisée",
+      "navigationTitle": "Étapes du Processus",
+      "step1": {
+        "title": "Choisissez Votre Thérapeute",
+        "description": "Parcourez notre réseau de professionnels agréés et trouvez la correspondance parfaite pour vos besoins",
+        "selectButton": "Sélectionner Dr. Sarah Johnson"
+      },
+      "step2": {
+        "title": "Planifiez Votre Session",
+        "description": "Choisissez un créneau qui vous convient parmi les disponibilités du calendrier de votre thérapeute",
+        "confirmButton": "Confirmer le Rendez-vous"
+      },
+      "step3": {
+        "title": "Configuration Pré-Session",
+        "description": "Effectuez une vérification technique rapide et examinez vos objectifs de session avant de vous connecter",
+        "readyButton": "Je Suis Prêt à Commencer"
+      },
+      "step4": {
+        "title": "Commencez Votre Session",
+        "description": "Connectez-vous en toute sécurité avec votre thérapeute dans un environnement vidéo privé et chiffré",
+        "endCallButton": "Terminer la Session"
+      }
+    },
+    "cta": {
+      "findTherapist": "Trouvez Votre Thérapeute",
+      "learnMore": "En Savoir Plus",
+      "description": "Rejoignez des milliers d'utilisateurs qui ont trouvé du soutien grâce à notre plateforme"
+    }
+  },
+  "popupBubbles": {
+    "messages": [
+      "Vous vous sentez dépassé ? Je suis là pour écouter 🌟",
+      "Vous n'êtes pas seul dans ce voyage 💙",
+      "Prenez une grande inspiration, vous vous en sortez bien ✨",
+      "La santé mentale compte, et vous aussi 💚",
+      "Chaque pas en avant est un progrès 🌱",
+      "Vos sentiments sont valides et importants 💜",
+      "Travaillons ensemble 🤗",
+      "Vous avez la force en vous ⚡",
+      "C'est normal de ne pas aller bien parfois 🌧️",
+      "Prendre soin de soi n'est pas égoïste, c'est nécessaire 💆‍♀️",
+      "Vous progressez, même si c'est petit 🐌",
+      "Votre santé mentale est une priorité 🎯",
+      "Demain est un nouveau jour avec de nouvelles possibilités 🌅",
+      "Vous êtes plus fort que vous ne le pensez 💪",
+      "C'est courageux de demander de l'aide 🦁",
+      "Vous méritez la paix et le bonheur 🕊️",
+      "Prenez une grande inspiration et lâchez prise 🌬️",
+    
+      "Les petits pas mènent à de grands changements 🪜",
+      "Célébrez vos victoires, peu importe la taille 🎉"
+    ]
+  },
+  "dynamicChat": {
+    "title": "Choisir le Type de Conversation",
+    "autoPlay": "Lecture automatique des conversations",
+    "status": {
+      "typing": "En train d'écrire...",
+      "online": "En ligne"
+    },
+    "conversations": {
+      "work": {
+        "title": "Stress au Travail",
+        "description": "Gérer la pression et les délais au travail",
+        "messages": {
+          "ai1": "Bonjour ! Je suis là pour vous écouter et vous soutenir. Comment vous sentez-vous aujourd'hui ? 🌟",
+          "user1": "Salut Vina, je me suis senti un peu dépassé récemment avec le travail et tout...",
+          "ai2": "Je vous entends, et c'est tout à fait normal de ressentir cela. Le stress au travail peut vraiment peser. Qu'est-ce qui a été le plus difficile pour vous récemment ?",
+          "user2": "Je pense que ce sont les délais et le sentiment de ne pas en faire assez. De plus, je n'ai pas bien dormi...",
+          "ai3": "Cela semble vraiment difficile. Le sommeil est si important pour notre santé mentale. Avez-vous essayé des techniques de relaxation avant de vous coucher ? J'aimerais vous aider à trouver des stratégies qui fonctionnent pour vous. 💙"
+        }
+      },
+      "sleep": {
+        "title": "Problèmes de Sommeil",
+        "description": "Améliorer la qualité du sommeil et la relaxation",
+        "messages": {
+          "ai1": "Bonjour ! Comment avez-vous dormi cette nuit ? 😊",
+          "user1": "En fait, j'ai très bien dormi pour la première fois depuis des semaines !",
+          "ai2": "C'est merveilleux à entendre ! Qu'est-ce qui vous a aidé à mieux dormir ?",
+          "user2": "J'ai essayé les exercices de respiration que vous avez suggérés. Ils ont vraiment aidé à calmer mon esprit.",
+          "ai3": "Je suis si contente que cela ait fonctionné pour vous ! La constance est la clé. Voulez-vous explorer d'autres techniques de relaxation ? 🌸"
+        }
+      },
+      "general": {
+        "title": "Soutien Général",
+        "description": "Soutien émotionnel général et conversation",
+        "messages": {
+          "ai1": "Salut ! J'ai remarqué que vous étiez silencieux aujourd'hui. Tout va bien ? 🤗",
+          "user1": "Je me sens juste un peu déprimé. Rien de spécifique, juste un de ces jours.",
+          "ai2": "Ces jours sont tout à fait normaux et valides. Parfois nous devons juste reconnaître nos sentiments sans essayer de les réparer. Et si nous parlions simplement de ce qui vous vient à l'esprit ?",
+          "user2": "Cela semble bien. Peut-être que j'ai juste besoin de quelqu'un à qui parler sans pression.",
+          "ai3": "Exactement ! Je suis là pour exactement cela. Pas de pression, pas de jugement, juste une oreille attentive. Qu'est-ce qui vous préoccupe ? 💭"
+        }
+      }
+    }
   },
   "footer": {
     "privacy": "Confidentialité",

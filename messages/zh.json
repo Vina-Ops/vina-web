@@ -49,14 +49,46 @@
     "registerSuccess": "注册成功",
     "logoutSuccess": "退出登录成功"
   },
+  "nav": {
+    "alwaysListening": "始终倾听",
+    "login": "登录",
+    "getStarted": "开始使用"
+  },
+  "features": {
+    "title": "为什么选择Vina？",
+    "subtitle": "通过我们先进的AI伴侣体验心理健康支持的未来。",
+    "alwaysAvailable": {
+      "title": "始终可用",
+      "description": "24/7随时获得支持。无需等待，无需预约，只需即时富有同情心的对话。"
+    },
+    "privacyFirst": {
+      "title": "隐私优先",
+      "description": "您的对话是私密和安全的。我们使用先进的加密技术来保护您的心理健康之旅。"
+    },
+    "aiPowered": {
+      "title": "AI驱动",
+      "description": "先进的AI技术提供个性化支持、理解和指导，根据您的独特需求量身定制。"
+    }
+  },
+  "hero": {
+    "title": "您的心理健康",
+    "subtitle": "伴侣",
+    "description": "Vina在这里始终倾听、支持和指导您通过AI驱动的富有同情心的对话来面对生活的挑战。",
+    "cta": "立即开始聊天",
+    "demo": "观看演示",
+    "available": "24/7可用",
+    "privacy": "隐私优先",
+    "aiPowered": "AI驱动"
+  },
   "landing": {
     "hero": {
-      "title": "您的心理健康",
+      "title": "Vina",
       "subtitle": "伴侣",
       "description": "Vina在这里始终倾听、支持和指导您通过AI驱动的富有同情心的对话来面对生活的挑战。",
       "startChatting": "立即开始聊天",
       "watchDemo": "观看演示",
-      "getStarted": "开始使用"
+      "getStarted": "开始使用",
+      "tryWithoutSigningUp": "无需注册试用"
     },
     "features": {
       "title": "为什么选择Vina？",
@@ -80,11 +112,39 @@
       "activeUsers": "活跃用户",
       "conversations": "对话",
       "satisfaction": "满意度",
-      "availability": "可用性"
+      "availability": "可用性",
+      "users": "活跃用户",
+      "numbers": {
+        "users": "10K+",
+        "conversations": "50K+",
+        "satisfaction": "99%",
+        "availability": "24/7"
+      }
     },
     "testimonials": {
       "title": "用户怎么说",
-      "subtitle": "通过Vina找到支持的人的真实故事"
+      "subtitle": "通过Vina找到支持的人的真实故事",
+      "starRating": "★★★★★",
+      "initials": {
+        "sarah": "S",
+        "mike": "M",
+        "emma": "E"
+      },
+      "sarah": {
+        "name": "Sarah Chen",
+        "role": "营销经理",
+        "text": "Vina对我的心理健康来说是一个改变游戏规则的存在。AI对话感觉如此自然和支持性。"
+      },
+      "mike": {
+        "name": "Mike Rodriguez",
+        "role": "软件工程师",
+        "text": "我喜欢Vina在我需要与人交谈时总是可用的。就像有一个24/7的支持性朋友。"
+      },
+      "emma": {
+        "name": "Emma Thompson",
+        "role": "教师",
+        "text": "隐私和安全功能给了我内心的平静。我可以完全诚实，没有任何判断。"
+      }
     },
     "cta": {
       "title": "准备好开始您的健康之旅了吗？",
@@ -149,6 +209,192 @@
     "therapists": "治疗师",
     "reports": "报告",
     "analytics": "分析"
+  },
+  "team": {
+    "title": "认识Vina背后的智囊团",
+    "subtitle": "远见者",
+    "subtitleHighlight": "构建明天的心理健康",
+    "description": "认识Vina背后的杰出人才 - 一个由创新者、心理健康专家和技术先驱组成的多元化团队，他们共同努力革命化可及的心理健康护理。",
+    "joinMission": "加入我们的使命",
+    "joinDescription": "我们一直在寻找想要在心理健康护理领域有所作为的热情人士。加入我们的团队，帮助我们构建可及治疗的未来。",
+    "viewPositions": "查看开放职位",
+    "contactUs": "联系我们",
+    "members": {
+      "sarah": {
+        "name": "Prince Igwe",
+        "role": "后端和AI代理工程师",
+        "description": "多才多艺的后端架构师，专长于实时系统和AI编程，对可扩展、安全的数字健康平台充满热情。"
+      },
+      "james": {
+        "name": "James Asaolu",
+        "role": "前端工程师",
+        "description": "充满激情且自我驱动的前端工程师，对像素完美设计有敏锐眼光，渴望构建可靠且有影响力的系统。"
+      }
+    }
+  },
+  "therapist": {
+    "title": "与",
+    "titleHighlight": "持牌治疗师",
+    "description": "通过安全的视频通话和实时消息，从合格的心理健康专业人士那里获得个性化支持。",
+    "badge": "专业心理健康支持",
+    "features": {
+      "videoSessions": {
+        "title": "高清视频会话",
+        "description": "与专业治疗师进行高清视频通话，在专为舒适和保密而设计的安全、私密环境中进行。"
+      },
+      "messaging": {
+        "title": "24/7消息",
+        "description": "通过与您指定的治疗师的安全消息获得持续支持，在您需要指导时随时可用。"
+      },
+      "licensed": {
+        "title": "持牌专业人士",
+        "description": "与专门从事心理健康和福祉各个领域的合格、持牌治疗师联系。"
+      },
+      "hipaa": {
+        "title": "HIPAA合规",
+        "description": "端到端加密和HIPAA合规确保您的对话保持完全机密和安全。"
+      }
+    },
+    "chat": {
+      "therapistName": "Dr. Sarah Johnson",
+      "therapistTitle": "持牌临床心理学家",
+      "status": "在线 • 现在可用",
+      "avatar": "Dr. S",
+      "timestamp1": "Dr. Johnson • 14:30",
+      "timestamp2": "Dr. Johnson • 14:33",
+      "userTimestamp": "您 • 14:32",
+      "messages": {
+        "therapist1": "早上好！您今天感觉如何？",
+        "user1": "我最近对工作感到焦虑。压力一直很大。",
+        "therapist2": "我理解，有这种感觉是完全正常的。工作压力真的会让人疲惫。最近对您来说最具挑战性的是什么？",
+        "user2": "我想是截止日期和感觉做得不够。另外，我睡眠也不好...",
+        "therapist3": "这听起来真的很困难。睡眠对我们的心理健康非常重要。您试过睡前放松技巧吗？我很乐意帮助您找到适合您的策略。💙"
+      },
+      "placeholder": "输入您的消息...",
+      "badges": {
+        "hipaa": "🔒 HIPAA合规",
+        "licensed": "✅ 持牌"
+      }
+    },
+    "videoCall": {
+      "title": "体验专业视频治疗",
+      "subtitle": "通过我们安全的HD视频平台与持牌治疗师面对面连接",
+      "therapistName": "Dr. Sarah Johnson",
+      "therapistTitle": "持牌临床心理学家",
+      "status": "在线 • 现在可用",
+      "connectionQuality": "HD",
+      "duration": "00:15:32",
+      "features": {
+        "hdVideo": {
+          "title": "HD视频质量",
+          "description": "水晶般清晰的视频通话，配备专业级音频，提供最佳治疗体验"
+        },
+        "secure": {
+          "title": "端到端加密",
+          "description": "您的视频会话完全加密并符合HIPAA标准，确保最大隐私保护"
+        },
+        "scheduling": {
+          "title": "灵活安排",
+          "description": "预订适合您日程的会话，提供简单的重新安排和取消选项"
+        }
+      }
+    },
+    "videoCallFlow": {
+      "title": "视频治疗如何运作",
+      "subtitle": "体验从治疗师选择到安全视频会话的完整旅程",
+      "navigationTitle": "流程步骤",
+      "step1": {
+        "title": "选择您的治疗师",
+        "description": "浏览我们持牌专业人士网络，找到完美匹配您需求的治疗师",
+        "selectButton": "选择 Dr. Sarah Johnson"
+      },
+      "step2": {
+        "title": "安排您的会话",
+        "description": "从治疗师日历中的可用时间段中选择适合您的时间",
+        "confirmButton": "确认预约"
+      },
+      "step3": {
+        "title": "会话前设置",
+        "description": "在连接前完成快速技术检查并审查您的会话目标",
+        "readyButton": "我准备好开始了"
+      },
+      "step4": {
+        "title": "开始您的会话",
+        "description": "在私密、加密的视频环境中与您的治疗师安全连接",
+        "endCallButton": "结束会话"
+      }
+    },
+    "cta": {
+      "findTherapist": "找到您的治疗师",
+      "learnMore": "了解更多",
+      "description": "加入通过我们平台找到支持的数千名用户"
+    }
+  },
+  "popupBubbles": {
+    "messages": [
+      "感到不知所措？我在这里倾听 🌟",
+      "您在这段旅程中并不孤单 💙",
+      "深呼吸，您做得很好 ✨",
+      "心理健康很重要，您也很重要 💚",
+      "每一步前进都是进步 🌱",
+      "您的感受是有效且重要的 💜",
+      "让我们一起解决 🤗",
+      "您内心有力量 ⚡",
+      "有时感觉不好也没关系 🌧️",
+      "自我照顾不是自私，而是必要的 💆‍♀️",
+      "您正在进步，即使很小 🐌",
+      "您的心理健康是优先事项 🎯",
+      "明天是新的一天，充满新的可能性 🌅",
+      "您比想象中更强大 💪",
+      "寻求帮助是勇敢的 🦁",
+      "您值得拥有和平与幸福 🕊️",
+      "深呼吸，放手 🌬️",
+      "小步骤带来大变化 🪜",
+      "庆祝您的胜利，无论大小 🎉"
+    ]
+  },
+  "dynamicChat": {
+    "title": "选择对话类型",
+    "autoPlay": "自动播放对话",
+    "status": {
+      "typing": "输入中...",
+      "online": "在线"
+    },
+    "conversations": {
+      "work": {
+        "title": "工作压力",
+        "description": "处理工作压力和截止日期",
+        "messages": {
+          "ai1": "您好！我在这里倾听和支持您。您今天感觉如何？ 🌟",
+          "user1": "嗨Vina，我最近对工作和一切感到有点不知所措...",
+          "ai2": "我听到了，有这种感觉是完全正常的。工作压力真的会让人疲惫。最近对您来说最具挑战性的是什么？",
+          "user2": "我想是截止日期和感觉做得不够。另外，我睡眠也不好...",
+          "ai3": "这听起来真的很困难。睡眠对我们的心理健康非常重要。您试过睡前放松技巧吗？我很乐意帮助您找到适合您的策略。💙"
+        }
+      },
+      "sleep": {
+        "title": "睡眠问题",
+        "description": "改善睡眠质量和放松",
+        "messages": {
+          "ai1": "早上好！您昨晚睡得怎么样？ 😊",
+          "user1": "实际上，我几周来第一次睡得很好！",
+          "ai2": "听到这个消息太好了！您认为是什么帮助您睡得更好？",
+          "user2": "我试了您建议的呼吸练习。它们真的帮助我平静了心情。",
+          "ai3": "我很高兴这对您有效！坚持是关键。您想探索其他放松技巧吗？ 🌸"
+        }
+      },
+      "general": {
+        "title": "一般支持",
+        "description": "一般情感支持和对话",
+        "messages": {
+          "ai1": "您好！我注意到您今天很安静。一切都好吗？ 🤗",
+          "user1": "我只是感觉有点沮丧。没什么特别的，就是这样的日子。",
+          "ai2": "这样的日子是完全正常和有效的。有时我们只需要承认我们的感受，而不是试图修复它们。我们随便聊聊您想到的任何事情怎么样？",
+          "user2": "听起来不错。也许我只是需要有人可以无压力地交谈。",
+          "ai3": "正是！我在这里就是为了这个。没有压力，没有评判，只是一个倾听的耳朵。您在想什么？ 💭"
+        }
+      }
+    }
   },
   "footer": {
     "privacy": "隐私",

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useLanguage } from "@/context/language-context";
 
 interface MessageBubble {
   id: string;
@@ -11,171 +12,167 @@ interface MessageBubble {
   position: number;
 }
 
-const messageBubbles: MessageBubble[] = [
-  {
-    id: "1",
-    content: "Feeling overwhelmed? I'm here to listen 🌟",
-    side: "left",
-    delay: 0,
-    duration: 2500,
-    position: 15,
-  },
-  {
-    id: "2",
-    content: "You're not alone in this journey 💙",
-    side: "top",
-    delay: 800,
-    duration: 2200,
-    position: 35,
-  },
-  {
-    id: "3",
-    content: "Take a deep breath, you're doing great ✨",
-    side: "left",
-    delay: 1600,
-    duration: 2400,
-    position: 55,
-  },
-  {
-    id: "4",
-    content: "Mental health matters, and so do you 💚",
-    side: "right",
-    delay: 2400,
-    duration: 2600,
-    position: 25,
-  },
-  {
-    id: "5",
-    content: "Every step forward is progress 🌱",
-    side: "left",
-    delay: 3200,
-    duration: 2300,
-    position: 75,
-  },
-  {
-    id: "6",
-    content: "Your feelings are valid and important 💜",
-    side: "top",
-    delay: 4000,
-    duration: 2500,
-    position: 45,
-  },
-  {
-    id: "7",
-    content: "Let's work through this together 🤗",
-    side: "left",
-    delay: 4800,
-    duration: 2400,
-    position: 20,
-  },
-  {
-    id: "8",
-    content: "You have the strength within you ⚡",
-    side: "right",
-    delay: 5600,
-    duration: 2300,
-    position: 60,
-  },
-  {
-    id: "9",
-    content: "It's okay to not be okay sometimes 🌧️",
-    side: "left",
-    delay: 6400,
-    duration: 2400,
-    position: 40,
-  },
-  {
-    id: "10",
-    content: "Self-care isn't selfish, it's necessary 💆‍♀️",
-    side: "right",
-    delay: 7200,
-    duration: 2500,
-    position: 30,
-  },
-  {
-    id: "11",
-    content: "You're making progress, even if it's small 🐌",
-    side: "left",
-    delay: 8000,
-    duration: 2400,
-    position: 65,
-  },
-  {
-    id: "12",
-    content: "Your mental health is a priority 🎯",
-    side: "top",
-    delay: 8800,
-    duration: 2300,
-    position: 50,
-  },
-  {
-    id: "13",
-    content: "Tomorrow is a new day with new possibilities 🌅",
-    side: "left",
-    delay: 9600,
-    duration: 2500,
-    position: 25,
-  },
-  {
-    id: "14",
-    content: "You're stronger than you think 💪",
-    side: "right",
-    delay: 10400,
-    duration: 2400,
-    position: 70,
-  },
-  {
-    id: "15",
-    content: "It's brave to ask for help 🦁",
-    side: "top",
-    delay: 11200,
-    duration: 2300,
-    position: 35,
-  },
-  {
-    id: "16",
-    content: "You deserve peace and happiness 🕊️",
-    side: "right",
-    delay: 12000,
-    duration: 2400,
-    position: 55,
-  },
-  {
-    id: "17",
-    content: "Take a deep breath and let it go 🌬️",
-    side: "left",
-    delay: 12800,
-    duration: 2300,
-    position: 15,
-  },
-  {
-    id: "18",
-    content: "You are not alone in this journey 🤝",
-    side: "right",
-    delay: 13600,
-    duration: 2400,
-    position: 10,
-  },
-  {
-    id: "19",
-    content: "Small steps lead to big changes 🪜",
-    side: "left",
-    delay: 14400,
-    duration: 2300,
-    position: 5,
-  },
-  {
-    id: "20",
-    content: "Celebrate your wins, no matter the size 🎉",
-    side: "top",
-    delay: 15200,
-    duration: 2400,
-    position: 20,
-  },
-];
+// This will be generated dynamically based on translations
 
 export const PopupMessageBubbles: React.FC = () => {
   const [visibleBubbles, setVisibleBubbles] = useState<Set<string>>(new Set());
+  const { t } = useLanguage();
+
+  // Generate message bubbles from translations
+  const messageBubbles: MessageBubble[] = [
+    {
+      id: "1",
+      content: t("popupBubbles.messages.0"),
+      side: "left",
+      delay: 0,
+      duration: 2500,
+      position: 15,
+    },
+    {
+      id: "2",
+      content: t("popupBubbles.messages.1"),
+      side: "top",
+      delay: 800,
+      duration: 2200,
+      position: 35,
+    },
+    {
+      id: "3",
+      content: t("popupBubbles.messages.2"),
+      side: "left",
+      delay: 1600,
+      duration: 2400,
+      position: 55,
+    },
+    {
+      id: "4",
+      content: t("popupBubbles.messages.3"),
+      side: "right",
+      delay: 2400,
+      duration: 2600,
+      position: 25,
+    },
+    {
+      id: "5",
+      content: t("popupBubbles.messages.4"),
+      side: "left",
+      delay: 3200,
+      duration: 2300,
+      position: 75,
+    },
+    {
+      id: "6",
+      content: t("popupBubbles.messages.5"),
+      side: "top",
+      delay: 4000,
+      duration: 2500,
+      position: 45,
+    },
+    {
+      id: "7",
+      content: t("popupBubbles.messages.6"),
+      side: "left",
+      delay: 4800,
+      duration: 2400,
+      position: 20,
+    },
+    {
+      id: "8",
+      content: t("popupBubbles.messages.7"),
+      side: "right",
+      delay: 5600,
+      duration: 2300,
+      position: 60,
+    },
+    {
+      id: "9",
+      content: t("popupBubbles.messages.8"),
+      side: "left",
+      delay: 6400,
+      duration: 2400,
+      position: 40,
+    },
+    {
+      id: "10",
+      content: t("popupBubbles.messages.9"),
+      side: "right",
+      delay: 7200,
+      duration: 2500,
+      position: 30,
+    },
+    {
+      id: "11",
+      content: t("popupBubbles.messages.10"),
+      side: "left",
+      delay: 8000,
+      duration: 2400,
+      position: 65,
+    },
+    {
+      id: "12",
+      content: t("popupBubbles.messages.11"),
+      side: "top",
+      delay: 8800,
+      duration: 2300,
+      position: 50,
+    },
+    {
+      id: "13",
+      content: t("popupBubbles.messages.12"),
+      side: "left",
+      delay: 9600,
+      duration: 2500,
+      position: 25,
+    },
+    {
+      id: "14",
+      content: t("popupBubbles.messages.13"),
+      side: "right",
+      delay: 10400,
+      duration: 2400,
+      position: 70,
+    },
+    {
+      id: "15",
+      content: t("popupBubbles.messages.14"),
+      side: "top",
+      delay: 11200,
+      duration: 2300,
+      position: 35,
+    },
+    {
+      id: "16",
+      content: t("popupBubbles.messages.15"),
+      side: "right",
+      delay: 12000,
+      duration: 2400,
+      position: 55,
+    },
+    {
+      id: "17",
+      content: t("popupBubbles.messages.16"),
+      side: "left",
+      delay: 12800,
+      duration: 2300,
+      position: 15,
+    },
+    // {
+    //   id: "18",
+    //   content: t("popupBubbles.messages.17"),
+    //   side: "right",
+    //   delay: 13600,
+    //   duration: 2400,
+    //   position: 10,
+    // },
+    {
+      id: "19",
+      content: t("popupBubbles.messages.18"),
+      side: "right",
+      delay: 14400,
+      duration: 2300,
+      position: 5,
+    },
+  ];
 
   useEffect(() => {
     const totalDuration = 14400; // Total cycle duration (12 seconds)
@@ -221,7 +218,7 @@ export const PopupMessageBubbles: React.FC = () => {
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-20">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
       {messageBubbles.map((bubble) => (
         <div
           key={bubble.id}
@@ -247,7 +244,7 @@ export const PopupMessageBubbles: React.FC = () => {
           }}
         >
           <div
-            className={`relative max-w-md px-4 py-3 rounded-2xl shadow-lg z-20 ${
+            className={`relative max-w-md px-4 py-3 rounded-2xl shadow-lg z-10 ${
               bubble.side === "left"
                 ? "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-l-4 border-green-500"
                 : bubble.side === "right"

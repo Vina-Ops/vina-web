@@ -5,6 +5,19 @@ const withNextIntl = createNextIntlPlugin("./i18n.ts");
 
 const nextConfig: NextConfig = {
   /* config options here */
+
+  // Image optimization configuration
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        port: "",
+        pathname: "/**",
+      },
+    ],
+  },
+
   // PWA Configuration - conditionally enabled
   async headers() {
     // Skip PWA headers if PWA is disabled

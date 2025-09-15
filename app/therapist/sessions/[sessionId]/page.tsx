@@ -23,6 +23,7 @@ import IncomingCall from "@/components/chat/IncomingCall";
 import { usePeerVideoCall, CallParticipant } from "@/hooks/usePeerVideoCall";
 import { useUser } from "@/context/user-context";
 import { fetchToken } from "@/helpers/get-token";
+import { fetchWsToken } from "@/helpers/get-ws-token";
 import { getMyTherapySessions } from "@/services/general-service";
 import notificationSound from "@/utils/notification-sound";
 import { useNotification } from "@/context/notification-context";
@@ -123,7 +124,7 @@ export default function TherapistChatPage() {
     const getToken = async () => {
       try {
         console.log("Fetching token...");
-        const token = await fetchToken();
+        const token = await fetchWsToken();
         console.log("Token received:", token);
         setTokens(token);
       } catch (error) {
@@ -263,7 +264,7 @@ export default function TherapistChatPage() {
       if (ws.readyState === WebSocket.OPEN) {
         try {
           // Send a simple ping message that the server can handle
-          ws.send(JSON.stringify({ type: "ping", timestamp: Date.now() }));
+
           console.log("💓 Sent heartbeat ping (therapist)");
           missedPings = 0; // Reset missed pings on successful send
         } catch (error) {
@@ -338,8 +339,7 @@ export default function TherapistChatPage() {
     }
 
     const roomId = session.id;
-    const baseUrl =
-      process.env.NEXT_PUBLIC_WS_BASE_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_WS_BASE_URL;
     const wsUrl = `${baseUrl}/safe-space/${roomId}?token=${tokens}`;
 
     console.log("Creating therapist chat WebSocket connection to:", wsUrl);
@@ -388,26 +388,26 @@ export default function TherapistChatPage() {
       startHeartbeat(ws);
 
       // Broadcast current peer ID if available
-      if (currentPeerId) {
-        try {
-          ws.send(
-            JSON.stringify({
-              type: "peer-id-broadcast",
-              data: {
-                peerId: currentPeerId,
-                userId: (user as any)?.id,
-                timestamp: Date.now(),
-              },
-            })
-          );
-          console.log(
-            "📡 Broadcasted therapist peer ID on WebSocket connect:",
-            currentPeerId
-          );
-        } catch (error) {
-          console.error("Failed to broadcast therapist peer ID:", error);
-        }
-      }
+      // if (currentPeerId) {
+      //   try {
+      //     ws.send(
+      //       JSON.stringify({
+      //         type: "peer-id-broadcast",
+      //         data: {
+      //           peerId: currentPeerId,
+      //           userId: (user as any)?.id,
+      //           timestamp: Date.now(),
+      //         },
+      //       })
+      //     );
+      //     console.log(
+      //       "📡 Broadcasted therapist peer ID on WebSocket connect:",
+      //       currentPeerId
+      //     );
+      //   } catch (error) {
+      //     console.error("Failed to broadcast therapist peer ID:", error);
+      //   }
+      // }
 
       // Send any queued messages
       if (messageQueue.length > 0) {

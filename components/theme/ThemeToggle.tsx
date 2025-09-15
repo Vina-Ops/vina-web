@@ -61,7 +61,7 @@ export const ThemeToggle = () => {
                   }}
                   className={`w-full flex z-[70] items-center space-x-3 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${
                     isActive
-                      ? "text-green dark:text-green bg-green-50 dark:bg-green-900/20"
+                      ? "text-green dark:text-white bg-green/50 dark:bg-green/20"
                       : "text-gray-700 dark:text-gray-300"
                   }`}
                   role="option"

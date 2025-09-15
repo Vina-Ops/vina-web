@@ -33,7 +33,7 @@ export function LanguageSwitcher() {
       {isOpen && (
         <>
           <div
-            className="fixed inset-0 z-[990]"
+            className="fixed inset-0 z-[9990]"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
