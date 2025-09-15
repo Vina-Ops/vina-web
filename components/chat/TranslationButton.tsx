@@ -73,7 +73,7 @@ export const TranslationButton: React.FC<TranslationButtonProps> = ({
 
       {/* Language Selector Dropdown */}
       {showLanguageSelector && (
-        <div className="absolute top-8 left-0 z-50 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto min-w-48">
+        <div className="absolute bottom-8 left-0 z-[80] bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto min-w-48">
           <div className="p-2">
             <div className="text-xs font-medium text-gray-500 mb-2 px-2">
               Select language:
@@ -95,7 +95,7 @@ export const TranslationButton: React.FC<TranslationButtonProps> = ({
 
       {/* Translation Display */}
       {showTranslation && translatedText && (
-        <div className="absolute top-8 left-0 z-50 bg-white border border-gray-200 rounded-lg shadow-lg max-w-sm p-3">
+        <div className="absolute bottom-8 left-0 z-50 bg-white border border-gray-200 rounded-lg shadow-lg max-w-sm p-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="text-base">

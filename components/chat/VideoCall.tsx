@@ -386,15 +386,15 @@ const VideoCall: React.FC<VideoCallProps> = ({
 
   return (
     <div className="fixed inset-0 z-[999999] bg-black">
-      {/* Header with call duration and network stats */}
+      {/* Header with call duration and network stats - Only show when controls are visible */}
       {showControls && (
         <div className="absolute top-0 left-0 right-0 z-[99999]	 bg-black bg-opacity-75 text-white p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                 <span className="text-sm font-medium">LIVE</span>
-              </div>
+              </div> */}
               <div className="text-sm">
                 Call Duration: {formatDuration(callDuration)}
               </div>
@@ -423,14 +423,14 @@ const VideoCall: React.FC<VideoCallProps> = ({
                 <span>🌐</span>
                 <span>{networkStats.bandwidth} kbps</span>
               </div>
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <span>📊</span>
                 <span>{networkStats.latency}ms</span>
               </div>
               <div className="flex items-center space-x-2">
                 <span>📉</span>
                 <span>{networkStats.packetLoss}%</span>
-              </div>
+              </div> */}
               {/* Debug: Local Stream Status */}
               <div className="flex items-center space-x-2">
                 <span>🎥</span>
@@ -457,10 +457,10 @@ const VideoCall: React.FC<VideoCallProps> = ({
         <div className="absolute top-20 left-0 right-0 z-10 bg-black bg-opacity-75 text-white p-3 text-xs">
           <div className="flex items-center justify-between max-w-4xl mx-auto">
             <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <span>📞</span>
                 <span>Call Active</span>
-              </div>
+              </div> */}
               <div className="flex items-center space-x-2">
                 <span>👥</span>
                 <span>Participants: {participants.length}</span>
@@ -485,7 +485,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
                   {isVideoEnabled ? "Video On" : "Video Off"}
                 </span>
               </div>
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <span>🖥️</span>
                 <span
                   className={
@@ -494,7 +494,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
                 >
                   {isScreenSharing ? "Screen Sharing" : "No Screen Share"}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -641,7 +641,7 @@ const VideoCall: React.FC<VideoCallProps> = ({
       {/* Main Video Area - Full Screen Remote Video */}
       <div
         className={`h-full w-full ${
-          callDuration > 0 ? "pt-32" : "pt-20"
+          showControls ? (callDuration > 0 ? "pt-32" : "pt-20") : "pt-0"
         } cursor-pointer`}
         onClick={handleScreenClick}
       >
@@ -659,9 +659,11 @@ const VideoCall: React.FC<VideoCallProps> = ({
                   playsInline
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-sm px-3 py-2 rounded-lg">
-                  {participant?.name || "Unknown"}
-                </div>
+                {showControls && (
+                  <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-sm px-3 py-2 rounded-lg">
+                    {participant?.name || "Unknown"}
+                  </div>
+                )}
               </div>
             );
           })
@@ -716,31 +718,35 @@ const VideoCall: React.FC<VideoCallProps> = ({
             }}
           />
 
-          {/* Local Video Overlay */}
-          <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-            You {isMuted && "🔇"} {!isVideoEnabled && "📷❌"}
-          </div>
+          {/* Local Video Overlay - Only show when controls are visible */}
+          {showControls && (
+            <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+              You {isMuted && "🔇"} {!isVideoEnabled && "📷❌"}
+            </div>
+          )}
 
-          {isScreenSharing && (
+          {showControls && isScreenSharing && (
             <div className="absolute top-2 right-8 bg-blue-600 text-white text-xs px-2 py-1 rounded">
               🖥️ Screen
             </div>
           )}
 
-          {/* Minimize/Maximize Button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMinimized(!isMinimized);
-            }}
-            className="absolute top-2 right-2 w-6 h-6 bg-black bg-opacity-50 text-white text-xs rounded hover:bg-opacity-70 flex items-center justify-center"
-            title={isMinimized ? "Maximize" : "Minimize"}
-          >
-            {isMinimized ? "⤢" : "⤡"}
-          </button>
+          {/* Minimize/Maximize Button - Only show when controls are visible */}
+          {showControls && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMinimized(!isMinimized);
+              }}
+              className="absolute top-2 right-2 w-6 h-6 bg-black bg-opacity-50 text-white text-xs rounded hover:bg-opacity-70 flex items-center justify-center"
+              title={isMinimized ? "Maximize" : "Minimize"}
+            >
+              {isMinimized ? "⤢" : "⤡"}
+            </button>
+          )}
 
-          {/* Resize Handle - Only show when not minimized */}
-          {!isMinimized && (
+          {/* Resize Handle - Only show when not minimized and controls are visible */}
+          {showControls && !isMinimized && (
             <div
               className="absolute bottom-0 right-0 w-4 h-4 bg-white/30 cursor-se-resize"
               onMouseDown={handleResizeMouseDown}
@@ -851,20 +857,23 @@ const VideoCall: React.FC<VideoCallProps> = ({
         </div>
       )}
 
-      {/* Participant Count Badge */}
-      <div
-        className={`absolute ${
-          isMobile ? "top-16 right-2" : "top-20 right-4"
-        } bg-black bg-opacity-75 text-white ${
-          isMobile ? "text-xs px-2 py-1" : "text-xs px-3 py-2"
-        } rounded-full`}
-      >
-        {1 + remoteStreams.size} participant
-        {1 + remoteStreams.size !== 1 ? "s" : ""}
-      </div>
+      {/* Participant Count Badge - Only show when controls are visible */}
+      {showControls && (
+        <div
+          className={`absolute ${
+            isMobile ? "top-16 right-2" : "top-20 right-4"
+          } bg-black bg-opacity-75 text-white ${
+            isMobile ? "text-xs px-2 py-1" : "text-xs px-3 py-2"
+          } rounded-full`}
+        >
+          {1 + remoteStreams.size} participant
+          {1 + remoteStreams.size !== 1 ? "s" : ""}
+        </div>
+      )}
 
-      {/* Call Waiting Indicator - Show when in active call but have waiting calls */}
-      {callWaitingState.hasWaitingCalls &&
+      {/* Call Waiting Indicator - Show when in active call but have waiting calls and controls are visible */}
+      {showControls &&
+        callWaitingState.hasWaitingCalls &&
         !isCallIncoming &&
         !isCallOutgoing &&
         callDuration > 0 && (
@@ -877,8 +886,8 @@ const VideoCall: React.FC<VideoCallProps> = ({
           />
         )}
 
-      {/* Connection Diagnostics - Only show when reconnecting */}
-      {connectionDiagnostics && isReconnecting && (
+      {/* Connection Diagnostics - Only show when reconnecting and controls are visible */}
+      {showControls && connectionDiagnostics && isReconnecting && (
         <div
           className={`absolute ${
             isMobile ? "top-16 left-2" : "top-20 left-4"
@@ -891,8 +900,8 @@ const VideoCall: React.FC<VideoCallProps> = ({
         </div>
       )}
 
-      {/* Toast Notification */}
-      {toastMessage && (
+      {/* Toast Notification - Only show when controls are visible */}
+      {showControls && toastMessage && (
         <div
           className={`absolute ${
             isMobile ? "top-2" : "top-4"

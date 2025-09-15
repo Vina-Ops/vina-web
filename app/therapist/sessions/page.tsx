@@ -1177,7 +1177,7 @@ function TherapistSessionsContent() {
             {filteredSessions.map((session) => (
               <div
                 key={session.id}
-                className="grid lg:flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="grid w-full  p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 <div className="flex items-start lg:items-center space-x-4">
                   <img
@@ -1185,7 +1185,7 @@ function TherapistSessionsContent() {
                     src={session.patientAvatar}
                     alt={session.patientName}
                   />
-                  <div className="flex-1 bg-greener">
+                  <div className="flex-1">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                       {session.patientName}
                     </h3>
@@ -1209,6 +1209,7 @@ function TherapistSessionsContent() {
                         </span>
                       )}
                     </div>
+
                     {session.sessionNotes && (
                       <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
                         {session.sessionNotes}
@@ -1217,7 +1218,7 @@ function TherapistSessionsContent() {
                   </div>
                 </div>
 
-                <div className="w-full flex justify-between lg:justify-normal lg:items-center gap-3 pt-3 lg:pt-0">
+                <div className="w-full grid grid-flow-col justify-end lg:justify-normal lg:items-center gap-3 pt-3 ">
                   {/* Status Badge */}
                   <span
                     className={`inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -1404,7 +1405,7 @@ function TherapistSessionsContent() {
                     <Video className="h-5 w-5" />
                   </button>
                   {/* Demo button to test video call UI */}
-                  <button
+                  {/* <button
                     onClick={() => {
                       console.log("Demo: Manually triggering video call UI");
                       setDemoCallActive(!demoCallActive);
@@ -1424,10 +1425,10 @@ function TherapistSessionsContent() {
                     ) : (
                       <Play className="h-5 w-5" />
                     )}
-                  </button>
+                  </button> */}
 
                   {/* Test local stream button */}
-                  <button
+                  {/* <button
                     onClick={async () => {
                       try {
                         console.log("Testing local stream acquisition...");
@@ -1453,7 +1454,7 @@ function TherapistSessionsContent() {
                     title="Test Local Stream"
                   >
                     📹
-                  </button>
+                  </button> */}
 
                   {/* Test peer connection button */}
                   <button

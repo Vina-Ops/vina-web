@@ -14,8 +14,63 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   const [stickyDate, setStickyDate] = useState<string>("");
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sort messages by timestamp to ensure proper chronological order
-  const sortedMessages = [...messages].sort((a, b) => {
+  // Deduplicate messages by ID and sort by timestamp to ensure proper chronological order
+  const deduplicatedMessages = messages.reduce((acc: any[], message) => {
+    // Check if message with same ID already exists
+    const existingMessage = acc.find((m) => m.id === message.id);
+    if (!existingMessage) {
+      acc.push(message);
+    } else {
+      // Debug logging for duplicates
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Duplicate message detected:", {
+          id: message.id,
+          content: message.content,
+          timestamp: message.timestamp,
+        });
+      }
+    }
+    return acc;
+  }, []);
+
+  // Additional deduplication by content and timestamp for messages without unique IDs
+  const finalDeduplicatedMessages = deduplicatedMessages.reduce(
+    (acc: any[], message) => {
+      // Create a unique key based on content, timestamp, and sender
+      const messageKey = `${message.content}-${message.timestamp}-${message.sender}`;
+      const existingMessage = acc.find((m) => {
+        const existingKey = `${m.content}-${m.timestamp}-${m.sender}`;
+        return existingKey === messageKey;
+      });
+
+      if (!existingMessage) {
+        acc.push(message);
+      } else {
+        // Debug logging for content-based duplicates
+        if (process.env.NODE_ENV === "development") {
+          console.warn("Content-based duplicate detected:", {
+            content: message.content,
+            timestamp: message.timestamp,
+            sender: message.sender,
+          });
+        }
+      }
+      return acc;
+    },
+    []
+  );
+
+  // Debug logging for message counts
+  if (process.env.NODE_ENV === "development") {
+    console.log("Message processing:", {
+      originalCount: messages.length,
+      deduplicatedCount: deduplicatedMessages.length,
+      finalDeduplicatedCount: finalDeduplicatedMessages.length,
+      duplicatesRemoved: messages.length - finalDeduplicatedMessages.length,
+    });
+  }
+
+  const sortedMessages = [...finalDeduplicatedMessages].sort((a, b) => {
     const timestampA =
       typeof a.timestamp === "string" ? new Date(a.timestamp) : a.timestamp;
     const timestampB =
@@ -200,7 +255,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             {/* Messages for this date */}
             {messageGroups[dateKey].map((message, index) => (
               <div
-                key={message.id || `${dateKey}-${index}`}
+                key={message.id || `${dateKey}-${index}-${message.timestamp}`}
                 // data-message-timestamp={message.timestamp.getTime()}
                 className="scroll-mt-20" // Offset for sticky header
               >

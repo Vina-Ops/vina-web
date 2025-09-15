@@ -192,20 +192,20 @@ function HomePageContent() {
 
           {/* Mobile Navigation */}
           <div className="md:hidden flex items-center space-x-2">
-            <LanguageSwitcher 
+            <LanguageSwitcher
               position={{
                 placement: "bottom",
                 mobilePlacement: "bottom",
                 offset: 8,
-                mobileOffset: 8
+                mobileOffset: 8,
               }}
             />
-            <ThemeToggle 
+            <ThemeToggle
               position={{
                 placement: "bottom",
                 mobilePlacement: "bottom",
                 offset: 8,
-                mobileOffset: 8
+                mobileOffset: 8,
               }}
             />
             <MobileMenu />

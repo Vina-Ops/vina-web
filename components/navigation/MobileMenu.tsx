@@ -95,11 +95,11 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className = "" }) => {
       {isOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
             onClick={closeMenu}
           />
-          
+
           {/* Menu Panel */}
           <div className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-white dark:bg-gray-900 shadow-2xl transform transition-all duration-300 ease-out animate-in slide-in-from-right">
             {/* Header */}
@@ -118,56 +118,56 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className = "" }) => {
 
             {/* Menu Content */}
             <div className="flex flex-col h-full">
-            {/* Navigation Links */}
-            <div className="flex-1 p-4 space-y-1">
-              <Link href="/therapist" onClick={closeMenu}>
-                <div className="flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
-                  <Users className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-3 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
-                  <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white">
-                    Therapists
-                  </span>
-                </div>
-              </Link>
-
-              <Link href="/auth/login" onClick={closeMenu}>
-                <div className="flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
-                  <LogIn className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-3 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
-                  <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white">
-                    {t("nav.login")}
-                  </span>
-                </div>
-              </Link>
-
-              <Link href="/?start=1" onClick={closeMenu}>
-                <div className="flex items-center p-3 rounded-lg bg-green hover:bg-green/80 transition-colors group">
-                  <Play className="w-5 h-5 text-white mr-3" />
-                  <span className="text-white font-medium">
-                    {t("nav.getStarted")}
-                  </span>
-                </div>
-              </Link>
-
-              {/* Additional mobile-only links */}
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
-                <Link href="/profile" onClick={closeMenu}>
+              {/* Navigation Links */}
+              <div className="flex-1 p-4 space-y-1">
+                <Link href="/therapist" onClick={closeMenu}>
                   <div className="flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
-                    <User className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-3 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
+                    <Users className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-3 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
                     <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white">
-                      Profile
+                      Therapists
                     </span>
                   </div>
                 </Link>
 
-                <Link href="/settings" onClick={closeMenu}>
+                <Link href="/auth/login" onClick={closeMenu}>
                   <div className="flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
-                    <Settings className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-3 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
+                    <LogIn className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-3 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
                     <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white">
-                      Settings
+                      {t("nav.login")}
                     </span>
                   </div>
                 </Link>
+
+                <Link href="/?start=1" onClick={closeMenu}>
+                  <div className="flex items-center p-3 rounded-lg bg-green hover:bg-green/80 transition-colors group">
+                    <Play className="w-5 h-5 text-white mr-3" />
+                    <span className="text-white font-medium">
+                      {t("nav.getStarted")}
+                    </span>
+                  </div>
+                </Link>
+
+                {/* Additional mobile-only links */}
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+                  <Link href="/profile" onClick={closeMenu}>
+                    <div className="flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
+                      <User className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-3 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
+                      <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white">
+                        Profile
+                      </span>
+                    </div>
+                  </Link>
+
+                  <Link href="/settings" onClick={closeMenu}>
+                    <div className="flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group">
+                      <Settings className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-3 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
+                      <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-white">
+                        Settings
+                      </span>
+                    </div>
+                  </Link>
+                </div>
               </div>
-            </div>
 
               {/* Settings Section */}
               <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
@@ -175,18 +175,18 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className = "" }) => {
                   <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                     Settings
                   </h3>
-                  
+
                   {/* Language Switcher */}
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-700 dark:text-gray-300">
                       Language
                     </span>
-                    <LanguageSwitcher 
+                    <LanguageSwitcher
                       position={{
                         placement: "left",
                         mobilePlacement: "top",
                         offset: 8,
-                        mobileOffset: 8
+                        mobileOffset: 8,
                       }}
                     />
                   </div>
@@ -196,12 +196,12 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className = "" }) => {
                     <span className="text-sm text-gray-700 dark:text-gray-300">
                       Theme
                     </span>
-                    <ThemeToggle 
+                    <ThemeToggle
                       position={{
                         placement: "left",
                         mobilePlacement: "top",
                         offset: 8,
-                        mobileOffset: 8
+                        mobileOffset: 8,
                       }}
                     />
                   </div>

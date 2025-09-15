@@ -165,7 +165,7 @@ export const ThemeToggle = ({
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-[9998]"
+            className="fixed inset-0 z-[999]"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
@@ -173,7 +173,7 @@ export const ThemeToggle = ({
           {/* Menu */}
           <div
             ref={dropdownRef}
-            className="fixed bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[9999]"
+            className="fixed bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-[9998]"
             style={{
               top: dropdownPosition.top,
               left: dropdownPosition.left,

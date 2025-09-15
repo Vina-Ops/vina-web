@@ -740,7 +740,7 @@ export default function TherapistChatPage() {
   return (
     <div className="relative h-full flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* Header - Fixed at top */}
-      <div className="flex-shrink-0 sticky top-0 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="flex-shrink-0 sticky top-16 z-[80] bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="grid lg:flex items-center justify-between p-4">
           <div className="flex items-center space-x-4">
             <button
@@ -816,7 +816,7 @@ export default function TherapistChatPage() {
       {/* Connection Status Banner */}
       {!wsConnected && (
         <div
-          className={`absolute z-50 top-20 left-0 right-0 flex-shrink-0 border-l-4 p-3 ${
+          className={`absolute z-[85] top-20 left-0 right-0 flex-shrink-0 border-l-4 p-3 ${
             wsConnecting
               ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400"
               : "bg-red-50 dark:bg-red-900/20 border-red-400"
@@ -853,7 +853,7 @@ export default function TherapistChatPage() {
             {!wsConnecting && (
               <button
                 onClick={retryWebSocketConnection}
-                className="ml-2 px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                className="ml-2 px-2 py-1 mt-2 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
               >
                 Retry
               </button>
@@ -863,10 +863,10 @@ export default function TherapistChatPage() {
       )}
 
       {/* Main Chat Container - Flexible height */}
-      <div className="flex-1 h-[calc(100vh-200px)] min-h-0 p-4">
+      <div className="flex-1 max-h-[calc(100vh-145px)] overflow-y-auto p-4">
         <div className="h-full bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col">
           {/* Chat Messages - Scrollable area */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4">
             <div className="space-y-4">
               {/* Welcome message */}
               <div className="flex justify-center">
@@ -883,7 +883,7 @@ export default function TherapistChatPage() {
                   messagesEndRef={messagesEndRef}
                 />
               ) : (
-                <div className="text-center py-8 h-[calc(100vh-350px)]">
+                <div className="text-center py-8 h-[calc(100vh-145px)]">
                   <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                     Chat with {session.patientName}
@@ -899,7 +899,7 @@ export default function TherapistChatPage() {
           </div>
 
           {/* Chat Input - Fixed at bottom */}
-          <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex-shrink-0 bg-white dark:bg-gray-800 absolute bottom-0 left-0 right-0 border-gray-200 dark:border-gray-700 px-3 pt-2">
             {/* Connection Warning */}
             {!wsConnected && (
               <div
@@ -965,7 +965,7 @@ export default function TherapistChatPage() {
                       : "Connection lost"
                   }
                   disabled={!wsConnected}
-                  className={`w-full resize-none rounded-lg border py-2 px-4 ${
+                  className={`w-full resize-none rounded-lg border px-4 py-1 ${
                     wsConnected
                       ? "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       : "border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500"
@@ -981,7 +981,7 @@ export default function TherapistChatPage() {
               <button
                 type="submit"
                 disabled={!chatMessage.trim() || !wsConnected}
-                className={`flex h-11 w-11 items-center justify-center rounded-lg transition-colors ${
+                className={`flex h-11 w-11 mb-1.5 items-center justify-center rounded-lg transition-colors ${
                   wsConnected && chatMessage.trim()
                     ? "bg-green-600 text-white hover:bg-green-700"
                     : wsConnecting

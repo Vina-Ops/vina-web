@@ -127,7 +127,10 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
               </div>
               <nav className="flex-1 space-y-1 px-2 py-4">
                 {navigation.map((item) => {
-                  const isActive = pathname?.includes(item.href);
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== "/therapist" &&
+                      pathname?.startsWith(item.href + "/"));
                   return (
                     <Link
                       key={item.name}
@@ -185,7 +188,10 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
               </div>
               <nav className="mt-8 flex-1 space-y-1 px-2">
                 {navigation.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== "/therapist" &&
+                      pathname?.startsWith(item.href + "/"));
                   return (
                     <Link
                       key={item.name}
