@@ -203,7 +203,7 @@ function HomePageContent() {
             <ThemeToggle
               position={{
                 placement: "bottom",
-                mobilePlacement: "bottom",
+                mobilePlacement: "left",
                 offset: 8,
                 mobileOffset: 8,
               }}
@@ -455,10 +455,10 @@ function HomePageContent() {
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                         {t("therapist.features.videoSessions.title")}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                         {t("therapist.features.videoSessions.description")}
                       </p>
                     </div>
@@ -483,10 +483,10 @@ function HomePageContent() {
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                         {t("therapist.features.messaging.title")}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                         {t("therapist.features.messaging.description")}
                       </p>
                     </div>
@@ -511,10 +511,10 @@ function HomePageContent() {
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                         {t("therapist.features.licensed.title")}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                         {t("therapist.features.licensed.description")}
                       </p>
                     </div>
@@ -539,10 +539,10 @@ function HomePageContent() {
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                         {t("therapist.features.hipaa.title")}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                         {t("therapist.features.hipaa.description")}
                       </p>
                     </div>
@@ -554,7 +554,7 @@ function HomePageContent() {
               <div className="sticky top-0">
                 <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 transform hover:scale-105 transition-transform duration-500 border border-green-100 dark:border-green-800">
                   {/* Chat Header */}
-                  <div className="flex items-center space-x-4 mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
+                  <div className="flex items-start space-x-4 mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
                     <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
                       <span className="text-green dark:text-white font-bold text-lg">
                         {t("therapist.chat.avatar")}
@@ -600,7 +600,7 @@ function HomePageContent() {
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-r from-green to-emerald-600 text-white rounded-2xl p-4 text-sm ml-8">
+                    <div className="bg-green text-white rounded-2xl p-4 text-sm ml-8">
                       <div className="mb-1">
                         {t("therapist.chat.messages.user1")}
                       </div>
@@ -627,7 +627,7 @@ function HomePageContent() {
                       className="flex-1 bg-transparent text-sm outline-none text-gray-600 dark:text-gray-300 placeholder-gray-400"
                       disabled
                     />
-                    <button className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all">
+                    <button className="w-10 h-10 bg-green rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all">
                       <svg
                         className="w-5 h-5 text-green dark:text-white"
                         fill="none"
