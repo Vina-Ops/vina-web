@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { UserProvider } from "@/context/user-context";
 import { WebSocketProvider } from "@/context/websocket-context";
+import { Analytics } from "@vercel/analytics/next";
 import { PWAProvider } from "@/components/pwa/PWAProvider";
 import { LanguageProvider } from "@/context/language-context";
 import { TopToastProvider } from "@/components/ui/toast";
@@ -60,6 +61,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased bg-background-white dark:bg-dark-bg-50 text-black dark:text-white transition-colors duration-300">
+        <Analytics />
         <TopToastProvider>
           <LanguageProvider>
             <ThemeProvider>
