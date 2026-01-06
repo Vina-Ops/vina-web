@@ -14,10 +14,10 @@ export const useChatWebSocket = () => {
 
   // Handle incoming messages from WebSocket
   const handleIncomingMessage = useCallback((message: Message) => {
-    // console.log("Adding new message:", message);
+   
     setMessages((prev) => {
       const newMessages = [...prev, message];
-      // console.log("Updated messages array:", newMessages);
+     
       return newMessages;
     });
     setIsTyping(false);
@@ -35,7 +35,6 @@ export const useChatWebSocket = () => {
 
   // Handle connection status changes
   const handleConnectionChange = useCallback((connected: boolean) => {
-    // console.log("Hook: Connection change handler called with:", connected);
     setIsConnected(connected);
     setIsConnecting(false); // Stop connecting state once we get a connection status
     if (connected) {
@@ -48,18 +47,6 @@ export const useChatWebSocket = () => {
     setError(errorMessage);
     setIsConnecting(false); // Stop connecting state on error
     console.error("Chat WebSocket error:", errorMessage);
-
-    // If WebSocket fails, simulate AI response for testing
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: `${Date.now()}-fallback-${Math.random().toString(36).substr(2, 9)}`,
-        content: "I'm here to help you. What would you like to talk about?",
-        sender: "ai",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiResponse]);
-      setIsTyping(false);
-    }, 1000);
   }, []);
 
   // Send message through WebSocket
@@ -73,8 +60,6 @@ export const useChatWebSocket = () => {
     // Handle string content (for text messages)
     if (!content.trim()) return;
 
-    // console.log("Sending message:", content);
-
     // Add user message to UI immediately
     const userMessage: Message = {
       id: `${Date.now()}-user-${Math.random().toString(36).substr(2, 9)}`,
@@ -83,8 +68,6 @@ export const useChatWebSocket = () => {
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, userMessage]);
-    // console.log("Added user message to UI:", userMessage);
-
     // Show typing indicator while waiting for response
     setIsTyping(true);
 
@@ -104,8 +87,6 @@ export const useChatWebSocket = () => {
   useEffect(() => {
     try {
       const service = getChatWebSocketService();
-      // console.log("Hook: Setting up WebSocket handlers");
-
       service.onMessage(handleIncomingMessage);
       service.onTyping(handleTyping);
       service.onConnectionChange(handleConnectionChange);
@@ -113,14 +94,13 @@ export const useChatWebSocket = () => {
 
       // Check initial connection status
       const initialStatus = service.isConnected();
-      // console.log("Hook: Initial connection status:", initialStatus);
+   
       setIsConnected(initialStatus);
       setIsConnecting(false); // Stop connecting state after initial check
 
       // Cleanup on unmount
       return () => {
-        // Note: We don't disconnect here to maintain the singleton pattern
-        // The service will handle reconnection automatically
+       
       };
     } catch (error) {
       console.warn("WebSocket service not available:", error);
